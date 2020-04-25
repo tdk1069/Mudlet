@@ -1,7 +1,7 @@
 name: Check quality of various code formatters
 on: [push]
 jobs:
-  jidicula/clang-format-action:
+  jidicula-clang-format-action:
     name: jidicula/clang-format-action
     runs-on: ubuntu-latest
     steps:
