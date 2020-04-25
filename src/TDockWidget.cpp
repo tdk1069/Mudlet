@@ -20,47 +20,48 @@
 
 #include "TDockWidget.h"
 
-TDockWidget::TDockWidget(Host* pH, const QString& consoleName)
-: QDockWidget()
-, widgetConsoleName(consoleName)
-, hasLayoutAlready(false)
-, mpHost(pH)
-, mpConsole(nullptr)
+TDockWidget::TDockWidget(Host *pH, const QString &consoleName)
+    : QDockWidget(), widgetConsoleName(consoleName), hasLayoutAlready(false), mpHost(pH), mpConsole(nullptr)
 {
 }
 
 // This sets the mutual pointers that the TConsole and the TDockWidget now
 // have for each other as well as assigning the TConsole to be the TDockWidget's
 // widget:
-void TDockWidget::setTConsole(TConsole* pC)
+void TDockWidget::setTConsole(TConsole *pC)
 {
     mpConsole = pC;
     setWidget(pC);
     pC->mpDockWidget = this;
 }
 
-void TDockWidget::closeEvent(QCloseEvent* event)
+void TDockWidget::closeEvent(QCloseEvent *event)
 {
-    if (!mpHost->isClosingDown()) {
+    if (!mpHost->isClosingDown())
+    {
         mudlet::self()->hideWindow(mpHost, widgetConsoleName);
         event->ignore();
         return;
-    } else {
+    }
+    else
+    {
         event->accept();
         return;
     }
 }
 
-void TDockWidget::resizeEvent(QResizeEvent* event)
+void TDockWidget::resizeEvent(QResizeEvent *event)
 {
-    if (!mudlet::self()->mIsLoadingLayout) {
+    if (!mudlet::self()->mIsLoadingLayout)
+    {
         mudlet::self()->setDockLayoutUpdated(mpHost, widgetConsoleName);
     }
 }
 
-void TDockWidget::moveEvent(QMoveEvent* event)
+void TDockWidget::moveEvent(QMoveEvent *event)
 {
-    if (!mudlet::self()->mIsLoadingLayout) {
+    if (!mudlet::self()->mIsLoadingLayout)
+    {
         mudlet::self()->setDockLayoutUpdated(mpHost, widgetConsoleName);
     }
 }

@@ -23,7 +23,7 @@
 
 class TMatchState
 {
-public:
+  public:
     TMatchState(int NumberOfConditions, int delta)
     {
         mNumberOfConditions = NumberOfConditions;
@@ -33,7 +33,7 @@ public:
         mSpacer = 0;
     }
 
-    TMatchState(const TMatchState& ms)
+    TMatchState(const TMatchState &ms)
     {
         mNumberOfConditions = ms.mNumberOfConditions;
         mNextCondition = ms.mNextCondition;
@@ -42,18 +42,36 @@ public:
         mSpacer = ms.mSpacer;
     }
 
-    int nextCondition() { return mNextCondition; }
-    void conditionMatched() { mNextCondition++; }
-    bool isComplete() { return (mNextCondition >= mNumberOfConditions); }
-    void newLineArrived() { mLineCount++; }
-    bool newLine() { return !(mLineCount > mDelta); }
+    int nextCondition()
+    {
+        return mNextCondition;
+    }
+    void conditionMatched()
+    {
+        mNextCondition++;
+    }
+    bool isComplete()
+    {
+        return (mNextCondition >= mNumberOfConditions);
+    }
+    void newLineArrived()
+    {
+        mLineCount++;
+    }
+    bool newLine()
+    {
+        return !(mLineCount > mDelta);
+    }
 
     bool lineSpacerMatch(int lines)
     {
-        if (mSpacer >= lines) {
+        if (mSpacer >= lines)
+        {
             mSpacer = 0;
             return true;
-        } else {
+        }
+        else
+        {
             mSpacer++;
             return false;
         }

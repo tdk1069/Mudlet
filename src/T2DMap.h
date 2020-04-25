@@ -23,7 +23,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QCache>
 #include <QColor>
@@ -33,7 +33,6 @@
 #include <QString>
 #include <QTreeWidget>
 #include <QWidget>
-#include "post_guard.h"
 
 class Host;
 class TArea;
@@ -47,26 +46,25 @@ class QListWidgetItem;
 class QPushButton;
 class QTreeWidgetItem;
 
-
 class T2DMap : public QWidget
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(T2DMap)
-    explicit T2DMap(QWidget* parent = nullptr);
+    explicit T2DMap(QWidget *parent = nullptr);
     void paintMap();
     void setMapZoom(int zoom);
     QColor getColor(int id);
     void init();
     void exportAreaImage(int);
-    void paintEvent(QPaintEvent*) override;
-    void mousePressEvent(QMouseEvent*) override;
-    void mouseDoubleClickEvent(QMouseEvent* event) override;
-    bool event(QEvent* event) override;
-    void wheelEvent(QWheelEvent*) override;
-    void mouseMoveEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* e) override;
+    void paintEvent(QPaintEvent *) override;
+    void mousePressEvent(QMouseEvent *) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+    bool event(QEvent *event) override;
+    void wheelEvent(QWheelEvent *) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *e) override;
 
     // Was getTopLeft() which returned an index into mMultiSelectionList but that
     // has been been changed to mMultiSelectionSet which cannot be accessed via
@@ -74,17 +72,22 @@ public:
     // mMultiSelectionHighlightRoomId and returns a (bool) on success or failure
     // to do so.
     bool getCenterSelection();
-    int getCenterSelectedRoomId() const { return mMultiSelectionHighlightRoomId; }
+    int getCenterSelectedRoomId() const
+    {
+        return mMultiSelectionHighlightRoomId;
+    }
 
     void setRoomSize(double);
     void setExitSize(double);
     void createLabel(QRectF labelRectangle);
     // Clears cache so new symbols are built at next paintEvent():
-    void flushSymbolPixmapCache() {mSymbolPixmapCache.clear();}
+    void flushSymbolPixmapCache()
+    {
+        mSymbolPixmapCache.clear();
+    }
     void addSymbolToPixmapCache(const QString, const bool);
 
-
-    TMap* mpMap;
+    TMap *mpMap;
     QPointer<Host> mpHost;
     int xyzoom;
     int mRX;
@@ -135,7 +138,7 @@ public:
     int mOz;
     bool mShiftMode;
     bool mShowInfo;
-    QComboBox* arealist_combobox;
+    QComboBox *arealist_combobox;
     QPointer<QDialog> mpCustomLinesDialog;
     int mCustomLinesRoomFrom;
     int mCustomLinesRoomTo;
@@ -164,7 +167,7 @@ public:
     QString mHelpMsg;
     void setPlayerRoomStyle(const int style);
 
-public slots:
+  public slots:
     void slot_roomSelectionChanged();
     void slot_deleteCustomExitLine();
     void slot_moveLabel();
@@ -175,7 +178,7 @@ public slots:
     void slot_customLineColor();
     void shiftZup();
     void shiftZdown();
-    void slot_switchArea(const QString&);
+    void slot_switchArea(const QString &);
     void toggleShiftMode();
     void shiftUp();
     void shiftDown();
@@ -185,7 +188,7 @@ public slots:
     void slot_setImage();
     void slot_movePosition();
     void slot_defineNewColor();
-    void slot_selectRoomColor(QListWidgetItem* pI);
+    void slot_selectRoomColor(QListWidgetItem *pI);
     void slot_moveRoom();
     void slot_deleteRoom();
     void slot_changeColor();
@@ -200,7 +203,7 @@ public slots:
     void slot_setCustomLine();
     void slot_setCustomLine2();
     void slot_userAction(QString);
-    void slot_setCustomLine2B(QTreeWidgetItem*, int);
+    void slot_setCustomLine2B(QTreeWidgetItem *, int);
     void slot_undoCustomLineLastPoint();
     void slot_doneCustomLine();
     void slot_customLineProperties();
@@ -210,14 +213,17 @@ public slots:
     void slot_loadMap();
     void slot_newMap();
 
-private:
+  private:
     void resizeMultiSelectionWidget();
     std::pair<int, int> getMousePosition();
-    bool checkButtonIsForGivenDirection(const QPushButton*, const QString&, const int&);
-    bool sizeFontToFitTextInRect(QFont&, const QRectF&, const QString&, const quint8 percentageMargin = 10);
-    void drawRoom(QPainter&, QFont&, QPen&, TRoom*, const bool isGridMode, const bool areRoomIdsLegible, const int, const float, const float, const bool);
-    void paintMapInfo(const QElapsedTimer& renderTimer, QPainter& painter, const bool showingCurrentArea, QColor& infoColor);
-    void paintAreaExits(QPainter& painter, QPen& pen, QList<int>& exitList, QList<int>& oneWayExits, const TArea* pArea, int zLevel, float exitWidth);
+    bool checkButtonIsForGivenDirection(const QPushButton *, const QString &, const int &);
+    bool sizeFontToFitTextInRect(QFont &, const QRectF &, const QString &, const quint8 percentageMargin = 10);
+    void drawRoom(QPainter &, QFont &, QPen &, TRoom *, const bool isGridMode, const bool areRoomIdsLegible, const int,
+                  const float, const float, const bool);
+    void paintMapInfo(const QElapsedTimer &renderTimer, QPainter &painter, const bool showingCurrentArea,
+                      QColor &infoColor);
+    void paintAreaExits(QPainter &painter, QPen &pen, QList<int> &exitList, QList<int> &oneWayExits, const TArea *pArea,
+                        int zLevel, float exitWidth);
     void initiateSpeeWalk(const int speedWalkStartRoomId, const int speedWalkTargetRoomId);
 
     bool mDialogLock;
@@ -254,7 +260,7 @@ private:
     // Holds the QRadialGradient details to use for the player room:
     QGradientStops mPlayerRoomColorGradentStops;
 
-private slots:
+  private slots:
     void slot_createRoom();
 };
 

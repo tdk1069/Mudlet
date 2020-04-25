@@ -19,15 +19,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "dlgNotepad.h"
 
 #include "mudlet.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QDir>
 #include <QTextCodec>
-#include "post_guard.h"
 
 using namespace std::chrono;
 
@@ -36,12 +35,12 @@ const QString local8BitEncodedNotesFileName{QStringLiteral("notes.txt")};
 // Used afterwards:
 const QString utf8EncodedNotesFileName{QStringLiteral("notes_utf8.txt")};
 
-dlgNotepad::dlgNotepad(Host* pH)
-: mpHost(pH)
+dlgNotepad::dlgNotepad(Host *pH) : mpHost(pH)
 {
     setupUi(this);
 
-    if (mpHost) {
+    if (mpHost)
+    {
         restore();
     }
 
@@ -53,7 +52,8 @@ dlgNotepad::dlgNotepad(Host* pH)
 dlgNotepad::~dlgNotepad()
 {
     // Safety step, just in case:
-    if (mpHost && mpHost->mpNotePad) {
+    if (mpHost && mpHost->mpNotePad)
+    {
         save();
         mpHost->mpNotePad = nullptr;
     }
@@ -64,7 +64,8 @@ void dlgNotepad::save()
     QString directoryFile = mudlet::getMudletPath(mudlet::profileHomePath, mpHost->getName());
     QString fileName = mudlet::getMudletPath(mudlet::profileDataItemPath, mpHost->getName(), utf8EncodedNotesFileName);
     QDir dirFile;
-    if (!dirFile.exists(directoryFile)) {
+    if (!dirFile.exists(directoryFile))
+    {
         dirFile.mkpath(directoryFile);
     }
     QFile file;
@@ -79,13 +80,14 @@ void dlgNotepad::save()
     mNeedToSave = false;
 }
 
-void dlgNotepad::restoreFile(const QString& fn, const bool useUtf8Encoding)
+void dlgNotepad::restoreFile(const QString &fn, const bool useUtf8Encoding)
 {
     QFile file(fn);
     file.open(QIODevice::ReadOnly);
     QTextStream fileStream;
     fileStream.setDevice(&file);
-    if (useUtf8Encoding) {
+    if (useUtf8Encoding)
+    {
         fileStream.setCodec(QTextCodec::codecForName("UTF-8"));
     }
     const QString txt = fileStream.readAll();
@@ -98,7 +100,8 @@ void dlgNotepad::restoreFile(const QString& fn, const bool useUtf8Encoding)
 void dlgNotepad::restore()
 {
     QString fileName = mudlet::getMudletPath(mudlet::profileDataItemPath, mpHost->getName(), utf8EncodedNotesFileName);
-    if (QFile::exists(fileName)) {
+    if (QFile::exists(fileName))
+    {
         restoreFile(fileName, true);
         return;
     }
@@ -116,11 +119,12 @@ void dlgNotepad::slot_text_written()
     mNeedToSave = true;
 }
 
-void dlgNotepad::timerEvent(QTimerEvent* event)
+void dlgNotepad::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
 
-    if (!mNeedToSave) {
+    if (!mNeedToSave)
+    {
         return;
     }
 

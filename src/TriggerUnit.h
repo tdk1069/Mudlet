@@ -21,58 +21,60 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QMultiMap>
 #include <QMutex>
 #include <QPointer>
 #include <QString>
-#include "post_guard.h"
 
 #include <list>
 
 class Host;
 class TTrigger;
 
-
 class TriggerUnit
 {
     friend class XMLexport;
     friend class XMLimport;
 
-public:
-    TriggerUnit(Host* pHost) : mpHost(pHost), mMaxID(0), statsPatterns(), mModuleMember() { initStats(); }
+  public:
+    TriggerUnit(Host *pHost) : mpHost(pHost), mMaxID(0), statsPatterns(), mModuleMember()
+    {
+        initStats();
+    }
 
-    std::list<TTrigger*> getTriggerRootNodeList()
+    std::list<TTrigger *> getTriggerRootNodeList()
     {
         QMutexLocker locker(&mTriggerUnitLock);
         return mTriggerRootNodeList;
     }
 
-    TTrigger* getTrigger(int id);
+    TTrigger *getTrigger(int id);
     void removeAllTempTriggers();
     void reorderTriggersAfterPackageImport();
-    TTrigger* findTrigger(const QString&);
-    bool enableTrigger(const QString&);
-    bool disableTrigger(const QString&);
-    bool killTrigger(const QString& name);
-    bool registerTrigger(TTrigger* pT);
-    void unregisterTrigger(TTrigger* pT);
-    void reParentTrigger(int childID, int oldParentID, int newParentID, int parentPosition = -1, int childPosition = -1);
-    void processDataStream(const QString&, int);
+    TTrigger *findTrigger(const QString &);
+    bool enableTrigger(const QString &);
+    bool disableTrigger(const QString &);
+    bool killTrigger(const QString &name);
+    bool registerTrigger(TTrigger *pT);
+    void unregisterTrigger(TTrigger *pT);
+    void reParentTrigger(int childID, int oldParentID, int newParentID, int parentPosition = -1,
+                         int childPosition = -1);
+    void processDataStream(const QString &, int);
     void compileAll();
-    void setTriggerStayOpen(const QString&, int);
+    void setTriggerStayOpen(const QString &, int);
     void stopAllTriggers();
     void reenableAllTriggers();
     QString assembleReport();
-    std::list<TTrigger*> mCleanupList;
+    std::list<TTrigger *> mCleanupList;
     int getNewID();
-    QMultiMap<QString, TTrigger*> mLookupTable;
+    QMultiMap<QString, TTrigger *> mLookupTable;
     QMutex mTriggerUnitLock;
-    void markCleanup(TTrigger* pT);
+    void markCleanup(TTrigger *pT);
     void doCleanup();
-    void uninstall(const QString&);
-    void _uninstall(TTrigger* pChild, const QString& packageName);
+    void uninstall(const QString &);
+    void _uninstall(TTrigger *pChild, const QString &packageName);
 
     int statsTriggerTotal;
     int statsTempTriggers;
@@ -87,22 +89,22 @@ public:
     int statsMaxLineProcessingTime;
     int statsMinLineProcessingTime;
     int statsRegexTriggers;
-    QList<TTrigger*> uninstallList;
+    QList<TTrigger *> uninstallList;
 
-private:
+  private:
     TriggerUnit() = default;
 
     void initStats();
-    void _assembleReport(TTrigger*);
-    TTrigger* getTriggerPrivate(int id);
-    void addTriggerRootNode(TTrigger* pT, int parentPosition = -1, int childPosition = -1, bool moveTrigger = false);
-    void addTrigger(TTrigger* pT);
-    void removeTriggerRootNode(TTrigger* pT);
-    void removeTrigger(TTrigger*);
+    void _assembleReport(TTrigger *);
+    TTrigger *getTriggerPrivate(int id);
+    void addTriggerRootNode(TTrigger *pT, int parentPosition = -1, int childPosition = -1, bool moveTrigger = false);
+    void addTrigger(TTrigger *pT);
+    void removeTriggerRootNode(TTrigger *pT);
+    void removeTrigger(TTrigger *);
 
     QPointer<Host> mpHost;
-    QMap<int, TTrigger*> mTriggerMap;
-    std::list<TTrigger*> mTriggerRootNodeList;
+    QMap<int, TTrigger *> mTriggerMap;
+    std::list<TTrigger *> mTriggerRootNodeList;
     int mMaxID;
     bool mModuleMember;
 };

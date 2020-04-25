@@ -22,31 +22,29 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QList>
 #include <QString>
-#include "post_guard.h"
-
 
 class TVar
 {
-public:
+  public:
     TVar();
-    TVar(TVar*);
-    TVar(TVar*, const QString&, int, const QString&, int);
-    void addChild(TVar*);
-    void setParent(TVar*);
-    void removeChild(TVar*);
-    bool setValue(const QString&);
-    bool setValue(const QString&, int);
+    TVar(TVar *);
+    TVar(TVar *, const QString &, int, const QString &, int);
+    void addChild(TVar *);
+    void setParent(TVar *);
+    void removeChild(TVar *);
+    bool setValue(const QString &);
+    bool setValue(const QString &, int);
     bool setValueType(int);
-    bool setName(const QString&);
-    bool setName(const QString&, int);
-    void setNewName(const QString&, int);
+    bool setName(const QString &);
+    bool setName(const QString &, int);
+    void setNewName(const QString &, int);
     void setReference(bool);
-    QList<TVar*> getChildren(bool isToSort = true);
-    TVar* getParent();
+    QList<TVar *> getChildren(bool isToSort = true);
+    TVar *getParent();
     QString getValue();
     QString getName();
     QString getNewName();
@@ -56,16 +54,16 @@ public:
     int getValueType();
     bool isReference();
 
-public:
+  public:
     bool hidden;
-    const void* kpointer;
-    const void* vpointer;
+    const void *kpointer;
+    const void *vpointer;
     bool saved;
 
-private:
+  private:
     bool reference;
-    QList<TVar*> children;
-    TVar* parent;
+    QList<TVar *> children;
+    TVar *parent;
     QString name;
     int kType;
     QString value;

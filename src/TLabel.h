@@ -26,11 +26,11 @@
 
 #include "TEvent.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QLabel>
 #include <QPointer>
 #include <QString>
-#include "post_guard.h"
 
 class Host;
 
@@ -40,9 +40,9 @@ class TLabel : public QLabel
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(TLabel)
-    TLabel(Host* pH, QWidget* pW = nullptr);
+    TLabel(Host *pH, QWidget *pW = nullptr);
     void setClick(const int func);
     void setDoubleClick(const int func);
     void setRelease(const int func);
@@ -50,16 +50,16 @@ public:
     void setWheel(const int func);
     void setEnter(const int func);
     void setLeave(const int func);
-    void mousePressEvent(QMouseEvent*) override;
-    void mouseDoubleClickEvent(QMouseEvent*) override;
-    void mouseReleaseEvent(QMouseEvent*) override;
-    void wheelEvent(QWheelEvent*) override;
-    void mouseMoveEvent(QMouseEvent*) override;
-    void leaveEvent(QEvent*) override;
-    void enterEvent(QEvent*) override;
+    void mousePressEvent(QMouseEvent *) override;
+    void mouseDoubleClickEvent(QMouseEvent *) override;
+    void mouseReleaseEvent(QMouseEvent *) override;
+    void wheelEvent(QWheelEvent *) override;
+    void mouseMoveEvent(QMouseEvent *) override;
+    void leaveEvent(QEvent *) override;
+    void enterEvent(QEvent *) override;
     void setClickThrough(bool clickthrough);
 
-    bool forwardEventToMapper(QEvent*);
+    bool forwardEventToMapper(QEvent *);
 
     QPointer<Host> mpHost;
     int mClickFunction = 0;
@@ -70,7 +70,7 @@ public:
     int mEnterFunction = 0;
     int mLeaveFunction = 0;
 
-private:
+  private:
     void releaseFunc(const int existingFunction, const int newFunction);
 };
 

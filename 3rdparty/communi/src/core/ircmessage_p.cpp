@@ -32,18 +32,23 @@
 IRC_BEGIN_NAMESPACE
 
 #ifndef IRC_DOXYGEN
-IrcMessagePrivate::IrcMessagePrivate() :
-    connection(0), type(IrcMessage::Unknown), timeStamp(QDateTime::currentDateTime()), encoding("ISO-8859-15"), flags(-1)
+IrcMessagePrivate::IrcMessagePrivate()
+    : connection(0), type(IrcMessage::Unknown), timeStamp(QDateTime::currentDateTime()), encoding("ISO-8859-15"),
+      flags(-1)
 {
 }
 
 QString IrcMessagePrivate::prefix() const
 {
-    if (!m_prefix.isExplicit() && m_prefix.isNull() && !data.prefix.isNull()) {
-        if (data.prefix.startsWith(':')) {
+    if (!m_prefix.isExplicit() && m_prefix.isNull() && !data.prefix.isNull())
+    {
+        if (data.prefix.startsWith(':'))
+        {
             if (data.prefix.length() > 1)
                 m_prefix = decode(data.prefix.mid(1), encoding);
-        } else {
+        }
+        else
+        {
             // empty (not null)
             m_prefix = QString("");
         }
@@ -51,7 +56,7 @@ QString IrcMessagePrivate::prefix() const
     return m_prefix.value();
 }
 
-void IrcMessagePrivate::setPrefix(const QString& prefix)
+void IrcMessagePrivate::setPrefix(const QString &prefix)
 {
     m_prefix.setValue(prefix);
     m_nick.clear();
@@ -87,16 +92,17 @@ QString IrcMessagePrivate::command() const
     return m_command.value();
 }
 
-void IrcMessagePrivate::setCommand(const QString& command)
+void IrcMessagePrivate::setCommand(const QString &command)
 {
     m_command.setValue(command);
 }
 
 QStringList IrcMessagePrivate::params() const
 {
-    if (!m_params.isExplicit() && m_params.isNull() && !data.params.isEmpty()) {
+    if (!m_params.isExplicit() && m_params.isNull() && !data.params.isEmpty())
+    {
         QStringList params;
-        foreach (const QByteArray& param, data.params)
+        foreach (const QByteArray &param, data.params)
             params += decode(param, encoding);
         m_params = params;
     }
@@ -108,14 +114,15 @@ QString IrcMessagePrivate::param(int index) const
     return params().value(index);
 }
 
-void IrcMessagePrivate::setParams(const QStringList& params)
+void IrcMessagePrivate::setParams(const QStringList &params)
 {
     m_params.setValue(params);
 }
 
 QVariantMap IrcMessagePrivate::tags() const
 {
-    if (!m_tags.isExplicit() && m_tags.isNull() && !data.tags.isEmpty()) {
+    if (!m_tags.isExplicit() && m_tags.isNull() && !data.tags.isEmpty())
+    {
         QVariantMap tags;
         QMap<QByteArray, QByteArray>::const_iterator it;
         for (it = data.tags.constBegin(); it != data.tags.constEnd(); ++it)
@@ -125,14 +132,15 @@ QVariantMap IrcMessagePrivate::tags() const
     return m_tags.value();
 }
 
-void IrcMessagePrivate::setTags(const QVariantMap& tags)
+void IrcMessagePrivate::setTags(const QVariantMap &tags)
 {
     m_tags.setValue(tags);
 }
 
 QByteArray IrcMessagePrivate::content() const
 {
-    if (m_prefix.isExplicit() || m_command.isExplicit() || m_params.isExplicit() || m_tags.isExplicit()) {
+    if (m_prefix.isExplicit() || m_command.isExplicit() || m_params.isExplicit() || m_tags.isExplicit())
+    {
         QByteArray data;
 
         // format <tags>
@@ -152,7 +160,8 @@ QByteArray IrcMessagePrivate::content() const
         data += command().toUtf8();
 
         // format <params>
-        foreach (const QString& param, params()) {
+        foreach (const QString &param, params())
+        {
             data += ' ';
             if (param.isEmpty() || param.startsWith(QLatin1Char(':')) || param.contains(QLatin1Char(' ')))
                 data += ':';
@@ -176,7 +185,7 @@ void IrcMessagePrivate::invalidate()
     m_tags.clear();
 }
 
-IrcMessageData IrcMessageData::fromData(const QByteArray& data)
+IrcMessageData IrcMessageData::fromData(const QByteArray &data)
 {
     IrcMessageData message;
     message.content = data;
@@ -203,10 +212,12 @@ IrcMessageData IrcMessageData::fromData(const QByteArray& data)
     QByteArray process = data;
 
     // parse <tags>
-    if (process.startsWith('@')) {
+    if (process.startsWith('@'))
+    {
         process.remove(0, 1);
         QByteArray tags = process.left(process.indexOf(' '));
-        foreach (const QByteArray& tag, tags.split(';')) {
+        foreach (const QByteArray &tag, tags.split(';'))
+        {
             const int idx = tag.indexOf('=');
             if (idx != -1)
                 message.tags.insert(tag.left(idx), tag.mid(idx + 1));
@@ -217,10 +228,13 @@ IrcMessageData IrcMessageData::fromData(const QByteArray& data)
     }
 
     // parse <prefix>
-    if (process.startsWith(':')) {
+    if (process.startsWith(':'))
+    {
         message.prefix = process.left(process.indexOf(' '));
         process.remove(0, message.prefix.length() + 1);
-    } else {
+    }
+    else
+    {
         // empty (not null)
         message.prefix = QByteArray("");
     }
@@ -230,12 +244,16 @@ IrcMessageData IrcMessageData::fromData(const QByteArray& data)
     process.remove(0, message.command.length() + 1);
 
     // parse <params>
-    while (!process.isEmpty()) {
-        if (process.startsWith(':')) {
+    while (!process.isEmpty())
+    {
+        if (process.startsWith(':'))
+        {
             process.remove(0, 1);
             message.params += process;
             process.clear();
-        } else {
+        }
+        else
+        {
             QByteArray param = process.mid(0, process.indexOf(' '));
             process.remove(0, param.length() + 1);
             message.params += param;
@@ -245,14 +263,14 @@ IrcMessageData IrcMessageData::fromData(const QByteArray& data)
     return message;
 }
 
-QString IrcMessagePrivate::decode(const QByteArray& data, const QByteArray& encoding)
+QString IrcMessagePrivate::decode(const QByteArray &data, const QByteArray &encoding)
 {
     // TODO: not thread safe
     static IrcMessageDecoder decoder;
     return decoder.decode(data, encoding);
 }
 
-bool IrcMessagePrivate::parsePrefix(const QString& prefix, QString* nick, QString* ident, QString* host)
+bool IrcMessagePrivate::parsePrefix(const QString &prefix, QString *nick, QString *ident, QString *host)
 {
     const QString trimmed = prefix.trimmed();
     if (trimmed.contains(QLatin1Char(' ')))
@@ -262,19 +280,36 @@ bool IrcMessagePrivate::parsePrefix(const QString& prefix, QString* nick, QStrin
     const int ex = trimmed.indexOf(QLatin1Char('!'));
     const int at = trimmed.indexOf(QLatin1Char('@'));
 
-    if (ex == -1 && at == -1) {
-        if (nick) *nick = trimmed;
-    } else if (ex > 0 && at > 0 && ex + 1 < at && at < len - 1) {
-        if (nick) *nick = trimmed.mid(0, ex);
-        if (ident) *ident = trimmed.mid(ex + 1, at - ex - 1);
-        if (host) *host = trimmed.mid(at + 1);
-    } else if (ex > 0 && ex < len - 1 && at == -1) {
-        if (nick) *nick = trimmed.mid(0, ex);
-        if (ident) *ident = trimmed.mid(ex + 1);
-    } else if (at > 0 && at < len - 1 && ex == -1) {
-        if (nick) *nick = trimmed.mid(0, at);
-        if (host) *host = trimmed.mid(at + 1);
-    } else {
+    if (ex == -1 && at == -1)
+    {
+        if (nick)
+            *nick = trimmed;
+    }
+    else if (ex > 0 && at > 0 && ex + 1 < at && at < len - 1)
+    {
+        if (nick)
+            *nick = trimmed.mid(0, ex);
+        if (ident)
+            *ident = trimmed.mid(ex + 1, at - ex - 1);
+        if (host)
+            *host = trimmed.mid(at + 1);
+    }
+    else if (ex > 0 && ex < len - 1 && at == -1)
+    {
+        if (nick)
+            *nick = trimmed.mid(0, ex);
+        if (ident)
+            *ident = trimmed.mid(ex + 1);
+    }
+    else if (at > 0 && at < len - 1 && ex == -1)
+    {
+        if (nick)
+            *nick = trimmed.mid(0, at);
+        if (host)
+            *host = trimmed.mid(at + 1);
+    }
+    else
+    {
         return false;
     }
     return true;

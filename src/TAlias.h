@@ -22,19 +22,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "Tree.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QApplication>
 #include <QPointer>
 #include <QSharedPointer>
-#include "post_guard.h"
 
 #include <pcre.h>
 
 class Host;
-
 
 class TAlias : public Tree<TAlias>
 {
@@ -42,25 +40,40 @@ class TAlias : public Tree<TAlias>
     friend class XMLexport;
     friend class XMLimport;
 
-public:
+  public:
     virtual ~TAlias();
-    TAlias(TAlias* parent, Host* pHost);
-    TAlias(const QString& name, Host* pHost);
+    TAlias(TAlias *parent, Host *pHost);
+    TAlias(const QString &name, Host *pHost);
     void compileAll();
     void compileRegex();
-    QString getName() { return mName; }
-    void setName(const QString& name);
+    QString getName()
+    {
+        return mName;
+    }
+    void setName(const QString &name);
     void compile();
     bool compileScript();
     void execute();
-    QString getScript() { return mScript; }
-    bool setScript(const QString& script);
-    QString getRegexCode() { return mRegexCode; }
-    void setRegexCode(const QString&);
-    void setCommand(const QString& command) { mCommand = command; }
-    QString getCommand() { return mCommand; }
+    QString getScript()
+    {
+        return mScript;
+    }
+    bool setScript(const QString &script);
+    QString getRegexCode()
+    {
+        return mRegexCode;
+    }
+    void setRegexCode(const QString &);
+    void setCommand(const QString &command)
+    {
+        mCommand = command;
+    }
+    QString getCommand()
+    {
+        return mCommand;
+    }
 
-    bool match(const QString& toMatch);
+    bool match(const QString &toMatch);
     bool registerAlias();
 
     TAlias() = default;

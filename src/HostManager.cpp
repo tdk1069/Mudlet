@@ -30,45 +30,50 @@
 
 #include "HostManager.h"
 
-
 #include "mudlet.h"
 
-
-bool HostManager::deleteHost(const QString& hostname)
+bool HostManager::deleteHost(const QString &hostname)
 {
     mPoolReadWriteLock.lockForWrite(); // Will block until gets lock
 
     // make sure this is really a new host
-    if (!mHostPool.contains(hostname)) {
+    if (!mHostPool.contains(hostname))
+    {
         mPoolReadWriteLock.unlock();
-        qDebug() << "HostManager::deleteHost(" << hostname.toUtf8().constData() << ") ERROR: it is not a member of host pool... releasing lock and aborting, returning false!";
+        qDebug() << "HostManager::deleteHost(" << hostname.toUtf8().constData()
+                 << ") ERROR: it is not a member of host pool... releasing lock and aborting, returning false!";
         return false;
-    } else {
+    }
+    else
+    {
         int ret = mHostPool.remove(hostname);
         mPoolReadWriteLock.unlock();
         return ret;
     }
 }
 
-bool HostManager::addHost(const QString& hostname, const QString& port, const QString& login, const QString& pass)
+bool HostManager::addHost(const QString &hostname, const QString &port, const QString &login, const QString &pass)
 {
-    if (hostname.isEmpty()) {
-        qDebug() << "HostManager::addHost(" << hostname.toUtf8().constData() << ") ERROR: an unnamed Host is not permitted, aborting and returning false!";
+    if (hostname.isEmpty())
+    {
+        qDebug() << "HostManager::addHost(" << hostname.toUtf8().constData()
+                 << ") ERROR: an unnamed Host is not permitted, aborting and returning false!";
         return false;
     }
 
     int portnumber = 23;
-    if (!port.isEmpty() && port.toInt() > 0 && port.toInt() < 65536) {
+    if (!port.isEmpty() && port.toInt() > 0 && port.toInt() < 65536)
+    {
         portnumber = port.toInt();
     }
 
     mPoolReadWriteLock.lockForWrite(); // Will block until gets lock
     // make sure this is really a new host
-    if (mHostPool.contains(hostname)) {
+    if (mHostPool.contains(hostname))
+    {
         mPoolReadWriteLock.unlock();
         return false;
     }
-
 
     // Was an ONLY use of a createNewHostID() method here but that extra
     // function call was unnecessary and wastes time while we are locking access
@@ -76,8 +81,11 @@ bool HostManager::addHost(const QString& hostname, const QString& port, const QS
     int id = mHostPool.size() + 1;
     QSharedPointer<Host> pNewHost(new Host(portnumber, hostname, login, pass, id));
 
-    if (Q_UNLIKELY(!pNewHost)) {
-        qDebug() << "HostManager::addHost(" << hostname.toUtf8().constData() << ") ERROR: failed to create new Host for the host pool... releasing lock and aborting, returning false!";
+    if (Q_UNLIKELY(!pNewHost))
+    {
+        qDebug()
+            << "HostManager::addHost(" << hostname.toUtf8().constData()
+            << ") ERROR: failed to create new Host for the host pool... releasing lock and aborting, returning false!";
         mPoolReadWriteLock.unlock();
         return false;
     }
@@ -94,7 +102,8 @@ QStringList HostManager::getHostList()
     QStringList strlist;
     const QList<QString> hostList = mHostPool.keys(); // As this is a QMap the list will be sorted alphabetically
     mPoolReadWriteLock.unlock();
-    if (!hostList.isEmpty()) {
+    if (!hostList.isEmpty())
+    {
         strlist << hostList;
     }
 
@@ -111,14 +120,16 @@ int HostManager::getHostCount()
     return total;
 }
 
-void HostManager::postIrcMessage(const QString& a, const QString& b, const QString& c)
+void HostManager::postIrcMessage(const QString &a, const QString &b, const QString &c)
 {
     mPoolReadWriteLock.lockForRead(); // Will block if a write lock is in place
 
     const QList<QSharedPointer<Host>> hostList = mHostPool.values();
     mPoolReadWriteLock.unlock();
-    for (const auto& i : hostList) {
-        if (i) {
+    for (const auto &i : hostList)
+    {
+        if (i)
+        {
             i->postIrcMessage(a, b, c);
         }
     }
@@ -130,9 +141,10 @@ void HostManager::postIrcMessage(const QString& a, const QString& b, const QStri
 // sending profile host does NOT get the event!
 // Note: Optional forceGlobal allows passing a null pointer as pHost, and will raise
 // an event for all profiles.
-void HostManager::postInterHostEvent(const Host* pHost, const TEvent& event, const bool forceGlobal)
+void HostManager::postInterHostEvent(const Host *pHost, const TEvent &event, const bool forceGlobal)
 {
-    if (!pHost && !forceGlobal) {
+    if (!pHost && !forceGlobal)
+    {
         return;
     }
 
@@ -144,18 +156,26 @@ void HostManager::postInterHostEvent(const Host* pHost, const TEvent& event, con
     QList<int> beforeSendingHost;
     int sendingHost = -1;
     QList<int> afterSendingHost;
-    while (i < hostList.size()) {
-        if (hostList.at(i) && hostList.at(i) != pHost) {
+    while (i < hostList.size())
+    {
+        if (hostList.at(i) && hostList.at(i) != pHost)
+        {
             beforeSendingHost.append(i++);
-        } else if (hostList.at(i) && hostList.at(i) == pHost) {
+        }
+        else if (hostList.at(i) && hostList.at(i) == pHost)
+        {
             sendingHost = i++;
             break;
-        } else {
+        }
+        else
+        {
             i++;
         }
     }
-    while (i < hostList.size()) {
-        if (hostList.at(i) && hostList.at(i) != pHost) {
+    while (i < hostList.size())
+    {
+        if (hostList.at(i) && hostList.at(i) != pHost)
+        {
             afterSendingHost.append(i);
         }
         i++;
@@ -165,15 +185,16 @@ void HostManager::postInterHostEvent(const Host* pHost, const TEvent& event, con
     allValidHosts = afterSendingHost;
     allValidHosts.append(beforeSendingHost);
 
-    for (int validHost : qAsConst(allValidHosts)) {
+    for (int validHost : qAsConst(allValidHosts))
+    {
         hostList.at(validHost)->raiseEvent(event);
     }
 }
 
-Host* HostManager::getHost(const QString& hostname)
+Host *HostManager::getHost(const QString &hostname)
 {
     mPoolReadWriteLock.lockForRead(); // Will block if a write lock is in place
-    Host* pHost = mHostPool.value(hostname).data();
+    Host *pHost = mHostPool.value(hostname).data();
     mPoolReadWriteLock.unlock();
 
     return pHost;

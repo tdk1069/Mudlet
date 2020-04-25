@@ -22,42 +22,64 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "Tree.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QPointer>
 #include <QRegularExpression>
-#include "post_guard.h"
 
 class Host;
-
 
 class TKey : public Tree<TKey>
 {
     friend class XMLexport;
     friend class XMLimport;
 
-public:
+  public:
     virtual ~TKey();
-    TKey(TKey* parent, Host* pHost);
-    TKey(QString name, Host* pHost);
+    TKey(TKey *parent, Host *pHost);
+    TKey(QString name, Host *pHost);
     void compileAll();
-    QString getName() { return mName; }
-    void setName(const QString & name);
-    int getKeyCode() { return mKeyCode; }
-    void setKeyCode(int code) { mKeyCode = code; }
-    int getKeyModifiers() { return mKeyModifier; }
-    void setKeyModifiers(int code) { mKeyModifier = code; }
-    void enableKey(const QString& name);
-    void disableKey(const QString& name);
+    QString getName()
+    {
+        return mName;
+    }
+    void setName(const QString &name);
+    int getKeyCode()
+    {
+        return mKeyCode;
+    }
+    void setKeyCode(int code)
+    {
+        mKeyCode = code;
+    }
+    int getKeyModifiers()
+    {
+        return mKeyModifier;
+    }
+    void setKeyModifiers(int code)
+    {
+        mKeyModifier = code;
+    }
+    void enableKey(const QString &name);
+    void disableKey(const QString &name);
     void compile();
     bool compileScript();
     void execute();
-    QString getScript() { return mScript; }
-    bool setScript(QString& script);
-    void setCommand(QString command) { mCommand = command; }
-    QString getCommand() { return mCommand; }
+    QString getScript()
+    {
+        return mScript;
+    }
+    bool setScript(QString &script);
+    void setCommand(QString command)
+    {
+        mCommand = command;
+    }
+    QString getCommand()
+    {
+        return mCommand;
+    }
 
     bool match(int, int, const bool);
     bool registerKey();
@@ -65,7 +87,7 @@ public:
     bool exportItem;
     bool mModuleMasterFolder;
 
-private:
+  private:
     TKey() = default;
 
     QString mName;

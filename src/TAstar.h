@@ -25,17 +25,17 @@
 #include "TRoom.h"
 
 #ifndef Q_MOC_RUN
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/astar_search.hpp>
 #include <boost/graph/graphviz.hpp>
-#include "post_guard.h"
 #endif
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QDebug>
 #include <QString>
-#include "post_guard.h"
 
 #include <math.h> // for sqrt
 
@@ -43,12 +43,11 @@ class TRoom;
 
 using namespace boost;
 
-
 // auxiliary types
 struct location
 {
     int id;    // Typically 4 bytes
-    TRoom* pR; // 4 or 8 bytes? - so may have reduced size from 20 to 8 or 12 plus padding...?
+    TRoom *pR; // 4 or 8 bytes? - so may have reduced size from 20 to 8 or 12 plus padding...?
 };
 
 typedef float cost;
@@ -65,13 +64,16 @@ struct route
 template <class Graph, class CostType, class LocMap>
 class distance_heuristic : public boost::astar_heuristic<Graph, CostType>
 {
-public:
+  public:
     typedef typename boost::graph_traits<Graph>::vertex_descriptor Vertex;
-    distance_heuristic(LocMap l, Vertex goal) : m_location(l), m_goal(goal) {}
+    distance_heuristic(LocMap l, Vertex goal) : m_location(l), m_goal(goal)
+    {
+    }
 
     CostType operator()(Vertex u)
     {
-        if (m_location[m_goal].pR->getArea() != m_location[u].pR->getArea()) {
+        if (m_location[m_goal].pR->getArea() != m_location[u].pR->getArea())
+        {
             return 1;
         }
         CostType dx = m_location[m_goal].pR->x - m_location[u].pR->x;
@@ -81,11 +83,10 @@ public:
         return std::sqrt(dx * dx + dy * dy + dz * dz);
     }
 
-private:
+  private:
     LocMap m_location;
     Vertex m_goal;
 };
-
 
 // exception for termination
 struct found_goal
@@ -93,21 +94,22 @@ struct found_goal
 };
 
 // visitor that terminates when we find the goal
-template <class Vertex>
-class astar_goal_visitor : public boost::default_astar_visitor
+template <class Vertex> class astar_goal_visitor : public boost::default_astar_visitor
 {
-public:
-    astar_goal_visitor(Vertex goal) : m_goal(goal) {}
-
-    template <class Graph>
-    void examine_vertex(Vertex u, Graph& g)
+  public:
+    astar_goal_visitor(Vertex goal) : m_goal(goal)
     {
-        if (u == m_goal) {
+    }
+
+    template <class Graph> void examine_vertex(Vertex u, Graph &g)
+    {
+        if (u == m_goal)
+        {
             throw found_goal();
         }
     }
 
-private:
+  private:
     Vertex m_goal;
 };
 

@@ -32,16 +32,17 @@
 #include "irc.h"
 #include "irccommand.h"
 #include "ircconnection.h"
+#include "ircfilter.h"
 #include "ircglobal.h"
 #include "ircmessage.h"
-#include "ircfilter.h"
 #include "ircnetwork.h"
 #include "ircprotocol.h"
 
 IRC_BEGIN_NAMESPACE
 
-namespace IrcCore {
-    IRC_CORE_EXPORT void registerMetaTypes();
+namespace IrcCore
+{
+IRC_CORE_EXPORT void registerMetaTypes();
 }
 
 IRC_END_NAMESPACE

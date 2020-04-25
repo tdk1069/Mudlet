@@ -18,32 +18,33 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "ScriptUnit.h"
-
 
 #include "Host.h"
 #include "TScript.h"
 
-void ScriptUnit::_uninstall(TScript* pChild, const QString& packageName)
+void ScriptUnit::_uninstall(TScript *pChild, const QString &packageName)
 {
-    std::list<TScript*>* childrenList = pChild->mpMyChildrenList;
-    for (auto script : *childrenList) {
+    std::list<TScript *> *childrenList = pChild->mpMyChildrenList;
+    for (auto script : *childrenList)
+    {
         _uninstall(script, packageName);
         uninstallList.append(script);
     }
 }
 
-
-void ScriptUnit::uninstall(const QString& packageName)
+void ScriptUnit::uninstall(const QString &packageName)
 {
-    for (auto rootScript : mScriptRootNodeList) {
-        if (rootScript->mPackageName == packageName) {
+    for (auto rootScript : mScriptRootNodeList)
+    {
+        if (rootScript->mPackageName == packageName)
+        {
             _uninstall(rootScript, packageName);
             uninstallList.append(rootScript);
         }
     }
-    for (auto& script : uninstallList) {
+    for (auto &script : uninstallList)
+    {
         unregisterScript(script);
     }
     uninstallList.clear();
@@ -51,27 +52,35 @@ void ScriptUnit::uninstall(const QString& packageName)
 
 void ScriptUnit::stopAllTriggers()
 {
-    for (auto script : mScriptRootNodeList) {
+    for (auto script : mScriptRootNodeList)
+    {
         script->setIsActive(false);
     }
 }
 
-void ScriptUnit::addScriptRootNode(TScript* pT, int parentPosition, int childPosition)
+void ScriptUnit::addScriptRootNode(TScript *pT, int parentPosition, int childPosition)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
-    if (!pT->getID()) {
+    if (!pT->getID())
+    {
         pT->setID(getNewID());
     }
 
-    if ((parentPosition == -1) || (childPosition >= static_cast<int>(mScriptRootNodeList.size()))) {
+    if ((parentPosition == -1) || (childPosition >= static_cast<int>(mScriptRootNodeList.size())))
+    {
         mScriptRootNodeList.push_back(pT);
-    } else {
+    }
+    else
+    {
         // insert item at proper position
         int cnt = 0;
-        for (auto it = mScriptRootNodeList.begin(); it != mScriptRootNodeList.end(); it++) {
-            if (cnt >= childPosition) {
+        for (auto it = mScriptRootNodeList.begin(); it != mScriptRootNodeList.end(); it++)
+        {
+            if (cnt >= childPosition)
+            {
                 mScriptRootNodeList.insert(it, pT);
                 break;
             }
@@ -84,115 +93,138 @@ void ScriptUnit::addScriptRootNode(TScript* pT, int parentPosition, int childPos
 
 void ScriptUnit::reParentScript(int childID, int oldParentID, int newParentID, int parentPosition, int childPosition)
 {
-    TScript* pOldParent = getScriptPrivate(oldParentID);
-    TScript* pNewParent = getScriptPrivate(newParentID);
-    TScript* pChild = getScriptPrivate(childID);
-    if (!pChild) {
+    TScript *pOldParent = getScriptPrivate(oldParentID);
+    TScript *pNewParent = getScriptPrivate(newParentID);
+    TScript *pChild = getScriptPrivate(childID);
+    if (!pChild)
+    {
         return;
     }
-    if (pOldParent) {
+    if (pOldParent)
+    {
         pOldParent->popChild(pChild);
     }
-    if (!pOldParent) {
+    if (!pOldParent)
+    {
         removeScriptRootNode(pChild);
     }
-    if (pNewParent) {
+    if (pNewParent)
+    {
         pNewParent->addChild(pChild, parentPosition, childPosition);
         pChild->setParent(pNewParent);
-        //cout << "dumping family of newParent:"<<endl;
-        //pNewParent->Dump();
-    } else {
+        // cout << "dumping family of newParent:"<<endl;
+        // pNewParent->Dump();
+    }
+    else
+    {
         pChild->Tree<TScript>::setParent(nullptr);
         addScriptRootNode(pChild, parentPosition, childPosition);
     }
 }
 
-void ScriptUnit::removeScriptRootNode(TScript* pT)
+void ScriptUnit::removeScriptRootNode(TScript *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
     mScriptRootNodeList.remove(pT);
 }
 
-TScript* ScriptUnit::getScript(int id)
+TScript *ScriptUnit::getScript(int id)
 {
     QMutexLocker locker(&mScriptUnitLock);
-    if (mScriptMap.find(id) != mScriptMap.end()) {
+    if (mScriptMap.find(id) != mScriptMap.end())
+    {
         return mScriptMap.value(id);
-    } else {
+    }
+    else
+    {
         return nullptr;
     }
 }
 
-TScript* ScriptUnit::getScriptPrivate(int id)
+TScript *ScriptUnit::getScriptPrivate(int id)
 {
-    if (mScriptMap.find(id) != mScriptMap.end()) {
+    if (mScriptMap.find(id) != mScriptMap.end())
+    {
         return mScriptMap.value(id);
-    } else {
+    }
+    else
+    {
         return nullptr;
     }
 }
 
-bool ScriptUnit::registerScript(TScript* pT)
+bool ScriptUnit::registerScript(TScript *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return false;
     }
 
-    if (pT->getParent()) {
+    if (pT->getParent())
+    {
         addScript(pT);
         return true;
-    } else {
+    }
+    else
+    {
         addScriptRootNode(pT);
         return true;
     }
 }
 
-void ScriptUnit::unregisterScript(TScript* pT)
+void ScriptUnit::unregisterScript(TScript *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
-    if (pT->getParent()) {
+    if (pT->getParent())
+    {
         removeScript(pT);
         return;
-    } else {
+    }
+    else
+    {
         removeScript(pT);
         removeScriptRootNode(pT);
         return;
     }
 }
 
-
-void ScriptUnit::addScript(TScript* pT)
+void ScriptUnit::addScript(TScript *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
 
     QMutexLocker locker(&mScriptUnitLock);
 
-    if (!pT->getID()) {
+    if (!pT->getID())
+    {
         pT->setID(getNewID());
     }
 
     mScriptMap.insert(pT->getID(), pT);
 }
 
-void ScriptUnit::removeScript(TScript* pT)
+void ScriptUnit::removeScript(TScript *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
-    QMapIterator<QString, QList<TScript*>> it(mpHost->mEventHandlerMap);
-    while (it.hasNext()) {
+    QMapIterator<QString, QList<TScript *>> it(mpHost->mEventHandlerMap);
+    while (it.hasNext())
+    {
         it.next();
         mpHost->mEventHandlerMap[it.key()].removeAll(pT);
     }
     mScriptMap.remove(pT->getID());
 }
-
 
 int ScriptUnit::getNewID()
 {
@@ -201,18 +233,22 @@ int ScriptUnit::getNewID()
 
 void ScriptUnit::compileAll()
 {
-    for (auto script : mScriptRootNodeList) {
-        if (script->isActive()) {
+    for (auto script : mScriptRootNodeList)
+    {
+        if (script->isActive())
+        {
             script->compileAll();
         }
     }
 }
 
-QVector<int> ScriptUnit::findScriptId(const QString& name) const
+QVector<int> ScriptUnit::findScriptId(const QString &name) const
 {
     QVector<int> Ids;
-    for (auto script : mScriptMap) {
-        if (script->getName() == name) {
+    for (auto script : mScriptMap)
+    {
+        if (script->getName() == name)
+        {
             Ids.append(script->getID());
         }
     }

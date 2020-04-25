@@ -19,47 +19,44 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TDebug.h"
 
 #include "TConsole.h"
 #include "mudlet.h"
 
-
-TDebug::TDebug(const QColor& c, const QColor& d)
-: msg()
-, fgColor(c)
-, bgColor(d)
+TDebug::TDebug(const QColor &c, const QColor &d) : msg(), fgColor(c), bgColor(d)
 {
 }
 
 // code is a dummy variable so that using operator>>() (at the end of a series
 // of operator<<() calls) causes the accumulated message to be printed/flushed
 // out...
-TDebug& TDebug::operator>>(const int code)
+TDebug &TDebug::operator>>(const int code)
 {
     Q_UNUSED(code);
-    if (mudlet::mpDebugConsole) {
+    if (mudlet::mpDebugConsole)
+    {
         mudlet::mpDebugConsole->print(msg, fgColor, bgColor);
     }
     return *this;
 }
 
-TDebug& TDebug::operator<<(const QString& t)
+TDebug &TDebug::operator<<(const QString &t)
 {
     msg += t;
     return *this;
 }
 
-TDebug& TDebug::operator<<(const int& t)
+TDebug &TDebug::operator<<(const int &t)
 {
     msg += QString::number(t);
     return *this;
 }
 
-TDebug& TDebug::operator<<(const QMap<QString, QString>& map)
+TDebug &TDebug::operator<<(const QMap<QString, QString> &map)
 {
-    for (QMap<QString, QString>::const_iterator it = map.constBegin(); it != map.constEnd(); ++it) {
+    for (QMap<QString, QString>::const_iterator it = map.constBegin(); it != map.constEnd(); ++it)
+    {
         msg += "(";
         msg += it.key();
         msg += ", ";
@@ -70,9 +67,10 @@ TDebug& TDebug::operator<<(const QMap<QString, QString>& map)
     return *this;
 }
 
-TDebug& TDebug::operator<<(const QMap<QString, int>& map)
+TDebug &TDebug::operator<<(const QMap<QString, int> &map)
 {
-    for (QMap<QString, int>::const_iterator it = map.constBegin(); it != map.constEnd(); ++it) {
+    for (QMap<QString, int>::const_iterator it = map.constBegin(); it != map.constEnd(); ++it)
+    {
         msg += "(";
         msg += it.key();
         msg += ", ";
@@ -83,9 +81,10 @@ TDebug& TDebug::operator<<(const QMap<QString, int>& map)
     return *this;
 }
 
-TDebug& TDebug::operator<<(const QMap<int, QString>& map)
+TDebug &TDebug::operator<<(const QMap<int, QString> &map)
 {
-    for (QMap<int, QString>::const_iterator it = map.constBegin(); it != map.constEnd(); ++it) {
+    for (QMap<int, QString>::const_iterator it = map.constBegin(); it != map.constEnd(); ++it)
+    {
         msg += "(";
         msg += QString::number(it.key());
         msg += ", ";
@@ -96,9 +95,10 @@ TDebug& TDebug::operator<<(const QMap<int, QString>& map)
     return *this;
 }
 
-TDebug& TDebug::operator<<(const QMap<int, int>& map)
+TDebug &TDebug::operator<<(const QMap<int, int> &map)
 {
-    for (QMap<int, int>::const_iterator it = map.constBegin(); it != map.constEnd(); ++it) {
+    for (QMap<int, int>::const_iterator it = map.constBegin(); it != map.constEnd(); ++it)
+    {
         msg += "(";
         msg += QString::number(it.key());
         msg += ", ";
@@ -109,9 +109,10 @@ TDebug& TDebug::operator<<(const QMap<int, int>& map)
     return *this;
 }
 
-TDebug& TDebug::operator<<(const QList<QString>& list)
+TDebug &TDebug::operator<<(const QList<QString> &list)
 {
-    for (QList<QString>::const_iterator it = list.constBegin(); it != list.constEnd(); ++it) {
+    for (QList<QString>::const_iterator it = list.constBegin(); it != list.constEnd(); ++it)
+    {
         msg += (*it);
         msg += ", ";
     }
@@ -119,9 +120,10 @@ TDebug& TDebug::operator<<(const QList<QString>& list)
     return *this;
 }
 
-TDebug& TDebug::operator<<(const QList<int>& list)
+TDebug &TDebug::operator<<(const QList<int> &list)
 {
-    for (QList<int>::const_iterator it = list.constBegin(); it != list.constEnd(); ++it) {
+    for (QList<int>::const_iterator it = list.constBegin(); it != list.constEnd(); ++it)
+    {
         msg += QString::number(*it);
         msg += ", ";
     }

@@ -21,19 +21,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include "ui_vars_main_area.h"
-#include "post_guard.h"
-
 
 class dlgVarsMainArea : public QWidget, public Ui::vars_main_area
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(dlgVarsMainArea)
-    dlgVarsMainArea(QWidget*);
+    dlgVarsMainArea(QWidget *);
 };
 
 #endif // MUDLET_DLGVARSMAINAREA_H

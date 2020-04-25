@@ -27,9 +27,9 @@
 */
 
 #include "irccommandqueue.h"
+#include "irccommand.h"
 #include "irccommandqueue_p.h"
 #include "ircconnection.h"
-#include "irccommand.h"
 
 IRC_BEGIN_NAMESPACE
 
@@ -55,17 +55,20 @@ static const int DEFAULT_INTERVAL = 2;
  */
 
 #ifndef IRC_DOXYGEN
-IrcCommandQueuePrivate::IrcCommandQueuePrivate() : q_ptr(0),
-    connection(0), batch(DEFAULT_BATCH), interval(DEFAULT_INTERVAL)
+IrcCommandQueuePrivate::IrcCommandQueuePrivate()
+    : q_ptr(0), connection(0), batch(DEFAULT_BATCH), interval(DEFAULT_INTERVAL)
 {
 }
 
-bool IrcCommandQueuePrivate::commandFilter(IrcCommand* cmd)
+bool IrcCommandQueuePrivate::commandFilter(IrcCommand *cmd)
 {
     Q_Q(IrcCommandQueue);
-    if (cmd->type() == IrcCommand::Quit) {
+    if (cmd->type() == IrcCommand::Quit)
+    {
         _irc_sendBatch(true);
-    } else if (interval > 0 && !cmd->parent() && connection->isConnected()) {
+    }
+    else if (interval > 0 && !cmd->parent() && connection->isConnected())
+    {
         cmd->setParent(q);
         commands.enqueue(cmd);
         emit q->sizeChanged(commands.size());
@@ -77,11 +80,14 @@ bool IrcCommandQueuePrivate::commandFilter(IrcCommand* cmd)
 
 void IrcCommandQueuePrivate::_irc_updateTimer()
 {
-    if (connection && interval > 0 && !commands.isEmpty() && connection->isConnected()) {
+    if (connection && interval > 0 && !commands.isEmpty() && connection->isConnected())
+    {
         timer.setInterval(interval * 1000);
         if (!timer.isActive())
             timer.start();
-    } else {
+    }
+    else
+    {
         if (timer.isActive())
             timer.stop();
     }
@@ -90,11 +96,14 @@ void IrcCommandQueuePrivate::_irc_updateTimer()
 void IrcCommandQueuePrivate::_irc_sendBatch(bool force)
 {
     Q_Q(IrcCommandQueue);
-    if (!commands.isEmpty()) {
+    if (!commands.isEmpty())
+    {
         int i = batch;
-        while ((force || --i >= 0) && !commands.isEmpty()) {
-            IrcCommand* cmd = commands.dequeue();
-            if (cmd) {
+        while ((force || --i >= 0) && !commands.isEmpty())
+        {
+            IrcCommand *cmd = commands.dequeue();
+            if (cmd)
+            {
                 connection->sendCommand(cmd);
                 cmd->deleteLater();
             }
@@ -111,12 +120,12 @@ void IrcCommandQueuePrivate::_irc_sendBatch(bool force)
     \note If \a parent is an instance of IrcConnection, it will be
     automatically assigned to \ref IrcCommandQueue::connection "connection".
  */
-IrcCommandQueue::IrcCommandQueue(QObject* parent) : QObject(parent), d_ptr(new IrcCommandQueuePrivate)
+IrcCommandQueue::IrcCommandQueue(QObject *parent) : QObject(parent), d_ptr(new IrcCommandQueuePrivate)
 {
     Q_D(IrcCommandQueue);
     d->q_ptr = this;
     connect(&d->timer, SIGNAL(timeout()), this, SLOT(_irc_sendBatch()));
-    setConnection(qobject_cast<IrcConnection*>(parent));
+    setConnection(qobject_cast<IrcConnection *>(parent));
 }
 
 /*!
@@ -168,7 +177,8 @@ int IrcCommandQueue::interval() const
 void IrcCommandQueue::setInterval(int seconds)
 {
     Q_D(IrcCommandQueue);
-    if (d->interval != seconds) {
+    if (d->interval != seconds)
+    {
         d->interval = seconds;
         d->_irc_updateTimer();
     }
@@ -196,23 +206,26 @@ int IrcCommandQueue::size() const
     \li IrcConnection* <b>connection</b>() const
     \li void <b>setConnection</b>(IrcConnection* connection)
  */
-IrcConnection* IrcCommandQueue::connection() const
+IrcConnection *IrcCommandQueue::connection() const
 {
     Q_D(const IrcCommandQueue);
     return d->connection;
 }
 
-void IrcCommandQueue::setConnection(IrcConnection* connection)
+void IrcCommandQueue::setConnection(IrcConnection *connection)
 {
     Q_D(IrcCommandQueue);
-    if (d->connection != connection) {
-        if (d->connection) {
+    if (d->connection != connection)
+    {
+        if (d->connection)
+        {
             d->connection->removeCommandFilter(d);
             disconnect(d->connection, SIGNAL(connected()), this, SLOT(_irc_sendBatch()));
             disconnect(d->connection, SIGNAL(disconnected()), this, SLOT(_irc_updateTimer()));
         }
         d->connection = connection;
-        if (connection) {
+        if (connection)
+        {
             connection->installCommandFilter(d);
             connect(connection, SIGNAL(connected()), this, SLOT(_irc_sendBatch()));
             connect(connection, SIGNAL(disconnected()), this, SLOT(_irc_updateTimer()));

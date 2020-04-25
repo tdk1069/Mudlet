@@ -22,14 +22,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QColor>
 #include <QList>
 #include <QMap>
 #include <QString>
-#include "post_guard.h"
-
 
 class TDebug
 {
@@ -37,20 +35,20 @@ class TDebug
     QColor fgColor;
     QColor bgColor;
 
-public:
-    TDebug(const QColor&, const QColor&);
+  public:
+    TDebug(const QColor &, const QColor &);
     ~TDebug() = default;
-    TDebug& operator>>(int);
-    TDebug& operator<<(const QString& t);
-    TDebug& operator<<(const int& t);
-    TDebug& operator<<(const QMap<QString, QString>& map);
-    TDebug& operator<<(const QMap<QString, int>& map);
-    TDebug& operator<<(const QMap<int, QString>& map);
-    TDebug& operator<<(const QMap<int, int>& map);
-    TDebug& operator<<(const QList<QString>& list);
-    TDebug& operator<<(const QList<int>& list);
+    TDebug &operator>>(int);
+    TDebug &operator<<(const QString &t);
+    TDebug &operator<<(const int &t);
+    TDebug &operator<<(const QMap<QString, QString> &map);
+    TDebug &operator<<(const QMap<QString, int> &map);
+    TDebug &operator<<(const QMap<int, QString> &map);
+    TDebug &operator<<(const QMap<int, int> &map);
+    TDebug &operator<<(const QList<QString> &list);
+    TDebug &operator<<(const QList<int> &list);
 
-private:
+  private:
     TDebug() = default;
 };
 

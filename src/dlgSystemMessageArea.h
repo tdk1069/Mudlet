@@ -21,19 +21,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include "ui_system_message_area.h"
-#include "post_guard.h"
-
 
 class dlgSystemMessageArea : public QWidget, public Ui::system_message_area
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(dlgSystemMessageArea)
-    dlgSystemMessageArea(QWidget*);
+    dlgSystemMessageArea(QWidget *);
 };
 
 #endif // MUDLET_DLGSYSTEMMESSAGEAREA_H

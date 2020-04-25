@@ -22,34 +22,31 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "Host.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QMap>
 #include <QReadWriteLock>
 #include <QString>
 #include <QStringList>
-#include "post_guard.h"
-
 
 class TEvent;
 
-
 class HostManager
 {
-public:
+  public:
     HostManager() = default; /* : mpActiveHost() - Not needed */
 
-    Host* getHost(const QString& hostname);
-    bool addHost(const QString& name, const QString& port, const QString& login, const QString& pass);
+    Host *getHost(const QString &hostname);
+    bool addHost(const QString &name, const QString &port, const QString &login, const QString &pass);
     int getHostCount();
     QStringList getHostList();
-    bool deleteHost(const QString&);
-    void postIrcMessage(const QString&, const QString&, const QString&);
-    void postInterHostEvent(const Host*, const TEvent&, const bool = false);
+    bool deleteHost(const QString &);
+    void postIrcMessage(const QString &, const QString &, const QString &);
+    void postInterHostEvent(const Host *, const TEvent &, const bool = false);
 
-private:
+  private:
     QReadWriteLock mPoolReadWriteLock; // Was QMutex, but we needed to allow concurrent read access
     QMap<QString, QSharedPointer<Host>> mHostPool;
 };

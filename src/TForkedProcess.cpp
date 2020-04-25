@@ -19,29 +19,29 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TForkedProcess.h"
-
 
 TForkedProcess::~TForkedProcess()
 {
-    if (callBackFunctionRef != -1) {
+    if (callBackFunctionRef != -1)
+    {
         luaL_unref(interpreter->pGlobalLua, LUA_REGISTRYINDEX, callBackFunctionRef);
     }
 }
 
-
-TForkedProcess::TForkedProcess(TLuaInterpreter* interpreter, lua_State* L) : QProcess()
+TForkedProcess::TForkedProcess(TLuaInterpreter *interpreter, lua_State *L) : QProcess()
 {
     this->interpreter = interpreter;
     int n = lua_gettop(L);
     callBackFunctionRef = -1;
-    if (n < 2) {
+    if (n < 2)
+    {
         lua_pushstring(L, "Need read function and process name as parameters.");
         lua_error(L);
     }
 
-    if (!lua_isfunction(L, 1)) {
+    if (!lua_isfunction(L, 1))
+    {
         lua_pushstring(L, "Need read function as first parameter.");
         lua_error(L);
     }
@@ -49,16 +49,17 @@ TForkedProcess::TForkedProcess(TLuaInterpreter* interpreter, lua_State* L) : QPr
     lua_pushvalue(L, 1);
     callBackFunctionRef = luaL_ref(L, LUA_REGISTRYINDEX);
 
-
-    QString prog = QString((char*)luaL_checkstring(L, 2));
+    QString prog = QString((char *)luaL_checkstring(L, 2));
     QStringList args;
-    for (int i = 3; i <= n; i++) {
-        args << ((char*)luaL_checkstring(L, i));
+    for (int i = 3; i <= n; i++)
+    {
+        args << ((char *)luaL_checkstring(L, i));
     }
 
     // QProcess::finished is overloaded so we have to say which form we are
     // connecting here
-    connect(this, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), interpreter, &TLuaInterpreter::slotDeleteSender);
+    connect(this, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), interpreter,
+            &TLuaInterpreter::slotDeleteSender);
     connect(this, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, &TForkedProcess::slotFinish);
     connect(this, &QProcess::readyReadStandardOutput, this, &TForkedProcess::slotReceivedData);
 
@@ -78,7 +79,8 @@ void TForkedProcess::slotFinish(int exitCode, QProcess::ExitStatus exitStatus)
 
 void TForkedProcess::slotReceivedData()
 {
-    while (canReadLine()) {
+    while (canReadLine())
+    {
         QByteArray line = readLine();
         // Call lua function by stored Reference
         lua_rawgeti(interpreter->pGlobalLua, LUA_REGISTRYINDEX, callBackFunctionRef);
@@ -87,25 +89,29 @@ void TForkedProcess::slotReceivedData()
     }
 }
 
-int TForkedProcess::sendMessage(lua_State* L)
+int TForkedProcess::sendMessage(lua_State *L)
 {
-    QPointer<TForkedProcess>* forkedProcess = *((QPointer<TForkedProcess>**)lua_topointer(L, lua_upvalueindex(1)));
+    QPointer<TForkedProcess> *forkedProcess = *((QPointer<TForkedProcess> **)lua_topointer(L, lua_upvalueindex(1)));
 
-    if (!forkedProcess || forkedProcess->isNull() || !(*forkedProcess)->running) {
+    if (!forkedProcess || forkedProcess->isNull() || !(*forkedProcess)->running)
+    {
         lua_pushstring(L, "Unable to send data to process. Process has ended.");
         return lua_error(L);
     }
 
     size_t stringLength = 0;
-    const char* toWrite = lua_tolstring(L, 1, &stringLength);
-    if (!toWrite) {
+    const char *toWrite = lua_tolstring(L, 1, &stringLength);
+    if (!toWrite)
+    {
         lua_pushstring(L, "Unable to get data to send.");
         lua_error(L);
     }
     size_t writedBytes = 0;
-    while (stringLength > writedBytes) {
+    while (stringLength > writedBytes)
+    {
         int res = (*forkedProcess)->write(toWrite + writedBytes, stringLength - writedBytes);
-        if (res == -1) {
+        if (res == -1)
+        {
             lua_pushstring(L, "Unable to send data to process.");
             lua_error(L);
         }
@@ -114,20 +120,21 @@ int TForkedProcess::sendMessage(lua_State* L)
     return 0;
 }
 
-int TForkedProcess::isProcessRunning(lua_State* L)
+int TForkedProcess::isProcessRunning(lua_State *L)
 {
-    QPointer<TForkedProcess>* forkedProcess = *((QPointer<TForkedProcess>**)lua_topointer(L, lua_upvalueindex(1)));
+    QPointer<TForkedProcess> *forkedProcess = *((QPointer<TForkedProcess> **)lua_topointer(L, lua_upvalueindex(1)));
 
     bool running = (forkedProcess != nullptr && !forkedProcess->isNull() && (*forkedProcess)->running);
     lua_pushboolean(L, running);
     return 1;
 }
 
-int TForkedProcess::closeInputOfProcess(lua_State* L)
+int TForkedProcess::closeInputOfProcess(lua_State *L)
 {
-    QPointer<TForkedProcess>* forkedProcess = *((QPointer<TForkedProcess>**)lua_topointer(L, lua_upvalueindex(1)));
+    QPointer<TForkedProcess> *forkedProcess = *((QPointer<TForkedProcess> **)lua_topointer(L, lua_upvalueindex(1)));
 
-    if (!forkedProcess || forkedProcess->isNull() || !(*forkedProcess)->running) {
+    if (!forkedProcess || forkedProcess->isNull() || !(*forkedProcess)->running)
+    {
         // Process is already finished. Nothing to do.
         return 0;
     }
@@ -135,27 +142,30 @@ int TForkedProcess::closeInputOfProcess(lua_State* L)
     return 0;
 }
 
-static int qPointerGC(lua_State* L)
+static int qPointerGC(lua_State *L)
 {
-    QPointer<TForkedProcess>* forkedProcessPointer = *((QPointer<TForkedProcess>**)lua_topointer(L, 1));
+    QPointer<TForkedProcess> *forkedProcessPointer = *((QPointer<TForkedProcess> **)lua_topointer(L, 1));
     delete forkedProcessPointer;
     lua_pushboolean(L, true);
     return 1;
 }
 
-
-int TForkedProcess::startProcess(TLuaInterpreter* interpreter, lua_State* L)
+int TForkedProcess::startProcess(TLuaInterpreter *interpreter, lua_State *L)
 {
     auto process = new TForkedProcess(interpreter, L);
 
     // The userdata for the closures.
-    auto ** luaMemory = (QPointer<TForkedProcess>**)lua_newuserdata(L, sizeof(QPointer<TForkedProcess>*));
+    auto **luaMemory = (QPointer<TForkedProcess> **)lua_newuserdata(L, sizeof(QPointer<TForkedProcess> *));
     int userDataIndex = lua_gettop(L);
-    if (lua_getmetatable(L, userDataIndex) != 0) {
+    if (lua_getmetatable(L, userDataIndex) != 0)
+    {
         lua_pushstring(L, "Error: new user data should not have any metatable.");
         lua_error(L);
-    } else {
-        if (luaL_newmetatable(L, "qPointerGCMetatable") == 1) {
+    }
+    else
+    {
+        if (luaL_newmetatable(L, "qPointerGCMetatable") == 1)
+        {
             // First time one call this method. One must register the garbage collection method.
             int tableIndex = lua_gettop(L);
             lua_pushstring(L, "__gc");

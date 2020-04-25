@@ -30,9 +30,9 @@
 #define IRC_H
 
 #include <IrcGlobal>
+#include <QtCore/qmetatype.h>
 #include <QtCore/qobject.h>
 #include <QtCore/qstring.h>
-#include <QtCore/qmetatype.h>
 
 IRC_BEGIN_NAMESPACE
 
@@ -44,19 +44,20 @@ class IRC_CORE_EXPORT Irc : public QObject
     Q_PROPERTY(QStringList supportedCapabilities READ supportedCapabilities CONSTANT)
     Q_ENUMS(Color DataRole SortMethod Code)
 
-public:
+  public:
     Q_INVOKABLE static QString version();
     Q_INVOKABLE static QString codeToString(int code);
-    Q_INVOKABLE static QString nickFromPrefix(const QString& prefix);
-    Q_INVOKABLE static QString identFromPrefix(const QString& prefix);
-    Q_INVOKABLE static QString hostFromPrefix(const QString& prefix);
+    Q_INVOKABLE static QString nickFromPrefix(const QString &prefix);
+    Q_INVOKABLE static QString identFromPrefix(const QString &prefix);
+    Q_INVOKABLE static QString hostFromPrefix(const QString &prefix);
     Q_INVOKABLE static void registerMetaTypes();
 
     static bool isSecureSupported();
     static QStringList supportedSaslMechanisms();
     static QStringList supportedCapabilities();
 
-    enum Color {
+    enum Color
+    {
         White = 0,
         Black = 1,
         Blue = 2,
@@ -75,7 +76,8 @@ public:
         LightGray = 15
     };
 
-    enum DataRole {
+    enum DataRole
+    {
         UserRole = Qt::UserRole,
         BufferRole,
         ChannelRole,
@@ -85,14 +87,16 @@ public:
         TitleRole
     };
 
-    enum SortMethod {
+    enum SortMethod
+    {
         SortByHand,
         SortByName,
         SortByTitle,
         SortByActivity
     };
 
-    enum Code {
+    enum Code
+    {
         RPL_WELCOME = 1,
         RPL_YOURHOST = 2,
         RPL_CREATED = 3,
@@ -550,7 +554,7 @@ IRC_CORE_EXPORT QDebug operator<<(QDebug debug, Irc::SortMethod method);
 
 IRC_END_NAMESPACE
 
-Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(Irc*))
+Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(Irc *))
 Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(Irc::Code))
 Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(Irc::DataRole))
 Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(Irc::Color))

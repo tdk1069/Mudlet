@@ -22,7 +22,7 @@
 
 // FreeBSD does not support the updater and these missing files upset
 // clang-tidy / Clazy when they are run in an environment without them:
-#if defined (INCLUDE_UPDATER)
+#if defined(INCLUDE_UPDATER)
 #include "dblsqd/feed.h"
 #include "dblsqd/update_dialog.h"
 #endif
@@ -31,17 +31,17 @@
 #include "../3rdparty/sparkle-glue/AutoUpdater.h"
 #endif
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QObject>
-#include "post_guard.h"
 
 class Updater : public QObject
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(Updater)
-    explicit Updater(QObject* parent = nullptr, QSettings* settings = nullptr);
+    explicit Updater(QObject *parent = nullptr, QSettings *settings = nullptr);
     virtual ~Updater();
     void checkUpdatesOnStart();
     void manuallyCheckUpdates();
@@ -50,20 +50,20 @@ public:
     bool updateAutomatically() const;
     bool shouldShowChangelog();
 
-private:
-    dblsqd::Feed* feed;
-    dblsqd::UpdateDialog* updateDialog;
-    QPushButton* mpInstallOrRestart;
+  private:
+    dblsqd::Feed *feed;
+    dblsqd::UpdateDialog *updateDialog;
+    QPushButton *mpInstallOrRestart;
     bool mUpdateInstalled;
-    QSettings* settings;
+    QSettings *settings;
     std::unique_ptr<QTimer> mDailyCheck;
 
 #if defined(Q_OS_LINUX)
     void setupOnLinux();
-    void untarOnLinux(const QString& fileName);
+    void untarOnLinux(const QString &fileName);
 #elif defined(Q_OS_WIN32)
     void setupOnWindows();
-    void prepareSetupOnWindows(const QString& fileName);
+    void prepareSetupOnWindows(const QString &fileName);
 #elif defined(Q_OS_MACOS)
     void setupOnMacOS();
 #endif
@@ -76,18 +76,17 @@ private:
 #if defined(Q_OS_LINUX)
     QString unzippedBinaryName;
 #elif defined(Q_OS_MACOS)
-    AutoUpdater* msparkleUpdater;
+    AutoUpdater *msparkleUpdater;
 #endif
 
-
-signals:
+  signals:
     void signal_updateInstalled();
     // Argument is a count of updates available
     void signal_updateAvailable(const int);
     void signal_automaticUpdatesChanged(const bool);
 
-public slots:
-    void installOrRestartClicked(QAbstractButton* button, const QString& filePath);
+  public slots:
+    void installOrRestartClicked(QAbstractButton *button, const QString &filePath);
 #if defined(Q_OS_LINUX)
     // might want to make these private
     void updateBinaryOnLinux();

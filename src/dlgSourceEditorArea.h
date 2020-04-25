@@ -22,18 +22,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include "ui_source_editor_area.h"
-#include "post_guard.h"
 
 class dlgSourceEditorArea : public QWidget, public Ui::source_editor_area
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(dlgSourceEditorArea)
-    dlgSourceEditorArea(QWidget*);
+    dlgSourceEditorArea(QWidget *);
 };
 
 #endif // MUDLET_DLGSOURCEEDITORAREA_H

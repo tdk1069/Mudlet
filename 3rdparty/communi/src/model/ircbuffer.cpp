@@ -30,9 +30,9 @@
 #include "ircbuffer_p.h"
 #include "ircbuffermodel.h"
 #include "ircbuffermodel_p.h"
+#include "ircchannel.h"
 #include "ircconnection.h"
 #include "ircnetwork.h"
-#include "ircchannel.h"
 
 IRC_BEGIN_NAMESPACE
 
@@ -75,15 +75,15 @@ IRC_BEGIN_NAMESPACE
 IrcBufferPrivate::IrcBufferPrivate()
     : q_ptr(0), model(0), persistent(false), sticky(false), monitorStatus(MonitorUnknown)
 {
-    qRegisterMetaType<IrcBuffer*>();
-    qRegisterMetaType<QList<IrcBuffer*> >();
+    qRegisterMetaType<IrcBuffer *>();
+    qRegisterMetaType<QList<IrcBuffer *>>();
 }
 
 IrcBufferPrivate::~IrcBufferPrivate()
 {
 }
 
-void IrcBufferPrivate::init(const QString& title, IrcBufferModel* m)
+void IrcBufferPrivate::init(const QString &title, IrcBufferModel *m)
 {
     name = title;
     setModel(m);
@@ -101,10 +101,11 @@ void IrcBufferPrivate::disconnected()
     emit q->activeChanged(q->isActive());
 }
 
-void IrcBufferPrivate::setName(const QString& value)
+void IrcBufferPrivate::setName(const QString &value)
 {
     Q_Q(IrcBuffer);
-    if (name != value) {
+    if (name != value)
+    {
         const QString oldTitle = q->title();
         name = value;
         emit q->nameChanged(name);
@@ -114,10 +115,11 @@ void IrcBufferPrivate::setName(const QString& value)
     }
 }
 
-void IrcBufferPrivate::setPrefix(const QString& value)
+void IrcBufferPrivate::setPrefix(const QString &value)
 {
     Q_Q(IrcBuffer);
-    if (prefix != value) {
+    if (prefix != value)
+    {
         const QString oldTitle = q->title();
         prefix = value;
         emit q->prefixChanged(prefix);
@@ -127,7 +129,7 @@ void IrcBufferPrivate::setPrefix(const QString& value)
     }
 }
 
-void IrcBufferPrivate::setModel(IrcBufferModel* value)
+void IrcBufferPrivate::setModel(IrcBufferModel *value)
 {
     model = value;
 }
@@ -135,7 +137,8 @@ void IrcBufferPrivate::setModel(IrcBufferModel* value)
 void IrcBufferPrivate::setMonitorStatus(MonitorStatus status)
 {
     Q_Q(IrcBuffer);
-    if (monitorStatus != status) {
+    if (monitorStatus != status)
+    {
         bool wasActive = q->isActive();
         monitorStatus = status;
         bool isActive = q->isActive();
@@ -147,60 +150,63 @@ void IrcBufferPrivate::setMonitorStatus(MonitorStatus status)
 bool IrcBufferPrivate::isMonitorable() const
 {
     Q_Q(const IrcBuffer);
-    IrcNetwork* n = q->network();
-    IrcConnection* c = q->connection();
-    if (!sticky && !name.startsWith(QLatin1String("*")) && c && c->isConnected() && n && n->numericLimit(IrcNetwork::MonitorCount) >= 0 && !n->isChannel(q->title()))
+    IrcNetwork *n = q->network();
+    IrcConnection *c = q->connection();
+    if (!sticky && !name.startsWith(QLatin1String("*")) && c && c->isConnected() && n &&
+        n->numericLimit(IrcNetwork::MonitorCount) >= 0 && !n->isChannel(q->title()))
         return true;
     return false;
 }
 
-bool IrcBufferPrivate::processMessage(IrcMessage* message)
+bool IrcBufferPrivate::processMessage(IrcMessage *message)
 {
     Q_Q(IrcBuffer);
     bool processed = false;
-    switch (message->type()) {
+    switch (message->type())
+    {
     case IrcMessage::Away:
-        processed = processAwayMessage(static_cast<IrcAwayMessage*>(message));
+        processed = processAwayMessage(static_cast<IrcAwayMessage *>(message));
         break;
     case IrcMessage::Join:
-        processed = processJoinMessage(static_cast<IrcJoinMessage*>(message));
+        processed = processJoinMessage(static_cast<IrcJoinMessage *>(message));
         break;
     case IrcMessage::Kick:
-        processed = processKickMessage(static_cast<IrcKickMessage*>(message));
+        processed = processKickMessage(static_cast<IrcKickMessage *>(message));
         break;
     case IrcMessage::Mode:
-        processed = processModeMessage(static_cast<IrcModeMessage*>(message));
+        processed = processModeMessage(static_cast<IrcModeMessage *>(message));
         break;
     case IrcMessage::Names:
-        processed = processNamesMessage(static_cast<IrcNamesMessage*>(message));
+        processed = processNamesMessage(static_cast<IrcNamesMessage *>(message));
         break;
     case IrcMessage::Nick:
-        processed = processNickMessage(static_cast<IrcNickMessage*>(message));
+        processed = processNickMessage(static_cast<IrcNickMessage *>(message));
         break;
     case IrcMessage::Notice:
-        processed = processNoticeMessage(static_cast<IrcNoticeMessage*>(message));
+        processed = processNoticeMessage(static_cast<IrcNoticeMessage *>(message));
         break;
     case IrcMessage::Numeric:
-        processed = processNumericMessage(static_cast<IrcNumericMessage*>(message));
+        processed = processNumericMessage(static_cast<IrcNumericMessage *>(message));
         break;
     case IrcMessage::Part:
-        processed = processPartMessage(static_cast<IrcPartMessage*>(message));
+        processed = processPartMessage(static_cast<IrcPartMessage *>(message));
         break;
     case IrcMessage::Private:
-        processed = processPrivateMessage(static_cast<IrcPrivateMessage*>(message));
-        if (processed) {
+        processed = processPrivateMessage(static_cast<IrcPrivateMessage *>(message));
+        if (processed)
+        {
             activity = message->timeStamp();
             IrcBufferModelPrivate::get(model)->promoteBuffer(q);
         }
         break;
     case IrcMessage::Quit:
-        processed = processQuitMessage(static_cast<IrcQuitMessage*>(message));
+        processed = processQuitMessage(static_cast<IrcQuitMessage *>(message));
         break;
     case IrcMessage::Topic:
-        processed = processTopicMessage(static_cast<IrcTopicMessage*>(message));
+        processed = processTopicMessage(static_cast<IrcTopicMessage *>(message));
         break;
     case IrcMessage::WhoReply:
-        processed = processWhoReplyMessage(static_cast<IrcWhoReplyMessage*>(message));
+        processed = processWhoReplyMessage(static_cast<IrcWhoReplyMessage *>(message));
         break;
     default:
         break;
@@ -210,51 +216,52 @@ bool IrcBufferPrivate::processMessage(IrcMessage* message)
     return processed;
 }
 
-bool IrcBufferPrivate::processAwayMessage(IrcAwayMessage* message)
+bool IrcBufferPrivate::processAwayMessage(IrcAwayMessage *message)
 {
     return !message->nick().compare(name, Qt::CaseInsensitive);
 }
 
-bool IrcBufferPrivate::processJoinMessage(IrcJoinMessage* message)
+bool IrcBufferPrivate::processJoinMessage(IrcJoinMessage *message)
 {
     Q_UNUSED(message);
     return false;
 }
 
-bool IrcBufferPrivate::processKickMessage(IrcKickMessage* message)
+bool IrcBufferPrivate::processKickMessage(IrcKickMessage *message)
 {
     Q_UNUSED(message);
     return false;
 }
 
-bool IrcBufferPrivate::processModeMessage(IrcModeMessage* message)
+bool IrcBufferPrivate::processModeMessage(IrcModeMessage *message)
 {
     Q_UNUSED(message);
     return false;
 }
 
-bool IrcBufferPrivate::processNamesMessage(IrcNamesMessage* message)
+bool IrcBufferPrivate::processNamesMessage(IrcNamesMessage *message)
 {
     Q_UNUSED(message);
     return false;
 }
 
-bool IrcBufferPrivate::processNickMessage(IrcNickMessage* message)
+bool IrcBufferPrivate::processNickMessage(IrcNickMessage *message)
 {
-    if (!message->testFlag(IrcMessage::Playback) && !message->nick().compare(name, Qt::CaseInsensitive)) {
+    if (!message->testFlag(IrcMessage::Playback) && !message->nick().compare(name, Qt::CaseInsensitive))
+    {
         setName(message->newNick());
         return true;
     }
     return !message->newNick().compare(name, Qt::CaseInsensitive);
 }
 
-bool IrcBufferPrivate::processNoticeMessage(IrcNoticeMessage* message)
+bool IrcBufferPrivate::processNoticeMessage(IrcNoticeMessage *message)
 {
     Q_UNUSED(message);
     return false;
 }
 
-bool IrcBufferPrivate::processNumericMessage(IrcNumericMessage* message)
+bool IrcBufferPrivate::processNumericMessage(IrcNumericMessage *message)
 {
     if (message->code() == Irc::RPL_MONONLINE)
         setMonitorStatus(MonitorOnline);
@@ -263,24 +270,24 @@ bool IrcBufferPrivate::processNumericMessage(IrcNumericMessage* message)
     return message->isImplicit();
 }
 
-bool IrcBufferPrivate::processPartMessage(IrcPartMessage* message)
+bool IrcBufferPrivate::processPartMessage(IrcPartMessage *message)
 {
     Q_UNUSED(message);
     return false;
 }
 
-bool IrcBufferPrivate::processPrivateMessage(IrcPrivateMessage* message)
+bool IrcBufferPrivate::processPrivateMessage(IrcPrivateMessage *message)
 {
     Q_UNUSED(message);
     return true;
 }
 
-bool IrcBufferPrivate::processQuitMessage(IrcQuitMessage* message)
+bool IrcBufferPrivate::processQuitMessage(IrcQuitMessage *message)
 {
     return !message->nick().compare(name, Qt::CaseInsensitive);
 }
 
-bool IrcBufferPrivate::processTopicMessage(IrcTopicMessage* message)
+bool IrcBufferPrivate::processTopicMessage(IrcTopicMessage *message)
 {
     Q_UNUSED(message);
     return false;
@@ -296,8 +303,7 @@ bool IrcBufferPrivate::processWhoReplyMessage(IrcWhoReplyMessage *message)
 /*!
     Constructs a new buffer object with \a parent.
  */
-IrcBuffer::IrcBuffer(QObject* parent)
-    : QObject(parent), d_ptr(new IrcBufferPrivate)
+IrcBuffer::IrcBuffer(QObject *parent) : QObject(parent), d_ptr(new IrcBufferPrivate)
 {
     Q_D(IrcBuffer);
     d->q_ptr = this;
@@ -306,8 +312,7 @@ IrcBuffer::IrcBuffer(QObject* parent)
 /*!
     \internal
  */
-IrcBuffer::IrcBuffer(IrcBufferPrivate& dd, QObject* parent)
-    : QObject(parent), d_ptr(&dd)
+IrcBuffer::IrcBuffer(IrcBufferPrivate &dd, QObject *parent) : QObject(parent), d_ptr(&dd)
 {
     Q_D(IrcBuffer);
     d->q_ptr = this;
@@ -354,7 +359,7 @@ QString IrcBuffer::name() const
     return d->name;
 }
 
-void IrcBuffer::setName(const QString& name)
+void IrcBuffer::setName(const QString &name)
 {
     Q_D(IrcBuffer);
     d->setName(name);
@@ -376,7 +381,7 @@ QString IrcBuffer::prefix() const
     return d->prefix;
 }
 
-void IrcBuffer::setPrefix(const QString& prefix)
+void IrcBuffer::setPrefix(const QString &prefix)
 {
     Q_D(IrcBuffer);
     return d->setPrefix(prefix);
@@ -393,7 +398,7 @@ void IrcBuffer::setPrefix(const QString& prefix)
  */
 bool IrcBuffer::isChannel() const
 {
-    return qobject_cast<const IrcChannel*>(this);
+    return qobject_cast<const IrcChannel *>(this);
 }
 
 /*!
@@ -402,9 +407,9 @@ bool IrcBuffer::isChannel() const
 
     \sa \ref channel "isChannel()"
 */
-IrcChannel* IrcBuffer::toChannel()
+IrcChannel *IrcBuffer::toChannel()
 {
-    return qobject_cast<IrcChannel*>(this);
+    return qobject_cast<IrcChannel *>(this);
 }
 
 /*!
@@ -413,7 +418,7 @@ IrcChannel* IrcBuffer::toChannel()
     \par Access function:
     \li \ref IrcConnection* <b>connection</b>() const
  */
-IrcConnection* IrcBuffer::connection() const
+IrcConnection *IrcBuffer::connection() const
 {
     Q_D(const IrcBuffer);
     return d->model ? d->model->connection() : 0;
@@ -425,7 +430,7 @@ IrcConnection* IrcBuffer::connection() const
     \par Access function:
     \li \ref IrcNetwork* <b>network</b>() const
  */
-IrcNetwork* IrcBuffer::network() const
+IrcNetwork *IrcBuffer::network() const
 {
     Q_D(const IrcBuffer);
     return d->model ? d->model->network() : 0;
@@ -437,7 +442,7 @@ IrcNetwork* IrcBuffer::network() const
     \par Access function:
     \li \ref IrcBufferModel* <b>model</b>() const
  */
-IrcBufferModel* IrcBuffer::model() const
+IrcBufferModel *IrcBuffer::model() const
 {
     Q_D(const IrcBuffer);
     return d->model;
@@ -462,7 +467,7 @@ bool IrcBuffer::isActive() const
 {
     Q_D(const IrcBuffer);
     bool connected = false;
-    if (IrcConnection* c = connection())
+    if (IrcConnection *c = connection())
         connected = c->isConnected();
     bool monitor = false;
     if (d->model)
@@ -496,7 +501,8 @@ bool IrcBuffer::isSticky() const
 void IrcBuffer::setSticky(bool sticky)
 {
     Q_D(IrcBuffer);
-    if (d->sticky != sticky) {
+    if (d->sticky != sticky)
+    {
         d->sticky = sticky;
         emit stickyChanged(sticky);
     }
@@ -531,7 +537,8 @@ bool IrcBuffer::isPersistent() const
 void IrcBuffer::setPersistent(bool persistent)
 {
     Q_D(IrcBuffer);
-    if (d->persistent != persistent) {
+    if (d->persistent != persistent)
+    {
         d->persistent = persistent;
         emit persistentChanged(persistent);
     }
@@ -555,10 +562,11 @@ QVariantMap IrcBuffer::userData() const
     return d->userData;
 }
 
-void IrcBuffer::setUserData(const QVariantMap& data)
+void IrcBuffer::setUserData(const QVariantMap &data)
 {
     Q_D(IrcBuffer);
-    if (d->userData != data) {
+    if (d->userData != data)
+    {
         d->userData = data;
         emit userDataChanged(data);
     }
@@ -575,9 +583,9 @@ void IrcBuffer::setUserData(const QVariantMap& data)
 
     \sa IrcConnection::sendCommand()
  */
-bool IrcBuffer::sendCommand(IrcCommand* command)
+bool IrcBuffer::sendCommand(IrcCommand *command)
 {
-    if (IrcConnection* c = connection())
+    if (IrcConnection *c = connection())
         return c->sendCommand(command);
     return false;
 }
@@ -592,7 +600,7 @@ bool IrcBuffer::sendCommand(IrcCommand* command)
     This method can be used to forward such ignored messages to the desired
     buffers (for instance the one that is currently active in the GUI).
  */
-void IrcBuffer::receiveMessage(IrcMessage* message)
+void IrcBuffer::receiveMessage(IrcMessage *message)
 {
     if (message)
         emit messageReceived(message);
@@ -609,7 +617,7 @@ void IrcBuffer::receiveMessage(IrcMessage* message)
 
     \sa IrcChannel::close()
  */
-void IrcBuffer::close(const QString& reason)
+void IrcBuffer::close(const QString &reason)
 {
     Q_UNUSED(reason);
     Q_D(const IrcBuffer);
@@ -618,11 +626,11 @@ void IrcBuffer::close(const QString& reason)
 }
 
 #ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug debug, const IrcBuffer* buffer)
+QDebug operator<<(QDebug debug, const IrcBuffer *buffer)
 {
     if (!buffer)
         return debug << "IrcBuffer(0x0) ";
-    debug.nospace() << buffer->metaObject()->className() << '(' << (void*) buffer;
+    debug.nospace() << buffer->metaObject()->className() << '(' << (void *)buffer;
     if (!buffer->objectName().isEmpty())
         debug.nospace() << ", name=" << qPrintable(buffer->objectName());
     if (!buffer->title().isEmpty())

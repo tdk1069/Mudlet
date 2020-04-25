@@ -18,30 +18,32 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TSplitterHandle.h"
 #include "TSplitter.h"
 
-#include "pre_guard.h"
-#include <QtEvents>
-#include <QPainter>
 #include "post_guard.h"
+#include "pre_guard.h"
+#include <QPainter>
+#include <QtEvents>
 
-TSplitterHandle::TSplitterHandle(Qt::Orientation orientation, TSplitter* parent)
-: QSplitterHandle(orientation, (QSplitter*)parent)
+TSplitterHandle::TSplitterHandle(Qt::Orientation orientation, TSplitter *parent)
+    : QSplitterHandle(orientation, (QSplitter *)parent)
 {
 }
 
-void TSplitterHandle::paintEvent(QPaintEvent* event)
+void TSplitterHandle::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     QLinearGradient gradient(QPointF(100, 100), QPointF(200, 200));
     gradient.setColorAt(0, Qt::black);
     gradient.setColorAt(1, Qt::white);
-    if (orientation() == Qt::Horizontal) {
+    if (orientation() == Qt::Horizontal)
+    {
         gradient.setStart(rect().left(), rect().height() / 2);
         gradient.setFinalStop(rect().right(), rect().height() / 2);
-    } else {
+    }
+    else
+    {
         gradient.setStart(rect().width() / 2, rect().top());
         gradient.setFinalStop(rect().width() / 2, rect().bottom());
     }

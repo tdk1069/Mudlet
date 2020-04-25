@@ -19,21 +19,21 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "FontManager.h"
 #include "mudlet.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
+#include <QDesktopServices>
 #include <QDir>
 #include <QFileInfo>
-#include <QDesktopServices>
-#include "post_guard.h"
 
 void FontManager::addFonts()
 {
     QDir dir(mudlet::getMudletPath(mudlet::mainFontsPath));
 
-    if (!dir.exists()) {
+    if (!dir.exists())
+    {
         return;
     }
 
@@ -41,29 +41,33 @@ void FontManager::addFonts()
     loadFonts(dir.absolutePath());
 
     // load all fonts in subfolders (of the 'font' folder)
-    foreach (QString fontfolder, dir.entryList(QDir::Dirs | QDir::Readable | QDir::NoDotAndDotDot)) {
+    foreach (QString fontfolder, dir.entryList(QDir::Dirs | QDir::Readable | QDir::NoDotAndDotDot))
+    {
         loadFonts(QStringLiteral("%1/%2").arg(dir.absolutePath(), fontfolder));
     }
 }
 
 // loads all of the fonts in the given folder
-void FontManager::loadFonts(const QString& folder)
+void FontManager::loadFonts(const QString &folder)
 {
-    // Check what happens with this: "Adding application fonts on Unix/X11 platforms without fontconfig is currently not supported."
+    // Check what happens with this: "Adding application fonts on Unix/X11 platforms without fontconfig is currently not
+    // supported."
     QStringList filters;
     filters << QStringLiteral("*.ttf") << QStringLiteral("*.otf");
     QDir dir = folder;
     dir.setNameFilters(filters);
 
-    foreach (QString fontFile, dir.entryList(QDir::Files | QDir::Readable | QDir::NoDotAndDotDot)) {
+    foreach (QString fontFile, dir.entryList(QDir::Files | QDir::Readable | QDir::NoDotAndDotDot))
+    {
         QString fontFilePathName = QStringLiteral("%1/%2").arg(dir.absolutePath(), fontFile);
         loadFont(fontFilePathName);
     }
 }
 
-void FontManager::loadFont(const QString& filePath)
+void FontManager::loadFont(const QString &filePath)
 {
-    if (fontAlreadyLoaded(filePath)) {
+    if (fontAlreadyLoaded(filePath))
+    {
         return;
     }
 
@@ -72,15 +76,19 @@ void FontManager::loadFont(const QString& filePath)
     // remember even if the font failed to load so we don't spam messages on fonts that repeat
     rememberFont(filePath, fontID);
 
-    if (fontID == -1) {
+    if (fontID == -1)
+    {
         qWarning() << "FontManager::loadFont() WARNING - Could not load the font(s) in the file: " << filePath;
-// Uncomment the next pair of lines to get details about fonts that ARE loaded:
-//    } else {
-//        qDebug().noquote().nospace() << "FontManager::loadFont() INFO - Loaded font(s) in the file: \"" << filePath << "\"\n    with ID: " << fontID << " providing: \"" << QFontDatabase::applicationFontFamilies(fontID).join(QLatin1String("\", \"")).append(QLatin1String("\"\n"));
+        // Uncomment the next pair of lines to get details about fonts that ARE loaded:
+        //    } else {
+        //        qDebug().noquote().nospace() << "FontManager::loadFont() INFO - Loaded font(s) in the file: \"" <<
+        //        filePath << "\"\n    with ID: " << fontID << " providing: \"" <<
+        //        QFontDatabase::applicationFontFamilies(fontID).join(QLatin1String("\",
+        //        \"")).append(QLatin1String("\"\n"));
     }
 }
 
-bool FontManager::fontAlreadyLoaded(const QString& filePath)
+bool FontManager::fontAlreadyLoaded(const QString &filePath)
 {
     QFileInfo fontFile(filePath);
     auto fileName = fontFile.fileName();
@@ -88,12 +96,13 @@ bool FontManager::fontAlreadyLoaded(const QString& filePath)
     return loadedFonts.contains(fileName);
 }
 
-void FontManager::rememberFont(const QString& filePath, int fontID)
+void FontManager::rememberFont(const QString &filePath, int fontID)
 {
     QFileInfo fontFile(filePath);
     auto fileName = fontFile.fileName();
 
-    if (loadedFonts.contains(fileName)) {
+    if (loadedFonts.contains(fileName))
+    {
         return;
     }
 

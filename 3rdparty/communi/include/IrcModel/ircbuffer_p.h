@@ -31,10 +31,10 @@
 
 #include "ircbuffer.h"
 #include "ircmessage.h"
-#include <qstringlist.h>
 #include <qdatetime.h>
 #include <qlist.h>
 #include <qmap.h>
+#include <qstringlist.h>
 
 IRC_BEGIN_NAMESPACE
 
@@ -45,45 +45,50 @@ class IrcBufferPrivate
 {
     Q_DECLARE_PUBLIC(IrcBuffer)
 
-public:
+  public:
     IrcBufferPrivate();
     virtual ~IrcBufferPrivate();
 
-    virtual void init(const QString& title, IrcBufferModel* model);
+    virtual void init(const QString &title, IrcBufferModel *model);
     virtual void connected();
     virtual void disconnected();
 
-    void setName(const QString& name);
-    void setPrefix(const QString& prefix);
-    void setModel(IrcBufferModel* model);
+    void setName(const QString &name);
+    void setPrefix(const QString &prefix);
+    void setModel(IrcBufferModel *model);
 
-    enum MonitorStatus { MonitorUnknown, MonitorOffline, MonitorOnline };
+    enum MonitorStatus
+    {
+        MonitorUnknown,
+        MonitorOffline,
+        MonitorOnline
+    };
     void setMonitorStatus(MonitorStatus status);
     bool isMonitorable() const;
 
-    bool processMessage(IrcMessage* message);
+    bool processMessage(IrcMessage *message);
 
-    virtual bool processAwayMessage(IrcAwayMessage* message);
-    virtual bool processJoinMessage(IrcJoinMessage* message);
-    virtual bool processKickMessage(IrcKickMessage* message);
-    virtual bool processModeMessage(IrcModeMessage* message);
-    virtual bool processNamesMessage(IrcNamesMessage* message);
-    virtual bool processNickMessage(IrcNickMessage* message);
-    virtual bool processNoticeMessage(IrcNoticeMessage* message);
-    virtual bool processNumericMessage(IrcNumericMessage* message);
-    virtual bool processPartMessage(IrcPartMessage* message);
-    virtual bool processPrivateMessage(IrcPrivateMessage* message);
-    virtual bool processQuitMessage(IrcQuitMessage* message);
-    virtual bool processTopicMessage(IrcTopicMessage* message);
-    virtual bool processWhoReplyMessage(IrcWhoReplyMessage* message);
+    virtual bool processAwayMessage(IrcAwayMessage *message);
+    virtual bool processJoinMessage(IrcJoinMessage *message);
+    virtual bool processKickMessage(IrcKickMessage *message);
+    virtual bool processModeMessage(IrcModeMessage *message);
+    virtual bool processNamesMessage(IrcNamesMessage *message);
+    virtual bool processNickMessage(IrcNickMessage *message);
+    virtual bool processNoticeMessage(IrcNoticeMessage *message);
+    virtual bool processNumericMessage(IrcNumericMessage *message);
+    virtual bool processPartMessage(IrcPartMessage *message);
+    virtual bool processPrivateMessage(IrcPrivateMessage *message);
+    virtual bool processQuitMessage(IrcQuitMessage *message);
+    virtual bool processTopicMessage(IrcTopicMessage *message);
+    virtual bool processWhoReplyMessage(IrcWhoReplyMessage *message);
 
-    static IrcBufferPrivate* get(IrcBuffer* buffer)
+    static IrcBufferPrivate *get(IrcBuffer *buffer)
     {
         return buffer->d_func();
     }
 
-    IrcBuffer* q_ptr;
-    IrcBufferModel* model;
+    IrcBuffer *q_ptr;
+    IrcBufferModel *model;
     QString name;
     QString prefix;
     bool persistent;

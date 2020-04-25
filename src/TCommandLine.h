@@ -22,68 +22,60 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QPlainTextEdit>
 #include <QPointer>
 #include <QString>
 #include <QStringList>
 #include <QTextDecoder>
-#include "post_guard.h"
-
 
 class TConsole;
 class KeyUnit;
 class Host;
 
-
-class TCommandLine : public QPlainTextEdit //QLineEdit
+class TCommandLine : public QPlainTextEdit // QLineEdit
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(TCommandLine)
-    TCommandLine(Host*, TConsole*, QWidget*);
-    void focusInEvent(QFocusEvent*) override;
-    void focusOutEvent(QFocusEvent*) override;
+    TCommandLine(Host *, TConsole *, QWidget *);
+    void focusInEvent(QFocusEvent *) override;
+    void focusOutEvent(QFocusEvent *) override;
     void recheckWholeLine();
     void clearMarksOnWholeLine();
 
-
     QPalette mRegularPalette;
 
-
-private:
-    bool event(QEvent*) override;
-    void mousePressEvent(QMouseEvent*) override;
+  private:
+    bool event(QEvent *) override;
+    void mousePressEvent(QMouseEvent *) override;
     void handleAutoCompletion();
     void spellCheck();
     void handleTabCompletion(bool);
-    void historyUp(QKeyEvent*);
-    void historyDown(QKeyEvent*);
-    void enterCommand(QKeyEvent*);
+    void historyUp(QKeyEvent *);
+    void historyDown(QKeyEvent *);
+    void enterCommand(QKeyEvent *);
     void adjustHeight();
-    void processNormalKey(QEvent*);
-    bool keybindingMatched(QKeyEvent*);
-
+    void processNormalKey(QEvent *);
+    bool keybindingMatched(QKeyEvent *);
 
     QPointer<Host> mpHost;
-    KeyUnit* mpKeyUnit;
-    TConsole* mpConsole;
+    KeyUnit *mpKeyUnit;
+    TConsole *mpConsole;
     QString mLastCompletion;
     int mTabCompletionCount;
     int mAutoCompletionCount;
     QString mTabCompletionTyped;
     bool mUserKeptOnTyping;
 
-
-public slots:
+  public slots:
     void slot_popupMenu();
     void slot_addWord();
     void slot_removeWord();
 
-
-private:
+  private:
     int mHistoryBuffer;
     QStringList mHistoryList;
     QString mSelectedText;
@@ -93,10 +85,10 @@ private:
     QString mSpellCheckedWord;
     int mSystemDictionarySuggestionsCount;
     int mUserDictionarySuggestionsCount;
-    char** mpSystemSuggestionsList;
-    char** mpUserSuggestionsList;
-    void spellCheckWord(QTextCursor& c);
-    bool handleCtrlTabChange(QKeyEvent* key, int tabNumber);
+    char **mpSystemSuggestionsList;
+    char **mpUserSuggestionsList;
+    void spellCheckWord(QTextCursor &c);
+    bool handleCtrlTabChange(QKeyEvent *key, int tabNumber);
 };
 
 #endif // MUDLET_TCOMMANDLINE_H

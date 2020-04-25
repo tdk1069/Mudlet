@@ -22,26 +22,24 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include "ui_color_trigger.h"
-#include <QSignalMapper>
 #include <QPointer>
-#include "post_guard.h"
+#include <QSignalMapper>
 
 class Host;
 class TTrigger;
-
 
 class dlgColorTrigger : public QDialog, public Ui::color_trigger
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(dlgColorTrigger)
-    dlgColorTrigger(QWidget*, TTrigger*, const bool isBackground, const QString &title = QString());
+    dlgColorTrigger(QWidget *, TTrigger *, const bool isBackground, const QString &title = QString());
 
-public slots:
+  public slots:
     void slot_basicColorClicked(int);
     void slot_resetColorClicked();
     void slot_defaultColorClicked();
@@ -53,12 +51,11 @@ public slots:
     void slot_rgbColorClicked();
     void slot_grayColorClicked();
 
+  private:
+    void setupBasicButton(QPushButton *, const int, const QColor &, const QString &);
 
-private:
-    void setupBasicButton(QPushButton*, const int, const QColor&, const QString&);
-
-    QSignalMapper* mSignalMapper;
-    TTrigger* mpTrigger;
+    QSignalMapper *mSignalMapper;
+    TTrigger *mpTrigger;
     bool mIsBackground;
     QColor mRgbAnsiColor;
     QColor mGrayAnsiColor;

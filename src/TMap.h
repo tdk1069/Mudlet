@@ -23,12 +23,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TAstar.h"
 #if defined(INCLUDE_3DMAPPER)
 #include "glwidget.h"
 #endif
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QApplication>
 #include <QColor>
@@ -40,7 +40,6 @@
 #include <QPointer>
 #include <QSizeF>
 #include <QVector3D>
-#include "post_guard.h"
 
 #include <stdlib.h>
 
@@ -56,10 +55,9 @@ class QFile;
 class QNetworkAccessManager;
 class QProgressDialog;
 
-
 class TMapLabel
 {
-public:
+  public:
     TMapLabel()
     {
         highlight = false;
@@ -80,25 +78,26 @@ public:
     bool noScaling;
 };
 
-
 class TMap : public QObject
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(TMap)
-    TMap(Host*, const QString&);
+    TMap(Host *, const QString &);
     ~TMap();
     void mapClear();
     int createMapLabelID(int area);
-    int createMapImageLabel(int area, QString filePath, float x, float y, float z, float width, float height, float zoom, bool showOnTop, bool noScaling);
-    int createMapLabel(int area, QString text, float x, float y, float z, QColor fg, QColor bg, bool showOnTop = true, bool noScaling = true, qreal zoom = 15.0, int fontSize = 15);
+    int createMapImageLabel(int area, QString filePath, float x, float y, float z, float width, float height,
+                            float zoom, bool showOnTop, bool noScaling);
+    int createMapLabel(int area, QString text, float x, float y, float z, QColor fg, QColor bg, bool showOnTop = true,
+                       bool noScaling = true, qreal zoom = 15.0, int fontSize = 15);
     void deleteMapLabel(int area, int labelID);
     bool addRoom(int id = 0);
     bool setRoomArea(int id, int area, bool isToDeferAreaRelatedRecalculations = false);
     void deleteArea(int id);
     int createNewRoomID(int minimumId = 1);
-    void logError(QString& msg);
+    void logError(QString &msg);
     void tidyMap(int area);
     bool setExit(int from, int to, int dir);
     bool setRoomCoordinates(int id, int x, int y, int z);
@@ -112,9 +111,9 @@ public:
     bool findPath(int from, int to);
     bool gotoRoom(int);
     bool gotoRoom(int, int);
-    bool serialize(QDataStream&, int saveVersion = 0);
+    bool serialize(QDataStream &, int saveVersion = 0);
     bool restore(QString location, bool downloadIfNotFound = true);
-    bool retrieveMapFileStats(QString, QString*, int*, int*, int*, int*);
+    bool retrieveMapFileStats(QString, QString *, int *, int *, int *, int *);
     void initGraph();
     void connectExitStub(int roomId, int dirType);
     void postMessage(QString text);
@@ -134,14 +133,14 @@ public:
     void pushErrorMessagesToFile(QString, bool isACleanup = false);
 
     // Moved and revised from dlgMapper:
-    void downloadMap(const QString& remoteUrl = QString(), const QString& localFileName = QString());
+    void downloadMap(const QString &remoteUrl = QString(), const QString &localFileName = QString());
 
     // Also uses readXmlMapFile(...) but for local files:
-    bool importMap(QFile&, QString* errMsg = Q_NULLPTR);
+    bool importMap(QFile &, QString *errMsg = Q_NULLPTR);
 
     // Used at end of downloadMap(...) OR as part of importMap(...) but not by
     // both at the same time thanks to mXmlImportMutex
-    bool readXmlMapFile(QFile&, QString* errMsg = Q_NULLPTR);
+    bool readXmlMapFile(QFile &, QString *errMsg = Q_NULLPTR);
 
     // Use progress dialog for post-download operations.
     void reportStringToProgressDialog(QString);
@@ -155,8 +154,7 @@ public:
     void setMmpMapLocation(const QString &location);
     QString getMmpMapLocation() const;
 
-
-    TRoomDB* mpRoomDB;
+    TRoomDB *mpRoomDB;
     QMap<int, int> envColors;
     QPointer<Host> mpHost;
     QString mProfileName;
@@ -185,7 +183,9 @@ public:
     QPointer<dlgMapper> mpMapper;
     QMap<int, int> roomidToIndex;
 
-    typedef boost::adjacency_list<boost::listS, boost::vecS, boost::directedS, boost::no_property, boost::property<boost::edge_weight_t, cost>> mygraph_t;
+    typedef boost::adjacency_list<boost::listS, boost::vecS, boost::directedS, boost::no_property,
+                                  boost::property<boost::edge_weight_t, cost>>
+        mygraph_t;
     typedef boost::property_map<mygraph_t, boost::edge_weight_t>::type WeightMap;
     typedef mygraph_t::vertex_descriptor vertex;
     typedef mygraph_t::edge_descriptor edge_descriptor;
@@ -252,15 +252,14 @@ public:
     // one):
     quint8 mPlayerRoomInnerDiameterPercentage;
 
-public slots:
+  public slots:
     // Moved and revised from dlgMapper:
     void slot_setDownloadProgress(qint64, qint64);
     void slot_downloadCancel();
     void slot_downloadError(QNetworkReply::NetworkError);
-    void slot_replyFinished(QNetworkReply*);
+    void slot_replyFinished(QNetworkReply *);
 
-
-private:
+  private:
     const QString createFileHeaderLine(QString, QChar);
 
     QStringList mStoredMessages;
@@ -278,10 +277,10 @@ private:
     bool mIsFileViewingRecommended;
 
     // Moved and revised from dlgMapper:
-    QNetworkAccessManager* mpNetworkAccessManager;
+    QNetworkAccessManager *mpNetworkAccessManager;
 
-    QProgressDialog* mpProgressDialog;
-    QNetworkReply* mpNetworkReply;
+    QProgressDialog *mpProgressDialog;
+    QNetworkReply *mpNetworkReply;
     QString mLocalMapFileName;
     int mExpectedFileSize;
     QMutex mXmlImportMutex;

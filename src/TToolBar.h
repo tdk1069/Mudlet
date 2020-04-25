@@ -21,46 +21,56 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QDockWidget>
-#include "post_guard.h"
 
 class TAction;
 class TFlipButton;
 
 class QGridLayout;
 
-
 class TToolBar : public QDockWidget
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(TToolBar)
-    TToolBar(TAction*, const QString&, QWidget* pW = nullptr);
-    void addButton(TFlipButton* pW);
-    void resizeEvent(QResizeEvent* e) override;
-    void moveEvent(QMoveEvent* e) override;
-    void setVerticalOrientation() { mVerticalOrientation = true; }
-    void setHorizontalOrientation() { mVerticalOrientation = false; }
+    TToolBar(TAction *, const QString &, QWidget *pW = nullptr);
+    void addButton(TFlipButton *pW);
+    void resizeEvent(QResizeEvent *e) override;
+    void moveEvent(QMoveEvent *e) override;
+    void setVerticalOrientation()
+    {
+        mVerticalOrientation = true;
+    }
+    void setHorizontalOrientation()
+    {
+        mVerticalOrientation = false;
+    }
     void clear();
     void finalize();
-    void recordMove() { mRecordMove = true; }
-    QString getName() const { return mName; }
-    void setName(const QString&);
+    void recordMove()
+    {
+        mRecordMove = true;
+    }
+    QString getName() const
+    {
+        return mName;
+    }
+    void setName(const QString &);
 
-    TAction* mpTAction;
+    TAction *mpTAction;
 
-private:
+  private:
     bool mVerticalOrientation;
-    QWidget* mpWidget;
+    QWidget *mpWidget;
     QString mName;
     bool mRecordMove;
-    QGridLayout* mpLayout;
+    QGridLayout *mpLayout;
     int mItemCount;
 
-public slots:
+  public slots:
     void slot_pressed(bool);
     void slot_topLevelChanged(bool);
     void slot_dockLocationChanged(Qt::DockWidgetArea);

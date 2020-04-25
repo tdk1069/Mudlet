@@ -21,22 +21,20 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QSplitterHandle>
-#include "post_guard.h"
 
 class TSplitter;
-
 
 class TSplitterHandle : public QSplitterHandle
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(TSplitterHandle)
-    TSplitterHandle(Qt::Orientation orientation, TSplitter* parent);
-    void paintEvent(QPaintEvent*) override;
+    TSplitterHandle(Qt::Orientation orientation, TSplitter *parent);
+    void paintEvent(QPaintEvent *) override;
 };
 
 #endif // MUDLET_TSPLITTERHANDLE_H

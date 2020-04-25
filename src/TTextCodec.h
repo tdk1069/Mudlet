@@ -25,15 +25,14 @@
  *   encodings - which seems to be the Windows AppVeyor CI at this time.   *
  ***************************************************************************/
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QTextCodec>
 #include <QVector>
-#include "post_guard.h"
-
 
 class TTextCodec_437 : private QTextCodec
 {
-public:
+  public:
     TTextCodec_437() = default;
     ~TTextCodec_437() = default;
 
@@ -43,13 +42,13 @@ public:
     QString convertToUnicode(const char *in, int length, ConverterState *state) const override;
     QByteArray convertFromUnicode(const QChar *in, int length, ConverterState *state) const override;
 
-private:
+  private:
     static const QVector<QChar> CptoUnicode;
 };
 
 class TTextCodec_667 : private QTextCodec
 {
-public:
+  public:
     TTextCodec_667() = default;
     ~TTextCodec_667() = default;
 
@@ -59,13 +58,13 @@ public:
     QString convertToUnicode(const char *in, int length, ConverterState *state) const override;
     QByteArray convertFromUnicode(const QChar *in, int length, ConverterState *state) const override;
 
-private:
+  private:
     static const QVector<QChar> CptoUnicode;
 };
 
 class TTextCodec_737 : private QTextCodec
 {
-public:
+  public:
     TTextCodec_737() = default;
     ~TTextCodec_737() = default;
 
@@ -75,13 +74,13 @@ public:
     QString convertToUnicode(const char *in, int length, ConverterState *state) const override;
     QByteArray convertFromUnicode(const QChar *in, int length, ConverterState *state) const override;
 
-private:
+  private:
     static const QVector<QChar> CptoUnicode;
 };
 
 class TTextCodec_869 : private QTextCodec
 {
-public:
+  public:
     TTextCodec_869() = default;
     ~TTextCodec_869() = default;
 
@@ -91,7 +90,7 @@ public:
     QString convertToUnicode(const char *in, int length, ConverterState *state) const override;
     QByteArray convertFromUnicode(const QChar *in, int length, ConverterState *state) const override;
 
-private:
+  private:
     static const QVector<QChar> CptoUnicode;
 };
 #endif // TTEXTCODEC_H

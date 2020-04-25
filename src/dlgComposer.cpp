@@ -19,14 +19,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "dlgComposer.h"
-
 
 #include "Host.h"
 
-
-dlgComposer::dlgComposer(Host* pH) : mpHost(pH)
+dlgComposer::dlgComposer(Host *pH) : mpHost(pH)
 
 {
     setupUi(this);

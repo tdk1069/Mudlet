@@ -18,7 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TTreeWidget.h"
 
 #include "Host.h"
@@ -26,12 +25,12 @@
 #include "TTimer.h"
 #include "VarUnit.h"
 
-#include "pre_guard.h"
-#include <QtEvents>
-#include <QHeaderView>
 #include "post_guard.h"
+#include "pre_guard.h"
+#include <QHeaderView>
+#include <QtEvents>
 
-TTreeWidget::TTreeWidget(QWidget* pW) : QTreeWidget(pW), mChildID()
+TTreeWidget::TTreeWidget(QWidget *pW) : QTreeWidget(pW), mChildID()
 {
     setSelectionMode(QAbstractItemView::SingleSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -124,46 +123,56 @@ void TTreeWidget::setIsScriptTree()
     mIsKeyTree = false;
 }
 
-void TTreeWidget::setHost(Host* pH)
+void TTreeWidget::setHost(Host *pH)
 {
     mpHost = pH;
 }
 
-void TTreeWidget::getAllChildren(QTreeWidgetItem* pItem, QList<QTreeWidgetItem*>& list)
+void TTreeWidget::getAllChildren(QTreeWidgetItem *pItem, QList<QTreeWidgetItem *> &list)
 {
     list.append(pItem);
-    for (int i = 0; i < pItem->childCount(); ++i) {
+    for (int i = 0; i < pItem->childCount(); ++i)
+    {
         getAllChildren(pItem->child(i), list);
     }
 }
 
-void TTreeWidget::mouseReleaseEvent(QMouseEvent* event)
+void TTreeWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     QModelIndex indexClicked = indexAt(event->pos());
-    if (mIsVarTree && indexClicked.isValid() && indexClicked.row() != 0 && mClickedItem == indexClicked) {
+    if (mIsVarTree && indexClicked.isValid() && indexClicked.row() != 0 && mClickedItem == indexClicked)
+    {
         QRect vrect = visualRect(indexClicked);
         int itemIndentation = vrect.x() - visualRect(rootIndex()).x();
-        QRect rect = QRect(header()->sectionViewportPosition(0) + itemIndentation, vrect.y(), style()->pixelMetric(QStyle::PM_IndicatorWidth), vrect.height());
-        if (rect.contains(event->pos())) {
-            QTreeWidgetItem* clicked = itemFromIndex(indexClicked);
-            if (!(clicked->flags() & Qt::ItemIsUserCheckable)) {
+        QRect rect = QRect(header()->sectionViewportPosition(0) + itemIndentation, vrect.y(),
+                           style()->pixelMetric(QStyle::PM_IndicatorWidth), vrect.height());
+        if (rect.contains(event->pos()))
+        {
+            QTreeWidgetItem *clicked = itemFromIndex(indexClicked);
+            if (!(clicked->flags() & Qt::ItemIsUserCheckable))
+            {
                 return;
             }
-            if (clicked->checkState(0) == Qt::Unchecked) {
+            if (clicked->checkState(0) == Qt::Unchecked)
+            {
                 clicked->setCheckState(0, Qt::Checked);
-                //get all children and see what ones we can save
-                QList<QTreeWidgetItem*> list;
+                // get all children and see what ones we can save
+                QList<QTreeWidgetItem *> list;
                 getAllChildren(clicked, list);
-                QListIterator<QTreeWidgetItem*> it(list);
-                LuaInterface* lI = mpHost->getLuaInterface();
-                VarUnit* vu = lI->getVarUnit();
-                while (it.hasNext()) {
-                    QTreeWidgetItem* item = it.next();
-                    if (!vu->shouldSave(item)) {
+                QListIterator<QTreeWidgetItem *> it(list);
+                LuaInterface *lI = mpHost->getLuaInterface();
+                VarUnit *vu = lI->getVarUnit();
+                while (it.hasNext())
+                {
+                    QTreeWidgetItem *item = it.next();
+                    if (!vu->shouldSave(item))
+                    {
                         item->setCheckState(0, Qt::Unchecked);
                     }
                 }
-            } else {
+            }
+            else
+            {
                 clicked->setCheckState(0, Qt::Unchecked);
             }
             return;
@@ -172,14 +181,17 @@ void TTreeWidget::mouseReleaseEvent(QMouseEvent* event)
     QTreeWidget::mouseReleaseEvent(event);
 }
 
-void TTreeWidget::mousePressEvent(QMouseEvent* event)
+void TTreeWidget::mousePressEvent(QMouseEvent *event)
 {
     QModelIndex indexClicked = indexAt(event->pos());
-    if (mIsVarTree && indexClicked.isValid()) {
+    if (mIsVarTree && indexClicked.isValid())
+    {
         QRect vrect = visualRect(indexClicked);
         int itemIndentation = vrect.x() - visualRect(rootIndex()).x();
-        QRect rect = QRect(header()->sectionViewportPosition(0) + itemIndentation, vrect.y(), style()->pixelMetric(QStyle::PM_IndicatorWidth), vrect.height());
-        if (rect.contains(event->pos())) {
+        QRect rect = QRect(header()->sectionViewportPosition(0) + itemIndentation, vrect.y(),
+                           style()->pixelMetric(QStyle::PM_IndicatorWidth), vrect.height());
+        if (rect.contains(event->pos()))
+        {
             mClickedItem = indexClicked;
             QTreeWidget::mousePressEvent(event);
             return;
@@ -188,102 +200,139 @@ void TTreeWidget::mousePressEvent(QMouseEvent* event)
     QTreeWidget::mousePressEvent(event);
 }
 
-void TTreeWidget::rowsAboutToBeRemoved(const QModelIndex& parent, int start, int end)
+void TTreeWidget::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
 {
-    if (parent.isValid()) {
+    if (parent.isValid())
+    {
         mOldParentID = parent.data(Qt::UserRole).toInt();
-    } else {
+    }
+    else
+    {
         mOldParentID = 0;
     }
 
-    if (mOldParentID == 0) {
+    if (mOldParentID == 0)
+    {
         mOldParentID = parent.sibling(start, 0).data(Qt::UserRole).toInt();
     }
 
-    if (parent.isValid()) {
+    if (parent.isValid())
+    {
         QModelIndex child = parent.child(start, 0);
         mChildID = child.data(Qt::UserRole).toInt();
-        if (mChildID == 0) {
-            if (parent.isValid()) {
+        if (mChildID == 0)
+        {
+            if (parent.isValid())
+            {
                 child = parent.model()->index(start, 0, QModelIndex());
             }
-            if (child.isValid()) {
+            if (child.isValid())
+            {
                 mChildID = child.data(Qt::UserRole).toInt();
-            } else {
+            }
+            else
+            {
                 mChildID = 0;
             }
         }
     }
 }
 
-
-void TTreeWidget::rowsInserted(const QModelIndex& parent, int start, int end)
+void TTreeWidget::rowsInserted(const QModelIndex &parent, int start, int end)
 {
     // determine position in parent list
 
-    if (mIsDropAction) {
+    if (mIsDropAction)
+    {
         QModelIndex child = parent.child(start, 0);
         int parentPosition = parent.row();
         int childPosition = child.row();
-        if (mChildID == 0) {
-            if (!parent.model()) {
+        if (mChildID == 0)
+        {
+            if (!parent.model())
+            {
                 goto END;
             }
-            if (!mpHost) {
+            if (!mpHost)
+            {
                 goto END;
             }
             mChildID = parent.model()->index(start, 0).data(Qt::UserRole).toInt();
         }
         int newParentID = parent.data(Qt::UserRole).toInt();
-        if (mIsTriggerTree) {
-            mpHost->getTriggerUnit()->reParentTrigger(mChildID, mOldParentID, newParentID, parentPosition, childPosition);
+        if (mIsTriggerTree)
+        {
+            mpHost->getTriggerUnit()->reParentTrigger(mChildID, mOldParentID, newParentID, parentPosition,
+                                                      childPosition);
         }
-        if (mIsAliasTree) {
+        if (mIsAliasTree)
+        {
             mpHost->getAliasUnit()->reParentAlias(mChildID, mOldParentID, newParentID, parentPosition, childPosition);
         }
-        if (mIsKeyTree) {
+        if (mIsKeyTree)
+        {
             mpHost->getKeyUnit()->reParentKey(mChildID, mOldParentID, newParentID, parentPosition, childPosition);
         }
 
-        if (mIsTimerTree) {
+        if (mIsTimerTree)
+        {
             mpHost->getTimerUnit()->reParentTimer(mChildID, mOldParentID, newParentID, parentPosition, childPosition);
-            TTimer* pTChild = mpHost->getTimerUnit()->getTimer(mChildID);
-            //TTimer * pTnewParent = mpHost->getTimerUnit()->getTimer( newParentID );
-            if (pTChild) {
+            TTimer *pTChild = mpHost->getTimerUnit()->getTimer(mChildID);
+            // TTimer * pTnewParent = mpHost->getTimerUnit()->getTimer( newParentID );
+            if (pTChild)
+            {
                 QIcon icon;
-                if (pTChild->isOffsetTimer()) {
-                    if (pTChild->shouldBeActive()) {
-                        icon.addPixmap(QPixmap(QStringLiteral(":/icons/offsettimer-on.png")), QIcon::Normal, QIcon::Off);
-                    } else {
-                        icon.addPixmap(QPixmap(QStringLiteral(":/icons/offsettimer-off.png")), QIcon::Normal, QIcon::Off);
+                if (pTChild->isOffsetTimer())
+                {
+                    if (pTChild->shouldBeActive())
+                    {
+                        icon.addPixmap(QPixmap(QStringLiteral(":/icons/offsettimer-on.png")), QIcon::Normal,
+                                       QIcon::Off);
                     }
-                } else {
-                    if (pTChild->shouldBeActive()) {
-                        icon.addPixmap(QPixmap(QStringLiteral(":/icons/tag_checkbox_checked.png")), QIcon::Normal, QIcon::Off);
-                    } else {
+                    else
+                    {
+                        icon.addPixmap(QPixmap(QStringLiteral(":/icons/offsettimer-off.png")), QIcon::Normal,
+                                       QIcon::Off);
+                    }
+                }
+                else
+                {
+                    if (pTChild->shouldBeActive())
+                    {
+                        icon.addPixmap(QPixmap(QStringLiteral(":/icons/tag_checkbox_checked.png")), QIcon::Normal,
+                                       QIcon::Off);
+                    }
+                    else
+                    {
                         icon.addPixmap(QPixmap(QStringLiteral(":/icons/tag_checkbox.png")), QIcon::Normal, QIcon::Off);
                     }
                 }
-                QTreeWidgetItem* pParent = itemFromIndex(parent);
-                if (!pParent) {
+                QTreeWidgetItem *pParent = itemFromIndex(parent);
+                if (!pParent)
+                {
                     goto END;
                 }
-                for (int i = 0; i < pParent->childCount(); i++) {
-                    QTreeWidgetItem* pItem = pParent->child(i);
-                    if (!pItem) {
+                for (int i = 0; i < pParent->childCount(); i++)
+                {
+                    QTreeWidgetItem *pItem = pParent->child(i);
+                    if (!pItem)
+                    {
                         goto END;
                     }
                     int id = pItem->data(0, Qt::UserRole).toInt();
-                    if (id == mChildID) {
+                    if (id == mChildID)
+                    {
                         pItem->setIcon(0, icon);
                     }
                 }
             }
         }
-        if (mIsScriptTree) {
+        if (mIsScriptTree)
+        {
             mpHost->getScriptUnit()->reParentScript(mChildID, mOldParentID, newParentID, parentPosition, childPosition);
         }
-        if (mIsActionTree) {
+        if (mIsActionTree)
+        {
             mpHost->getActionUnit()->reParentAction(mChildID, mOldParentID, newParentID, parentPosition, childPosition);
             mpHost->getActionUnit()->updateToolbar();
         }
@@ -301,39 +350,45 @@ Qt::DropActions TTreeWidget::supportedDropActions() const
     return Qt::MoveAction;
 }
 
-
-void TTreeWidget::dragEnterEvent(QDragEnterEvent* event)
+void TTreeWidget::dragEnterEvent(QDragEnterEvent *event)
 {
     mIsDropAction = true;
     QTreeWidget::dragEnterEvent(event);
 }
 
-void TTreeWidget::dropEvent(QDropEvent* event)
+void TTreeWidget::dropEvent(QDropEvent *event)
 {
-    QTreeWidgetItem* pItem = itemAt(event->pos());
+    QTreeWidgetItem *pItem = itemAt(event->pos());
 
-    if (!pItem) {
+    if (!pItem)
+    {
         event->setDropAction(Qt::IgnoreAction);
         event->ignore();
     }
 
-    if (pItem == topLevelItem(0)) {
-        if ((dropIndicatorPosition() == QAbstractItemView::AboveItem) || (dropIndicatorPosition() == QAbstractItemView::BelowItem)) {
+    if (pItem == topLevelItem(0))
+    {
+        if ((dropIndicatorPosition() == QAbstractItemView::AboveItem) ||
+            (dropIndicatorPosition() == QAbstractItemView::BelowItem))
+        {
             event->setDropAction(Qt::IgnoreAction);
             event->ignore();
         }
     }
 
-    if (mIsVarTree) {
-        LuaInterface* lI = mpHost->getLuaInterface();
-        if (!lI->validMove(pItem)) {
+    if (mIsVarTree)
+    {
+        LuaInterface *lI = mpHost->getLuaInterface();
+        if (!lI->validMove(pItem))
+        {
             event->setDropAction(Qt::IgnoreAction);
             event->ignore();
         }
-        QTreeWidgetItem* newpItem = pItem;
-        QTreeWidgetItem* cItem = selectedItems().first();
-        QTreeWidgetItem* oldpItem = cItem->parent();
-        if (!lI->reparentVariable(newpItem, cItem, oldpItem)) {
+        QTreeWidgetItem *newpItem = pItem;
+        QTreeWidgetItem *cItem = selectedItems().first();
+        QTreeWidgetItem *oldpItem = cItem->parent();
+        if (!lI->reparentVariable(newpItem, cItem, oldpItem))
+        {
             event->setDropAction(Qt::IgnoreAction);
             event->ignore();
         }
@@ -342,11 +397,11 @@ void TTreeWidget::dropEvent(QDropEvent* event)
     QTreeWidget::dropEvent(event);
 }
 
-void TTreeWidget::beginInsertRows(const QModelIndex& parent, int first, int last)
+void TTreeWidget::beginInsertRows(const QModelIndex &parent, int first, int last)
 {
 }
 
-void TTreeWidget::dragMoveEvent(QDragMoveEvent* e)
+void TTreeWidget::dragMoveEvent(QDragMoveEvent *e)
 {
     QTreeWidget::dragMoveEvent(e);
 }
@@ -356,7 +411,7 @@ void TTreeWidget::startDrag(Qt::DropActions supportedActions)
     QTreeWidget::startDrag(supportedActions);
 }
 
-bool TTreeWidget::dropMimeData(QTreeWidgetItem* parent, int index, const QMimeData* data, Qt::DropAction action)
+bool TTreeWidget::dropMimeData(QTreeWidgetItem *parent, int index, const QMimeData *data, Qt::DropAction action)
 {
     return QTreeWidget::dropMimeData(parent, index, data, action);
 }

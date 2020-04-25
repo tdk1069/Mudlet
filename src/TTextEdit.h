@@ -25,16 +25,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TBuffer.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QMap>
 #include <QPointer>
 #include <QTime>
 #include <QWidget>
 #include <chrono>
-#include "post_guard.h"
 
 #include <string>
 
@@ -45,43 +44,45 @@ class TChar;
 class QScrollBar;
 class QString;
 
-
 class TTextEdit : public QWidget
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(TTextEdit)
-    TTextEdit(TConsole*, QWidget*, TBuffer* pB, Host* pH, bool isLowerPane);
-    void paintEvent(QPaintEvent*) override;
-    void contextMenuEvent(QContextMenuEvent* event) override;
-    void drawForeground(QPainter&, const QRect&);
-    void drawBackground(QPainter&, const QRect&, const QColor&) const;
-    uint getGraphemeBaseCharacter(const QString& str) const;
-    void drawLine(QPainter& painter, int lineNumber, int rowOfScreen) const;
+    TTextEdit(TConsole *, QWidget *, TBuffer *pB, Host *pH, bool isLowerPane);
+    void paintEvent(QPaintEvent *) override;
+    void contextMenuEvent(QContextMenuEvent *event) override;
+    void drawForeground(QPainter &, const QRect &);
+    void drawBackground(QPainter &, const QRect &, const QColor &) const;
+    uint getGraphemeBaseCharacter(const QString &str) const;
+    void drawLine(QPainter &painter, int lineNumber, int rowOfScreen) const;
     int drawGrapheme(QPainter &painter, const QPoint &cursor, const QString &c, int column, TChar &style) const;
-    void drawCharacters(QPainter&, const QRect&, QString&, const QColor&, const TChar::AttributeFlags);
+    void drawCharacters(QPainter &, const QRect &, QString &, const QColor &, const TChar::AttributeFlags);
     void showNewLines();
     void forceUpdate();
     void needUpdate(int, int);
     void scrollTo(int);
     void scrollUp(int lines);
     void scrollDown(int lines);
-    void wheelEvent(QWheelEvent* e) override;
-    void resizeEvent(QResizeEvent* event) override;
-    void mousePressEvent(QMouseEvent*) override;
-    void mouseReleaseEvent(QMouseEvent*) override;
-    void mouseMoveEvent(QMouseEvent*) override;
-    void showEvent(QShowEvent* event) override;
+    void wheelEvent(QWheelEvent *e) override;
+    void resizeEvent(QResizeEvent *event) override;
+    void mousePressEvent(QMouseEvent *) override;
+    void mouseReleaseEvent(QMouseEvent *) override;
+    void mouseMoveEvent(QMouseEvent *) override;
+    void showEvent(QShowEvent *event) override;
     void updateScreenView();
     void highlightSelection();
     void unHighlight();
-    void focusInEvent(QFocusEvent* event) override;
+    void focusInEvent(QFocusEvent *event) override;
     int imageTopLine();
     int bufferScrollUp(int lines);
     int bufferScrollDown(int lines);
-// Not used:    void setConsoleFgColor(int r, int g, int b) { mFgColor = QColor(r, g, b); }
-    void setConsoleBgColor(int r, int g, int b) { mBgColor = QColor(r, g, b); }
+    // Not used:    void setConsoleFgColor(int r, int g, int b) { mFgColor = QColor(r, g, b); }
+    void setConsoleBgColor(int r, int g, int b)
+    {
+        mBgColor = QColor(r, g, b);
+    }
     void searchSelectionOnline();
     int getColumnCount();
     int getRowCount();
@@ -105,9 +106,9 @@ public:
     QRegion mSelectedRegion;
     bool mShowTimeStamps;
     int mWrapAt;
-    int mWrapIndentCount {};
+    int mWrapIndentCount{};
 
-public slots:
+  public slots:
     void slot_toggleTimeStamps(const bool);
     void slot_copySelectionToClipboard();
     void slot_selectAll();
@@ -118,21 +119,21 @@ public slots:
     void slot_analyseSelection();
     void slot_changeIsAmbigousWidthGlyphsToBeWide(bool);
 
-private slots:
+  private slots:
     void slot_copySelectionToClipboardImage();
 
-private:
+  private:
     void initDefaultSettings();
     QString getSelectedText(char newlineChar = '\n');
-    static QString htmlCenter(const QString&);
-    static QString convertWhitespaceToVisual(const QChar& first, const QChar& second = QChar::Null);
-    static QString byteToLuaCodeOrChar(const char*);
-    std::pair<bool, int> drawTextForClipboard(QPainter& p, QRect r, int lineOffset) const;
+    static QString htmlCenter(const QString &);
+    static QString convertWhitespaceToVisual(const QChar &first, const QChar &second = QChar::Null);
+    static QString byteToLuaCodeOrChar(const char *);
+    std::pair<bool, int> drawTextForClipboard(QPainter &p, QRect r, int lineOffset) const;
     int convertMouseXToBufferX(const int mouseX, const int lineNumber, bool *isOverTimeStamp = nullptr) const;
     int getGraphemeWidth(uint unicode) const;
     void normaliseSelection();
-    void updateTextCursor(const QMouseEvent* event, int lineIndex, int tCharIndex);
-    void raiseMudletMousePressOrReleaseEvent(QMouseEvent*, const bool);
+    void updateTextCursor(const QMouseEvent *event, int lineIndex, int tCharIndex);
+    void raiseMudletMousePressOrReleaseEvent(QMouseEvent *, const bool);
 
     int mFontHeight;
     int mFontWidth;
@@ -146,18 +147,18 @@ private:
     // last line offset rendered
     int mLastRenderBottom;
     bool mMouseTracking;
-    bool mCtrlSelecting {};
-    int mCtrlDragStartY {};
+    bool mCtrlSelecting{};
+    int mCtrlDragStartY{};
     QPoint mDragStart, mDragSelectionEnd;
     int mOldScrollPos;
     // top-left point of the selection
     QPoint mPA;
     // bottom-right point of the selection
     QPoint mPB;
-    TBuffer* mpBuffer;
-    TConsole* mpConsole;
+    TBuffer *mpBuffer;
+    TConsole *mpConsole;
     QPointer<Host> mpHost;
-    QScrollBar* mpScrollBar;
+    QScrollBar *mpScrollBar;
     // screen height in characters
     int mScreenHeight;
     // currently viewed screen area

@@ -29,12 +29,12 @@
 #ifndef IRCMESSAGE_P_H
 #define IRCMESSAGE_P_H
 
-#include <QtCore/qmap.h>
-#include <QtCore/qlist.h>
-#include <QtCore/qstring.h>
-#include <QtCore/qvariant.h>
 #include <QtCore/qbytearray.h>
+#include <QtCore/qlist.h>
+#include <QtCore/qmap.h>
+#include <QtCore/qstring.h>
 #include <QtCore/qstringlist.h>
+#include <QtCore/qvariant.h>
 
 #include "ircmessage.h"
 
@@ -42,22 +42,44 @@ IRC_BEGIN_NAMESPACE
 
 class IrcConnection;
 
-template <class T>
-class IrcExplicitValue
+template <class T> class IrcExplicitValue
 {
-public:
-    IrcExplicitValue() : exp(false), null(true) { }
-    IrcExplicitValue(const T& value) : v(value), exp(false), null(false) { }
+  public:
+    IrcExplicitValue() : exp(false), null(true)
+    {
+    }
+    IrcExplicitValue(const T &value) : v(value), exp(false), null(false)
+    {
+    }
 
-    bool isNull() const { return null; }
-    bool isExplicit() const { return exp; }
+    bool isNull() const
+    {
+        return null;
+    }
+    bool isExplicit() const
+    {
+        return exp;
+    }
 
-    const T& value() const { return v; }
-    void setValue(const T& value) { v = value; exp = true; null = false; }
+    const T &value() const
+    {
+        return v;
+    }
+    void setValue(const T &value)
+    {
+        v = value;
+        exp = true;
+        null = false;
+    }
 
-    void clear() { v = T(); exp = false; null = true; }
+    void clear()
+    {
+        v = T();
+        exp = false;
+        null = true;
+    }
 
-private:
+  private:
     T v;
     bool exp;
     bool null;
@@ -65,8 +87,8 @@ private:
 
 class IrcMessageData
 {
-public:
-    static IrcMessageData fromData(const QByteArray& data);
+  public:
+    static IrcMessageData fromData(const QByteArray &data);
 
     QByteArray content;
     QByteArray prefix;
@@ -77,45 +99,45 @@ public:
 
 class IrcMessagePrivate
 {
-public:
+  public:
     IrcMessagePrivate();
 
-    static IrcMessagePrivate* get(IrcMessage* msg)
+    static IrcMessagePrivate *get(IrcMessage *msg)
     {
         return msg->d_func();
     }
 
     QString prefix() const;
-    void setPrefix(const QString& prefix);
+    void setPrefix(const QString &prefix);
 
     QString nick() const;
     QString ident() const;
     QString host() const;
 
     QString command() const;
-    void setCommand(const QString& command);
+    void setCommand(const QString &command);
 
     QStringList params() const;
     QString param(int index) const;
-    void setParams(const QStringList& params);
+    void setParams(const QStringList &params);
 
     QVariantMap tags() const;
-    void setTags(const QVariantMap& tags);
+    void setTags(const QVariantMap &tags);
 
     QByteArray content() const;
 
     void invalidate();
 
-    static QString decode(const QByteArray& data, const QByteArray& encoding);
-    static bool parsePrefix(const QString& prefix, QString* nick, QString* ident, QString* host);
+    static QString decode(const QByteArray &data, const QByteArray &encoding);
+    static bool parsePrefix(const QString &prefix, QString *nick, QString *ident, QString *host);
 
-    IrcConnection* connection;
+    IrcConnection *connection;
     IrcMessage::Type type;
     QDateTime timeStamp;
     QByteArray encoding;
     mutable int flags;
     IrcMessageData data;
-    QList<IrcMessage*> batch;
+    QList<IrcMessage *> batch;
 
     mutable QString m_nick, m_ident, m_host;
     mutable IrcExplicitValue<QString> m_prefix;

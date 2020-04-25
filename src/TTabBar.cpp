@@ -25,18 +25,21 @@
 
 #include "TTabBar.h"
 
-#include "pre_guard.h"
-#include <QStyleOption>
-#include <QPainter>
 #include "post_guard.h"
+#include "pre_guard.h"
+#include <QPainter>
+#include <QStyleOption>
 
-void TStyle::drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
+void TStyle::drawControl(ControlElement element, const QStyleOption *option, QPainter *painter,
+                         const QWidget *widget) const
 {
-    if (element == QStyle::CE_TabBarTab) {
+    if (element == QStyle::CE_TabBarTab)
+    {
         QString tabName = mpTabBar->tabData(mpTabBar->tabAt(option->rect.center())).toString();
         QFont font = widget->font();
         bool isStyleChanged = false;
-        if (mBoldTabsSet.contains(tabName) || mItalicTabsSet.contains(tabName) || mUnderlineTabsSet.contains(tabName)) {
+        if (mBoldTabsSet.contains(tabName) || mItalicTabsSet.contains(tabName) || mUnderlineTabsSet.contains(tabName))
+        {
             painter->save();
             font.setBold(mBoldTabsSet.contains(tabName));
             font.setItalic(mItalicTabsSet.contains(tabName));
@@ -47,69 +50,85 @@ void TStyle::drawControl(ControlElement element, const QStyleOption *option, QPa
 
         QProxyStyle::drawControl(element, option, painter, widget);
 
-        if (isStyleChanged) {
+        if (isStyleChanged)
+        {
             painter->restore();
         }
-
-    } else {
+    }
+    else
+    {
         QProxyStyle::drawControl(element, option, painter, widget);
     }
 }
 
-void TStyle::setNamedTabState(const QString& text, const bool state, QSet<QString>& effect)
+void TStyle::setNamedTabState(const QString &text, const bool state, QSet<QString> &effect)
 {
     bool textIsInATab = false;
-    for (int i = 0, total = mpTabBar->count(); i < total; ++i) {
-        if (mpTabBar->tabData(i).toString() == text) {
+    for (int i = 0, total = mpTabBar->count(); i < total; ++i)
+    {
+        if (mpTabBar->tabData(i).toString() == text)
+        {
             textIsInATab = true;
             break;
         }
     }
 
-    if (!textIsInATab) {
+    if (!textIsInATab)
+    {
         return;
     }
 
-    if (state) {
+    if (state)
+    {
         effect.insert(text);
-    } else {
+    }
+    else
+    {
         effect.remove(text);
     }
 }
 
-void TStyle::setIndexedTabState(const int index, const bool state, QSet<QString>& effect)
+void TStyle::setIndexedTabState(const int index, const bool state, QSet<QString> &effect)
 {
-    if (index < 0 || index >= mpTabBar->count()) {
+    if (index < 0 || index >= mpTabBar->count())
+    {
         return;
     }
 
-    if (state) {
+    if (state)
+    {
         effect.insert(mpTabBar->tabData(index).toString());
-    } else {
+    }
+    else
+    {
         effect.remove(mpTabBar->tabData(index).toString());
     }
 }
 
-bool TStyle::namedTabState(const QString& text, const QSet<QString>& effect) const
+bool TStyle::namedTabState(const QString &text, const QSet<QString> &effect) const
 {
     bool textIsInATab = false;
-    for (int i = 0, total = mpTabBar->count(); i < total; ++i) {
-        if (mpTabBar->tabData(i).toString() == text) {
+    for (int i = 0, total = mpTabBar->count(); i < total; ++i)
+    {
+        if (mpTabBar->tabData(i).toString() == text)
+        {
             textIsInATab = true;
             break;
         }
     }
 
-    if (!textIsInATab) {
+    if (!textIsInATab)
+    {
         return false;
     }
 
     return effect.contains(text);
 }
 
-bool TStyle::indexedTabState(const int index, const QSet<QString>& effect) const
+bool TStyle::indexedTabState(const int index, const QSet<QString> &effect) const
 {
-    if (index < 0 || index >= mpTabBar->count()) {
+    if (index < 0 || index >= mpTabBar->count())
+    {
         return false;
     }
 
@@ -118,7 +137,8 @@ bool TStyle::indexedTabState(const int index, const QSet<QString>& effect) const
 
 QSize TTabBar::tabSizeHint(int index) const
 {
-    if (mStyle.tabBold(index) || mStyle.tabItalic(index) || mStyle.tabUnderline(index)) {
+    if (mStyle.tabBold(index) || mStyle.tabItalic(index) || mStyle.tabUnderline(index))
+    {
         const QSize s = QTabBar::tabSizeHint(index);
         const QFontMetrics fm(font());
         // Note that this method must use (because it is associated with sizing
@@ -136,7 +156,9 @@ QSize TTabBar::tabSizeHint(int index) const
         const int bw = bfm.width(tabText(index));
 
         return {s.width() - w + bw, s.height()};
-    } else {
+    }
+    else
+    {
         return QTabBar::tabSizeHint(index);
     }
 }

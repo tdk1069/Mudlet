@@ -29,12 +29,12 @@
 #ifndef IRCPROTOCOL_H
 #define IRCPROTOCOL_H
 
-#include <IrcGlobal>
 #include <IrcConnection>
-#include <QtCore/qset.h>
+#include <IrcGlobal>
 #include <QtCore/qhash.h>
 #include <QtCore/qobject.h>
 #include <QtCore/qscopedpointer.h>
+#include <QtCore/qset.h>
 #include <QtNetwork/qabstractsocket.h>
 
 IRC_BEGIN_NAMESPACE
@@ -45,33 +45,33 @@ class IrcProtocolPrivate;
 class IRC_CORE_EXPORT IrcProtocol : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(IrcConnection* connection READ connection)
-    Q_PROPERTY(QAbstractSocket* socket READ socket)
+    Q_PROPERTY(IrcConnection *connection READ connection)
+    Q_PROPERTY(QAbstractSocket *socket READ socket)
 
-public:
-    explicit IrcProtocol(IrcConnection* connection);
+  public:
+    explicit IrcProtocol(IrcConnection *connection);
     virtual ~IrcProtocol();
 
-    IrcConnection* connection() const;
-    QAbstractSocket* socket() const;
+    IrcConnection *connection() const;
+    QAbstractSocket *socket() const;
 
     virtual void open();
     virtual void close();
 
     virtual void read();
-    virtual bool write(const QByteArray& data);
+    virtual bool write(const QByteArray &data);
 
-public Q_SLOTS:
-    void receiveMessage(IrcMessage* message);
+  public Q_SLOTS:
+    void receiveMessage(IrcMessage *message);
 
-protected Q_SLOTS:
-    void setNickName(const QString& name);
+  protected Q_SLOTS:
+    void setNickName(const QString &name);
     void setStatus(IrcConnection::Status status);
-    void setInfo(const QHash<QString, QString>& info);
-    void setAvailableCapabilities(const QSet<QString>& capabilities);
-    void setActiveCapabilities(const QSet<QString>& capabilities);
+    void setInfo(const QHash<QString, QString> &info);
+    void setAvailableCapabilities(const QSet<QString> &capabilities);
+    void setActiveCapabilities(const QSet<QString> &capabilities);
 
-private:
+  private:
     QScopedPointer<IrcProtocolPrivate> d_ptr;
     Q_DECLARE_PRIVATE(IrcProtocol)
     Q_DISABLE_COPY(IrcProtocol)

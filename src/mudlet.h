@@ -25,9 +25,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
-#include "HostManager.h"
 #include "FontManager.h"
+#include "HostManager.h"
 #include "TBuffer.h" // Needed for TChar details
 
 #include "edbee/views/texttheme.h"
@@ -44,6 +43,9 @@
 #ifdef QT_GAMEPAD_LIB
 #include <QGamepad>
 #endif
+#include "edbee/models/textautocompleteprovider.h"
+#include "post_guard.h"
+#include <../3rdparty/qtkeychain/keychain.h>
 #include <QKeySequence>
 #include <QMainWindow>
 #include <QMap>
@@ -59,24 +61,21 @@
 #include <QTimer>
 #include <QToolButton>
 #include <QVersionNumber>
-#include "edbee/models/textautocompleteprovider.h"
-#include <../3rdparty/qtkeychain/keychain.h>
 #include <optional>
-#include "post_guard.h"
 
-#include <hunspell/hunspell.hxx>
 #include <hunspell/hunspell.h>
+#include <hunspell/hunspell.hxx>
 
 // for system physical memory info
 #ifdef WIN32
-#include <Windows.h>
 #include <Psapi.h>
+#include <Windows.h>
 #elif defined(__APPLE__)
+#include <array>
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <array>
 #else
 #include <sys/resource.h>
 #include <sys/sysinfo.h>
@@ -114,105 +113,118 @@ class mudlet : public QMainWindow, public Ui::main_window
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(mudlet)
     mudlet();
     ~mudlet();
-    static mudlet* self();
+    static mudlet *self();
     // This method allows better debugging when mudlet::self() is called inappropriately.
     static void start();
-    HostManager& getHostManager() { return mHostManager; }
-    void attachDebugArea(const QString& hostname);
+    HostManager &getHostManager()
+    {
+        return mHostManager;
+    }
+    void attachDebugArea(const QString &hostname);
     FontManager mFontManager;
     Discord mDiscord;
     QPointer<QSettings> mpSettings;
-    void addSubWindow(TConsole* p);
-    int getColumnNumber(Host* pHost, QString& name);
-    std::pair<bool, int> getLineNumber(Host* pHost, QString& windowName);
-    void printSystemMessage(Host* pH, const QString& s);
-    void print(Host*, const QString&);
-    void addConsoleForNewHost(Host* pH);
+    void addSubWindow(TConsole *p);
+    int getColumnNumber(Host *pHost, QString &name);
+    std::pair<bool, int> getLineNumber(Host *pHost, QString &windowName);
+    void printSystemMessage(Host *pH, const QString &s);
+    void print(Host *, const QString &);
+    void addConsoleForNewHost(Host *pH);
     void disableToolbarButtons();
     void enableToolbarButtons();
-    Host* getActiveHost();
+    Host *getActiveHost();
     void forceClose();
     bool saveWindowLayout();
     bool loadWindowLayout();
-    void setDockLayoutUpdated(Host*, const QString&);
-    void setToolbarLayoutUpdated(Host*, TToolBar*);
+    void setDockLayoutUpdated(Host *, const QString &);
+    void setToolbarLayoutUpdated(Host *, TToolBar *);
     void commitLayoutUpdates();
-    bool setWindowFont(Host*, const QString&, const QString&);
-    QString getWindowFont(Host*, const QString&);
+    bool setWindowFont(Host *, const QString &, const QString &);
+    QString getWindowFont(Host *, const QString &);
     bool setWindowFontSize(Host *, const QString &, int);
-    int getFontSize(Host*, const QString&);
-    QSize calcFontSize(Host* pHost, const QString& windowName);
-    std::pair<bool, QString> openWindow(Host*, const QString&, bool loadLayout, bool autoDock, const QString &area);
-    bool setProfileStyleSheet(Host* pHost, const QString& styleSheet);
-    std::pair<bool, QString> createMiniConsole(Host*, const QString& windowname, const QString& name, int, int, int, int);
-    std::pair<bool, QString> createLabel(Host* pHost, const QString& windowname, const QString& name, int x, int y, int width, int height, bool fillBg, bool clickthrough);
-    bool echoWindow(Host*, const QString&, const QString&);
-    bool echoLink(Host* pHost, const QString& name, const QString& text, QStringList&, QStringList&, bool customFormat = false);
-    void insertLink(Host*, const QString&, const QString&, QStringList&, QStringList&, bool customFormat = false);
-    bool appendBuffer(Host*, const QString&);
-    bool createBuffer(Host*, const QString&);
-    bool showWindow(Host*, const QString&);
-    bool hideWindow(Host*, const QString&);
-    bool paste(Host*, const QString&);
-    bool closeWindow(Host*, const QString&);
-    bool resizeWindow(Host*, const QString&, int, int);
-    bool clearWindow(Host*, const QString&);
-    bool pasteWindow(Host* pHost, const QString& name);
-    bool setBackgroundColor(Host*, const QString& name, int r, int g, int b, int alpha);
-    bool setBackgroundImage(Host*, const QString& name, QString& path);
-    bool setTextFormat(Host*, const QString& name, const QColor &bgColor, const QColor &fgColor, const TChar::AttributeFlags attributes = TChar::None);
-    bool setDisplayAttributes(Host* pHost, const QString& name, const TChar::AttributeFlags attributes, const bool state);
-    bool setLabelClickCallback(Host*, const QString&, const int);
-    bool setLabelDoubleClickCallback(Host*, const QString&, const int);
-    bool setLabelReleaseCallback(Host*, const QString&, const int);
-    bool setLabelMoveCallback(Host*, const QString&, const int);
-    bool setLabelWheelCallback(Host*, const QString&, const int);
-    bool setLabelOnEnter(Host*, const QString&, const int);
-    bool setLabelOnLeave(Host*, const QString&, const int);
-    bool moveWindow(Host*, const QString& name, int, int);
-    std::pair<bool, QString> setWindow(Host* pHost, const QString& windowname, const QString& name, int x1, int y1, bool show);
-    std::pair<bool, QString> openMapWidget(Host* pHost, const QString& area, int x, int y, int width, int height);
-    std::pair<bool, QString> closeMapWidget(Host* pHost);
-    void deleteLine(Host*, const QString& name);
-    std::optional<QSize> getImageSize(const QString& imageLocation);
-    bool insertText(Host*, const QString& windowName, const QString&);
-    void replace(Host*, const QString& name, const QString&);
-    int selectString(Host*, const QString& name, const QString& what, int);
-    int selectSection(Host*, const QString& name, int, int);
-    void setLink(Host* pHost, const QString& name, QStringList& linkFunction, QStringList&);
-    std::tuple<bool, QString, int, int> getSelection(Host* pHost, const QString& name);
-    void setFgColor(Host*, const QString& name, int, int, int);
-    void setBgColor(Host*, const QString& name, int, int, int);
-    QString readProfileData(const QString& profile, const QString& item);
-    QPair<bool, QString> writeProfileData(const QString& profile, const QString& item, const QString& what);
+    int getFontSize(Host *, const QString &);
+    QSize calcFontSize(Host *pHost, const QString &windowName);
+    std::pair<bool, QString> openWindow(Host *, const QString &, bool loadLayout, bool autoDock, const QString &area);
+    bool setProfileStyleSheet(Host *pHost, const QString &styleSheet);
+    std::pair<bool, QString> createMiniConsole(Host *, const QString &windowname, const QString &name, int, int, int,
+                                               int);
+    std::pair<bool, QString> createLabel(Host *pHost, const QString &windowname, const QString &name, int x, int y,
+                                         int width, int height, bool fillBg, bool clickthrough);
+    bool echoWindow(Host *, const QString &, const QString &);
+    bool echoLink(Host *pHost, const QString &name, const QString &text, QStringList &, QStringList &,
+                  bool customFormat = false);
+    void insertLink(Host *, const QString &, const QString &, QStringList &, QStringList &, bool customFormat = false);
+    bool appendBuffer(Host *, const QString &);
+    bool createBuffer(Host *, const QString &);
+    bool showWindow(Host *, const QString &);
+    bool hideWindow(Host *, const QString &);
+    bool paste(Host *, const QString &);
+    bool closeWindow(Host *, const QString &);
+    bool resizeWindow(Host *, const QString &, int, int);
+    bool clearWindow(Host *, const QString &);
+    bool pasteWindow(Host *pHost, const QString &name);
+    bool setBackgroundColor(Host *, const QString &name, int r, int g, int b, int alpha);
+    bool setBackgroundImage(Host *, const QString &name, QString &path);
+    bool setTextFormat(Host *, const QString &name, const QColor &bgColor, const QColor &fgColor,
+                       const TChar::AttributeFlags attributes = TChar::None);
+    bool setDisplayAttributes(Host *pHost, const QString &name, const TChar::AttributeFlags attributes,
+                              const bool state);
+    bool setLabelClickCallback(Host *, const QString &, const int);
+    bool setLabelDoubleClickCallback(Host *, const QString &, const int);
+    bool setLabelReleaseCallback(Host *, const QString &, const int);
+    bool setLabelMoveCallback(Host *, const QString &, const int);
+    bool setLabelWheelCallback(Host *, const QString &, const int);
+    bool setLabelOnEnter(Host *, const QString &, const int);
+    bool setLabelOnLeave(Host *, const QString &, const int);
+    bool moveWindow(Host *, const QString &name, int, int);
+    std::pair<bool, QString> setWindow(Host *pHost, const QString &windowname, const QString &name, int x1, int y1,
+                                       bool show);
+    std::pair<bool, QString> openMapWidget(Host *pHost, const QString &area, int x, int y, int width, int height);
+    std::pair<bool, QString> closeMapWidget(Host *pHost);
+    void deleteLine(Host *, const QString &name);
+    std::optional<QSize> getImageSize(const QString &imageLocation);
+    bool insertText(Host *, const QString &windowName, const QString &);
+    void replace(Host *, const QString &name, const QString &);
+    int selectString(Host *, const QString &name, const QString &what, int);
+    int selectSection(Host *, const QString &name, int, int);
+    void setLink(Host *pHost, const QString &name, QStringList &linkFunction, QStringList &);
+    std::tuple<bool, QString, int, int> getSelection(Host *pHost, const QString &name);
+    void setFgColor(Host *, const QString &name, int, int, int);
+    void setBgColor(Host *, const QString &name, int, int, int);
+    QString readProfileData(const QString &profile, const QString &item);
+    QPair<bool, QString> writeProfileData(const QString &profile, const QString &item, const QString &what);
     void deleteProfileData(const QString &profile, const QString &item);
-    bool setWindowWrap(Host* pHost, const QString& name, int& wrap);
-    bool setWindowWrapIndent(Host* pHost, const QString& name, int& wrap);
-    bool copy(Host* pHost, const QString& name);
-    bool moveCursorEnd(Host*, const QString&);
-    bool moveCursor(Host*, const QString&, int, int);
-    int getLastLineNumber(Host*, const QString&);
-    void readEarlySettings(const QSettings&);
-    void readLateSettings(const QSettings&);
+    bool setWindowWrap(Host *pHost, const QString &name, int &wrap);
+    bool setWindowWrapIndent(Host *pHost, const QString &name, int &wrap);
+    bool copy(Host *pHost, const QString &name);
+    bool moveCursorEnd(Host *, const QString &);
+    bool moveCursor(Host *, const QString &, int, int);
+    int getLastLineNumber(Host *, const QString &);
+    void readEarlySettings(const QSettings &);
+    void readLateSettings(const QSettings &);
     void writeSettings();
-    bool openWebPage(const QString& path);
+    bool openWebPage(const QString &path);
     void checkUpdatesOnStart();
     void processEventLoopHack();
     static const QString scmMudletXmlDefaultVersion;
     static QPointer<TConsole> mpDebugConsole;
     static QPointer<QMainWindow> mpDebugArea;
     static bool debugMode;
-    QMap<Host*, TConsole*> mConsoleMap;
-    bool isGoingDown() { return mIsGoingDown; }
+    QMap<Host *, TConsole *> mConsoleMap;
+    bool isGoingDown()
+    {
+        return mIsGoingDown;
+    }
     int mToolbarIconSize;
     int mEditorTreeWidgetIconSize;
     void setToolBarIconSize(int);
     void setEditorTreeWidgetIconSize(int);
-    enum controlsVisibilityFlag {
+    enum controlsVisibilityFlag
+    {
         visibleNever = 0,
         visibleOnlyWithoutLoadedProfile = 0x1,
         visibleMaskNormally = 0x2,
@@ -223,31 +235,37 @@ public:
     void setMenuBarVisibility(controlsVisibility);
     void adjustToolBarVisibility();
     void adjustMenuBarVisibility();
-    controlsVisibility menuBarVisibility() const { return mMenuBarVisibility; }
-    controlsVisibility toolBarVisibility() const { return mToolbarVisibility; }
+    controlsVisibility menuBarVisibility() const
+    {
+        return mMenuBarVisibility;
+    }
+    controlsVisibility toolBarVisibility() const
+    {
+        return mToolbarVisibility;
+    }
     bool replayStart();
-    bool setConsoleBufferSize(Host* pHost, const QString& name, int x1, int y1);
-    bool setScrollBarVisible(Host* pHost, const QString& name, bool isVisible);
-    bool setClickthrough(Host* pHost, const QString& name, bool clickthrough);
+    bool setConsoleBufferSize(Host *pHost, const QString &name, int x1, int y1);
+    bool setScrollBarVisible(Host *pHost, const QString &name, bool isVisible);
+    bool setClickthrough(Host *pHost, const QString &name, bool clickthrough);
     void replayOver();
-    void showEvent(QShowEvent* event) override;
-    void hideEvent(QHideEvent* event) override;
-    bool resetFormat(Host*, QString& name);
+    void showEvent(QShowEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
+    bool resetFormat(Host *, QString &name);
     bool moduleTableVisible();
     bool mWindowMinimized;
-    void doAutoLogin(const QString&);
-    bool deselect(Host* pHost, const QString& name);
+    void doAutoLogin(const QString &);
+    bool deselect(Host *pHost, const QString &name);
     void stopSounds();
     void playSound(const QString &s, int);
-    int getColumnCount(Host* pHost, QString& name);
-    int getRowCount(Host* pHost, QString& name);
+    int getColumnCount(Host *pHost, QString &name);
+    int getRowCount(Host *pHost, QString &name);
     QStringList getAvailableFonts();
     void hideMudletsVariables(Host *pHost);
     void updateMudletDiscordInvite();
-    std::pair<bool, QString> setProfileIcon(const QString& profile, const QString& newIconPath);
-    std::pair<bool, QString> resetProfileIcon(const QString& profile);
+    std::pair<bool, QString> setProfileIcon(const QString &profile, const QString &newIconPath);
+    std::pair<bool, QString> resetProfileIcon(const QString &profile);
 #if defined(Q_OS_WIN32)
-    void sanitizeUtf8Path(QString& originalLocation, const QString& fileName) const;
+    void sanitizeUtf8Path(QString &originalLocation, const QString &fileName) const;
 #endif
 
     // used by developers in everyday coding
@@ -264,23 +282,23 @@ public:
     static const int scmQDataStreamFormat_5_12;
     QTime mReplayTime;
     int mReplaySpeed;
-    QToolBar* mpMainToolBar;
-    QMap<Host*, QPointer<dlgIRC>> mpIrcClientMap;
+    QToolBar *mpMainToolBar;
+    QMap<Host *, QPointer<dlgIRC>> mpIrcClientMap;
     QString version;
     QPointer<Host> mpCurrentActiveHost;
     bool mAutolog;
-    QList<QMediaPlayer*> mMusicBoxList;
-    TTabBar* mpTabBar;
+    QList<QMediaPlayer *> mMusicBoxList;
+    TTabBar *mpTabBar;
     QStringList packagesToInstallList;
     bool mIsLoadingLayout;
     static QVariantHash mLuaFunctionNames;
     bool mHasSavedLayout;
-    QMap<Host*, QList<QString>> mHostDockLayoutChangeMap;
-    QMap<Host*, QList<TToolBar*>> mHostToolbarLayoutChangeMap;
+    QMap<Host *, QList<QString>> mHostDockLayoutChangeMap;
+    QMap<Host *, QList<TToolBar *>> mHostToolbarLayoutChangeMap;
     QPointer<dlgAboutDialog> mpAboutDlg;
     QPointer<QDialog> mpModuleDlg;
     QPointer<QDialog> mpPackageManagerDlg;
-    QMap<Host*, QPointer<dlgProfilePreferences>> mpProfilePreferencesDlgMap;
+    QMap<Host *, QPointer<dlgProfilePreferences>> mpProfilePreferencesDlgMap;
     // More modern Desktop styles no longer include icons on the buttons in
     // QDialogButtonBox buttons - but some users are using Desktops (KDE4?) that
     // does use them - use this flag to determine whether we should apply our
@@ -306,7 +324,7 @@ public:
     QTextOption::Flags mEditorTextOptions;
     void setEditorTextoptions(bool isTabsAndSpacesToBeShown, bool isLinesAndParagraphsToBeShown);
     static bool loadLuaFunctionList();
-    static bool loadEdbeeTheme(const QString& themeName, const QString& themeFile);
+    static bool loadEdbeeTheme(const QString &themeName, const QString &themeFile);
 
     // Used by a profile to tell the mudlet class
     // to tell other profiles to reload the updated
@@ -315,25 +333,38 @@ public:
 
     void showChangelogIfUpdated();
 
-    bool showMapAuditErrors() const { return mshowMapAuditErrors; }
+    bool showMapAuditErrors() const
+    {
+        return mshowMapAuditErrors;
+    }
     void setShowMapAuditErrors(const bool);
-    bool compactInputLine() const { return mCompactInputLine; }
-    void setCompactInputLine(const bool state) { mCompactInputLine = state; }
+    bool compactInputLine() const
+    {
+        return mCompactInputLine;
+    }
+    void setCompactInputLine(const bool state)
+    {
+        mCompactInputLine = state;
+    }
     void createMapper(bool loadDefaultMap = true);
     void setShowIconsOnMenu(const Qt::CheckState);
 
-    static bool unzip(const QString& archivePath, const QString& destination, const QDir& tmpDir);
+    static bool unzip(const QString &archivePath, const QString &destination, const QDir &tmpDir);
 
     // This construct will be very useful for formatting tooltips and by
     // defining a static function/method here we can save using the same
     // QStringLiteral all over the place:
-    static QString htmlWrapper(const QString& text) { return QStringLiteral("<html><head/><body>%1</body></html>").arg(text); }
+    static QString htmlWrapper(const QString &text)
+    {
+        return QStringLiteral("<html><head/><body>%1</body></html>").arg(text);
+    }
 
     // From https://stackoverflow.com/a/14678964/4805858 an answer to:
     // "How to find and replace string?" by "Czarek Tomczak":
-    static std::string replaceString(std::string subject, const std::string& search, const std::string& replace);
+    static std::string replaceString(std::string subject, const std::string &search, const std::string &replace);
 
-    enum mudletPathType {
+    enum mudletPathType
+    {
         // The root of all mudlet data for the user - does not end in a '/'
         mainPath = 0,
         // Takes one extra argument as a file (or directory) relating to
@@ -412,21 +443,30 @@ public:
         // dictionaries from:
         hunspellDictionaryPath
     };
-    static QString getMudletPath(mudletPathType, const QString& extra1 = QString(), const QString& extra2 = QString());
+    static QString getMudletPath(mudletPathType, const QString &extra1 = QString(), const QString &extra2 = QString());
     // Used to enable "emergency" control recovery action - if Mudlet is
     // operating without either menubar or main toolbar showing.
     bool isControlsVisible() const;
-    bool loadReplay(Host*, const QString&, QString* pErrMsg = nullptr);
-    void show_options_dialog(const QString& tab);
+    bool loadReplay(Host *, const QString &, QString *pErrMsg = nullptr);
+    void show_options_dialog(const QString &tab);
     void setInterfaceLanguage(const QString &languageCode);
-    const QString& getInterfaceLanguage() const { return mInterfaceLanguage; }
-    QList<QString> getAvailableTranslationCodes() const { return mTranslationsMap.keys(); }
-    QPair<bool, QStringList> getLines(Host* pHost, const QString& windowName, const int lineFrom, const int lineTo);
+    const QString &getInterfaceLanguage() const
+    {
+        return mInterfaceLanguage;
+    }
+    QList<QString> getAvailableTranslationCodes() const
+    {
+        return mTranslationsMap.keys();
+    }
+    QPair<bool, QStringList> getLines(Host *pHost, const QString &windowName, const int lineFrom, const int lineTo);
     void setEnableFullScreenMode(const bool);
     bool migratePasswordsToProfileStorage();
-    bool storingPasswordsSecurely() const { return mStorePasswordsSecurely; }
+    bool storingPasswordsSecurely() const
+    {
+        return mStorePasswordsSecurely;
+    }
     bool migratePasswordsToSecureStorage();
-    static void setNetworkRequestDefaults(const QUrl& url, QNetworkRequest& request);
+    static void setNetworkRequestDefaults(const QUrl &url, QNetworkRequest &request);
 
     // Both of these revises the contents of the .aff file: the first will
     // handle a .dic file that has been updated externally/manually (to add
@@ -434,25 +474,26 @@ public:
     // supplied second argument; the second will replace the .dic file with just
     // the words in the supplied second argument and is to be used at the end of
     // a session to store away the user's changes:
-    Hunhandle* prepareProfileDictionary(const QString&, QSet<QString>&);
-    Hunhandle* prepareSharedDictionary();
-    bool saveDictionary(const QString&, QSet<QString>&);
-    QPair<bool, bool> addWordToSet(const QString&);
-    QPair<bool, bool> removeWordFromSet(const QString&);
+    Hunhandle *prepareProfileDictionary(const QString &, QSet<QString> &);
+    Hunhandle *prepareSharedDictionary();
+    bool saveDictionary(const QString &, QSet<QString> &);
+    QPair<bool, bool> addWordToSet(const QString &);
+    QPair<bool, bool> removeWordFromSet(const QString &);
     QSet<QString> getWordSet();
-    void scanForMudletTranslations(const QString&);
-    void scanForQtTranslations(const QString&);
+    void scanForMudletTranslations(const QString &);
+    void scanForQtTranslations(const QString &);
     void layoutModules();
-    void startAutoLogin(const QString&);
+    void startAutoLogin(const QString &);
     QPointer<QTableWidget> moduleTable;
     int64_t getPhysicalMemoryTotal();
-    const QMap<QByteArray, QString>& getEncodingNamesMap() const { return mEncodingNameMap; }
-
+    const QMap<QByteArray, QString> &getEncodingNamesMap() const
+    {
+        return mEncodingNameMap;
+    }
 
 #if defined(INCLUDE_UPDATER)
-    Updater* updater;
+    Updater *updater;
 #endif
-
 
     // Currently tracks the "mudlet_option_use_smallscreen" file's existance but
     // may eventually migrate solely to the "EnableFullScreenMode" in the main
@@ -475,14 +516,14 @@ public:
     // entries in their system if they do not appear in this and thus get
     // reported in the dictionary selection as the hunspell dictionary/affix
     // filename (e.g. a "xx" or "xx_YY" form rather than "words"):
-    QHash<QString, QString>mDictionaryLanguageCodeMap;
+    QHash<QString, QString> mDictionaryLanguageCodeMap;
 
     // This is used to keep track of where the main dictionary files are located
     // will be true if they are ones bundled with Mudlet, false if provided by
     // the system
     bool mUsingMudletDictionaries;
 
-public slots:
+  public slots:
     void processEventLoopHack_timerRun();
     void slot_mapper();
     void slot_replayTimeChanged();
@@ -494,10 +535,10 @@ public slots:
     void slot_show_help_dialog_forum();
     void slot_show_help_dialog_irc();
     void slot_open_mappingscripts_page();
-    void slot_module_clicked(QTableWidgetItem*);
-    void slot_module_changed(QTableWidgetItem*);
+    void slot_module_clicked(QTableWidgetItem *);
+    void slot_module_changed(QTableWidgetItem *);
     void slot_multi_view();
-    void slot_connection_dlg_finished(const QString& profile, bool connectOnLoad);
+    void slot_connection_dlg_finished(const QString &profile, bool connectOnLoad);
     void slot_timer_fires();
     void slot_send_login();
     void slot_send_pass();
@@ -519,35 +560,39 @@ public slots:
 #if defined(INCLUDE_UPDATER)
     void slot_check_manual_update();
 #endif
-    void slot_restoreMainMenu() { setMenuBarVisibility(visibleAlways); }
-    void slot_restoreMainToolBar() { setToolBarVisibility(visibleAlways); }
+    void slot_restoreMainMenu()
+    {
+        setMenuBarVisibility(visibleAlways);
+    }
+    void slot_restoreMainToolBar()
+    {
+        setToolBarVisibility(visibleAlways);
+    }
     void slot_handleToolbarVisibilityChanged(bool);
-    void slot_newDataOnHost(const QString&, bool isLowerPriorityChange = false);
+    void slot_newDataOnHost(const QString &, bool isLowerPriorityChange = false);
 
+  protected:
+    void closeEvent(QCloseEvent *event) override;
 
-protected:
-    void closeEvent(QCloseEvent* event) override;
-
-signals:
+  signals:
     void signal_editorTextOptionsChanged(QTextOption::Flags);
     void signal_profileMapReloadRequested(QList<QString>);
-    void signal_tabChanged(const QString& hostName);
+    void signal_tabChanged(const QString &hostName);
     void signal_setToolBarIconSize(int);
     void signal_setTreeIconSize(int);
-    void signal_hostCreated(Host*, quint8);
-    void signal_hostDestroyed(Host*, quint8);
+    void signal_hostCreated(Host *, quint8);
+    void signal_hostDestroyed(Host *, quint8);
     void signal_enableFulScreenModeChanged(bool);
     void signal_showMapAuditErrorsChanged(bool);
     void signal_menuBarVisibilityChanged(const controlsVisibility);
     void signal_toolBarVisibilityChanged(const controlsVisibility);
     void signal_showIconsOnMenusChanged(const Qt::CheckState);
-    void signal_guiLanguageChanged(const QString&);
+    void signal_guiLanguageChanged(const QString &);
     void signal_passwordsMigratedToSecure();
-    void signal_passwordMigratedToSecure(const QString&);
+    void signal_passwordMigratedToSecure(const QString &);
     void signal_passwordsMigratedToProfiles();
 
-
-private slots:
+  private slots:
     void slot_tab_changed(int);
     void show_help_dialog();
     void slot_show_connection_dialog();
@@ -578,33 +623,35 @@ private slots:
     void slot_password_migrated_to_secure(QKeychain::Job *job);
     void slot_password_migrated_to_profile(QKeychain::Job *job);
 
-
-private:
+  private:
     void initEdbee();
-    void goingDown() { mIsGoingDown = true; }
-    bool scanDictionaryFile(QFile&, int&, QHash<QString, unsigned int>&, QStringList&);
-    int scanWordList(QStringList&, QHash<QString, unsigned int>&);
-    bool overwriteDictionaryFile(QFile&, const QStringList&);
-    bool overwriteAffixFile(QFile&, QHash<QString, unsigned int>&);
-    int getDictionaryWordCount(QFile&);
+    void goingDown()
+    {
+        mIsGoingDown = true;
+    }
+    bool scanDictionaryFile(QFile &, int &, QHash<QString, unsigned int> &, QStringList &);
+    int scanWordList(QStringList &, QHash<QString, unsigned int> &);
+    bool overwriteDictionaryFile(QFile &, const QStringList &);
+    bool overwriteAffixFile(QFile &, QHash<QString, unsigned int> &);
+    int getDictionaryWordCount(QFile &);
     void check_for_mappingscript();
     void set_compact_input_line();
-    QSettings* getQSettings();
+    QSettings *getQSettings();
     void loadTranslators(const QString &languageCode);
     void loadMaps();
-    void migrateDebugConsole(Host* currentHost);
+    void migrateDebugConsole(Host *currentHost);
     static bool firstLaunch();
     QString autodetectPreferredLanguage();
 
-    QMap<QString, TConsole*> mTabMap;
-    QWidget* mainPane;
+    QMap<QString, TConsole *> mTabMap;
+    QWidget *mainPane;
 
     QQueue<QString> tempLoginQueue;
     QQueue<QString> tempPassQueue;
-    QQueue<Host*> tempHostQueue;
+    QQueue<Host *> tempHostQueue;
     static QPointer<mudlet> _self;
-    QMap<Host*, QToolBar*> mUserToolbarMap;
-    QMenu* restoreBar;
+    QMap<Host *, QToolBar *> mUserToolbarMap;
+    QMenu *restoreBar;
     bool mIsGoingDown;
     controlsVisibility mMenuBarVisibility;
     controlsVisibility mToolbarVisibility;
@@ -693,7 +740,7 @@ private:
     // Has default form of "en_US" but can be just an ISO langauge code e.g. "fr" for french,
     // without a country designation. Replaces xx in "mudlet_xx.qm" to provide the translation
     // file for GUI translation
-    QString mInterfaceLanguage {};
+    QString mInterfaceLanguage{};
     // The next pair retains the path argument supplied to the corresponding
     // scanForXxxTranslations(...) method so it is available to the subsquent
     // loadTranslators(...) call
@@ -703,7 +750,7 @@ private:
 
     // Points to the common mudlet dictionary handle once a profile has
     // requested it, then gets closed at termination of the application.
-    Hunhandle* mHunspell_sharedDictionary;
+    Hunhandle *mHunspell_sharedDictionary;
     // The collection of words in the above:
     QSet<QString> mWordSet_shared;
     // Prevent problems when updating the dictionary:
@@ -712,9 +759,9 @@ private:
     QString mMudletDiscordInvite = QStringLiteral("https://discordapp.com/invite/kuYvMQ9");
 
     // a list of profiles currently being migrated to secure or profile storage
-    QStringList mProfilePasswordsToMigrate {};
+    QStringList mProfilePasswordsToMigrate{};
 
-    bool mStorePasswordsSecurely {true};
+    bool mStorePasswordsSecurely{true};
     // Stores the translated names for the Encodings for the static and thus
     // const TBuffer::csmEncodingTable:
     QMap<QByteArray, QString> mEncodingNameMap;
@@ -726,13 +773,15 @@ class TConsoleMonitor : public QObject
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(TConsoleMonitor)
-    TConsoleMonitor(QObject* parent) : QObject(parent) {}
-protected:
-    bool eventFilter(QObject* obj, QEvent* event) override;
-};
+    TConsoleMonitor(QObject *parent) : QObject(parent)
+    {
+    }
 
+  protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
+};
 
 // A convenience class to keep all the details for the translators for a
 // specific locale code (langauge only "xx" or language/country "xx_YY")
@@ -740,19 +789,36 @@ protected:
 class translation
 {
     // The following must have friendship so they can set private members:
-    friend void mudlet::scanForMudletTranslations(const QString&);
-    friend void mudlet::scanForQtTranslations(const QString&);
+    friend void mudlet::scanForMudletTranslations(const QString &);
+    friend void mudlet::scanForQtTranslations(const QString &);
 
-public:
-    translation(const int translationPercent = -1) : mTranslatedPercentage(translationPercent) {}
+  public:
+    translation(const int translationPercent = -1) : mTranslatedPercentage(translationPercent)
+    {
+    }
 
-    const QString& getNativeName() const { return mNativeName; }
-    const QString& getMudletTranslationFileName() const { return mMudletTranslationFileName; }
-    const QString& getQtTranslationFileName() const { return mQtTranslationFileName; }
-    const int& getTranslatedPercentage() const { return mTranslatedPercentage; }
-    bool fromResourceFile() const { return mTranslatedPercentage >= 0; }
+    const QString &getNativeName() const
+    {
+        return mNativeName;
+    }
+    const QString &getMudletTranslationFileName() const
+    {
+        return mMudletTranslationFileName;
+    }
+    const QString &getQtTranslationFileName() const
+    {
+        return mQtTranslationFileName;
+    }
+    const int &getTranslatedPercentage() const
+    {
+        return mTranslatedPercentage;
+    }
+    bool fromResourceFile() const
+    {
+        return mTranslatedPercentage >= 0;
+    }
 
-private:
+  private:
     // Used for display in the profile preferences and is never translated:
     QString mNativeName;
     // ONLY if the translation is loaded from an embedded resource file,

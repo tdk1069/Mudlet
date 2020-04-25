@@ -19,7 +19,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TEasyButtonBar.h"
 
 #include "Host.h"
@@ -27,19 +26,13 @@
 #include "TConsole.h"
 #include "TFlipButton.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QGridLayout>
-#include "post_guard.h"
 
-
-TEasyButtonBar::TEasyButtonBar(TAction* pA, QString name, QWidget* pW)
-: QWidget( pW )
-, mpTAction( pA )
-, mVerticalOrientation( false )
-, mpWidget( new QWidget(this) )
-, mRecordMove( false )
-, mpLayout( nullptr )
-, mItemCount( 0 )
+TEasyButtonBar::TEasyButtonBar(TAction *pA, QString name, QWidget *pW)
+    : QWidget(pW), mpTAction(pA), mVerticalOrientation(false), mpWidget(new QWidget(this)), mRecordMove(false),
+      mpLayout(nullptr), mItemCount(0)
 {
     mButtonList.clear();
     auto hostName(pA->mpHost->getName());
@@ -49,7 +42,8 @@ TEasyButtonBar::TEasyButtonBar(TAction* pA, QString name, QWidget* pW)
     layout->setMargin(0);
     layout->setSpacing(0);
     layout->addWidget(mpWidget);
-    if (!mpTAction->mUseCustomLayout) {
+    if (!mpTAction->mUseCustomLayout)
+    {
         mpLayout = new QGridLayout(mpWidget);
         setContentsMargins(0, 0, 0, 0);
         mpLayout->setContentsMargins(0, 0, 0, 0);
@@ -57,7 +51,9 @@ TEasyButtonBar::TEasyButtonBar(TAction* pA, QString name, QWidget* pW)
         mpLayout->setSpacing(0);
         QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         mpWidget->setSizePolicy(sizePolicy);
-    } else {
+    }
+    else
+    {
         mpWidget->setMinimumHeight(mpTAction->mSizeY);
         mpWidget->setMaximumHeight(mpTAction->mSizeY);
         mpWidget->setMinimumWidth(mpTAction->mSizeX);
@@ -72,15 +68,19 @@ TEasyButtonBar::TEasyButtonBar(TAction* pA, QString name, QWidget* pW)
     setWindowTitle(tr("Easybutton Bar - %1 - %2").arg(hostName, name));
 }
 
-void TEasyButtonBar::addButton(TFlipButton* pB)
+void TEasyButtonBar::addButton(TFlipButton *pB)
 {
-    if (!mpTAction->mUseCustomLayout) {
+    if (!mpTAction->mUseCustomLayout)
+    {
         QSize size = pB->minimumSizeHint();
-        if (pB->mpTAction->getButtonRotation() > 0) {
+        if (pB->mpTAction->getButtonRotation() > 0)
+        {
             size.transpose();
             pB->setMaximumSize(size);
         }
-    } else {
+    }
+    else
+    {
         qDebug() << "setting up custom sizes";
         QSize size = QSize(pB->mpTAction->mSizeX, pB->mpTAction->mSizeY);
         pB->setMaximumSize(size);
@@ -92,7 +92,8 @@ void TEasyButtonBar::addButton(TFlipButton* pB)
     pB->setStyleSheet(pB->mpTAction->css);
     pB->setFlat(pB->mpTAction->getButtonFlat());
     int rotation = pB->mpTAction->getButtonRotation();
-    switch (rotation) {
+    switch (rotation)
+    {
     case 0:
         pB->setOrientation(Qt::Horizontal);
         break;
@@ -105,27 +106,34 @@ void TEasyButtonBar::addButton(TFlipButton* pB)
         break;
     }
 
-    if (!mpTAction->mUseCustomLayout) {
+    if (!mpTAction->mUseCustomLayout)
+    {
         // tool bar mButtonColumns > 0 -> autolayout
         // case == 0: use individual button placement for user defined layouts
         int columns = mpTAction->getButtonColumns();
-        if (columns <= 0) {
+        if (columns <= 0)
+        {
             columns = 1;
         }
-        if (columns > 0) {
+        if (columns > 0)
+        {
             mItemCount++;
             int row = mItemCount / columns;
             int col = mItemCount % columns;
-            if (mVerticalOrientation) {
+            if (mVerticalOrientation)
+            {
                 mpLayout->addWidget(pB, row, col);
-            } else {
+            }
+            else
+            {
                 mpLayout->addWidget(pB, col, row);
             }
         }
-    } else {
+    }
+    else
+    {
         pB->move(pB->mpTAction->mPosX, pB->mpTAction->mPosY);
     }
-
 
     // Was using released() signal but now we want to track the ACTUAL state of
     // the underlying QAbstractButton
@@ -134,10 +142,10 @@ void TEasyButtonBar::addButton(TFlipButton* pB)
     pB->setChecked(pB->mpTAction->mButtonState);
 }
 
-
 void TEasyButtonBar::finalize()
 {
-    if (mpTAction->mUseCustomLayout) {
+    if (mpTAction->mUseCustomLayout)
+    {
         return;
     }
     auto fillerWidget = new QWidget;
@@ -145,12 +153,14 @@ void TEasyButtonBar::finalize()
     QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     fillerWidget->setSizePolicy(sizePolicy);
     int columns = mpTAction->getButtonColumns();
-    if (columns <= 0) {
+    if (columns <= 0)
+    {
         columns = 1;
     }
     int row = (++mItemCount) / columns;
     int column = mItemCount % columns;
-    if (mpLayout) {
+    if (mpLayout)
+    {
         mpLayout->addWidget(fillerWidget, row, column);
     }
 }
@@ -159,12 +169,13 @@ void TEasyButtonBar::finalize()
 // button state to ensure the visible representation is used.
 void TEasyButtonBar::slot_pressed(const bool isChecked)
 {
-    auto * pB = dynamic_cast<TFlipButton*>(sender());
-    if (!pB) {
+    auto *pB = dynamic_cast<TFlipButton *>(sender());
+    if (!pB)
+    {
         return;
     }
 
-    TAction* pA = pB->mpTAction;
+    TAction *pA = pB->mpTAction;
 
     // NOTE: This function blocks until an item is selected from the menu, and,
     // as the action to "pop-up" the menu is the same as "buttons" use to
@@ -174,11 +185,14 @@ void TEasyButtonBar::slot_pressed(const bool isChecked)
     // entries...
     pB->showMenu();
 
-    if (pA->mIsPushDownButton) {
+    if (pA->mIsPushDownButton)
+    {
         // DO NOT MANIPULATE THE BUTTON STATE OURSELF NOW
         pA->mButtonState = isChecked;
         pA->mpHost->mpConsole->mButtonState = (pA->mButtonState ? 2 : 1);
-    } else {
+    }
+    else
+    {
         pA->mButtonState = false;                // Forces a fixup if not correct
         pB->setChecked(false);                   // This does NOT invoke the clicked() signal!
         pA->mpHost->mpConsole->mButtonState = 1; // Was effectively 0 but that is wrong
@@ -190,7 +204,8 @@ void TEasyButtonBar::slot_pressed(const bool isChecked)
 void TEasyButtonBar::clear()
 {
     auto pW = new QWidget;
-    for (auto& flipButton : mButtonList) {
+    for (auto &flipButton : mButtonList)
+    {
         disconnect(flipButton, &QAbstractButton::clicked, this, &TEasyButtonBar::slot_pressed);
     }
     mButtonList.clear();
@@ -201,7 +216,8 @@ void TEasyButtonBar::clear()
     mpWidget = pW;
     mpWidget->setObjectName(widgetObjectName);
 
-    if (!mpTAction->mUseCustomLayout) {
+    if (!mpTAction->mUseCustomLayout)
+    {
         mpLayout = new QGridLayout;
         mpWidget->setLayout(mpLayout);
         mpLayout->setContentsMargins(0, 0, 0, 0);
@@ -212,7 +228,9 @@ void TEasyButtonBar::clear()
 
         mpWidget->setContentsMargins(0, 0, 0, 0);
         mpLayout->setMargin(0);
-    } else {
+    }
+    else
+    {
         mpLayout = nullptr;
         mpWidget->setMinimumHeight(mpTAction->mSizeY);
         mpWidget->setMaximumHeight(mpTAction->mSizeY);

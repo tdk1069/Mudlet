@@ -19,9 +19,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TAction.h"
-
 
 #include "EAction.h"
 #include "Host.h"
@@ -32,83 +30,48 @@
 #include "TToolBar.h"
 #include "mudlet.h"
 
-TAction::TAction(TAction* parent, Host* pHost)
-: Tree<TAction>(parent)
-, mpToolBar(nullptr)
-, mpEasyButtonBar(nullptr)
-, mButtonState(false)
-, mPosX(0)
-, mPosY(0)
-, mNeedsToBeCompiled(true)
-, mButtonColumns(1)
-, mIsLabel(false)
-, mUseCustomLayout(false)
-, mButtonColor(QColor(Qt::white))
-, mpHost(pHost)
-, exportItem(true)
-, mModuleMasterFolder(false)
-, mModuleMember(false)
-, mOrientation()
-, mLocation()
-, mIsPushDownButton()
-, mButtonRotation()
-, mButtonFlat()
-, mSizeX()
-, mSizeY()
-, mDataChanged(true)
-, mToolbarLastDockArea(Qt::LeftDockWidgetArea)
-, mToolbarLastFloatingState(true)
+TAction::TAction(TAction *parent, Host *pHost)
+    : Tree<TAction>(parent), mpToolBar(nullptr), mpEasyButtonBar(nullptr), mButtonState(false), mPosX(0), mPosY(0),
+      mNeedsToBeCompiled(true), mButtonColumns(1), mIsLabel(false), mUseCustomLayout(false),
+      mButtonColor(QColor(Qt::white)), mpHost(pHost), exportItem(true), mModuleMasterFolder(false),
+      mModuleMember(false), mOrientation(), mLocation(), mIsPushDownButton(), mButtonRotation(), mButtonFlat(),
+      mSizeX(), mSizeY(), mDataChanged(true), mToolbarLastDockArea(Qt::LeftDockWidgetArea),
+      mToolbarLastFloatingState(true)
 {
 }
 
-TAction::TAction(const QString& name, Host* pHost)
-: Tree<TAction>(nullptr)
-, mpToolBar(nullptr)
-, mpEasyButtonBar(nullptr)
-, mButtonState(false)
-, mPosX(0)
-, mPosY(0)
-, mName(name)
-, mNeedsToBeCompiled(true)
-, mButtonColumns(1)
-, mIsLabel(false)
-, mUseCustomLayout(false)
-, mButtonColor(QColor(Qt::white))
-, mpHost(pHost)
-, exportItem(true)
-, mModuleMasterFolder(false)
-, mModuleMember(false)
-, mOrientation()
-, mLocation()
-, mIsPushDownButton()
-, mButtonRotation()
-, mButtonFlat()
-, mSizeX()
-, mSizeY()
-, mDataChanged(true)
-, mToolbarLastDockArea(Qt::LeftDockWidgetArea)
-, mToolbarLastFloatingState(true)
+TAction::TAction(const QString &name, Host *pHost)
+    : Tree<TAction>(nullptr), mpToolBar(nullptr), mpEasyButtonBar(nullptr), mButtonState(false), mPosX(0), mPosY(0),
+      mName(name), mNeedsToBeCompiled(true), mButtonColumns(1), mIsLabel(false), mUseCustomLayout(false),
+      mButtonColor(QColor(Qt::white)), mpHost(pHost), exportItem(true), mModuleMasterFolder(false),
+      mModuleMember(false), mOrientation(), mLocation(), mIsPushDownButton(), mButtonRotation(), mButtonFlat(),
+      mSizeX(), mSizeY(), mDataChanged(true), mToolbarLastDockArea(Qt::LeftDockWidgetArea),
+      mToolbarLastFloatingState(true)
 {
 }
 
 TAction::~TAction()
 {
-    if (mpHost) {
+    if (mpHost)
+    {
         mpHost->getActionUnit()->unregisterAction(this);
     }
 
-    if (mpToolBar) {
+    if (mpToolBar)
+    {
         mpToolBar->hide();
     }
 
-    if (mpEasyButtonBar) {
+    if (mpEasyButtonBar)
+    {
         mpEasyButtonBar->hide();
     }
 }
 
 bool TAction::registerAction()
 {
-    if (!mpHost) {
+    if (!mpHost)
+    {
         qDebug() << "ERROR: TAction::registerTrigger() pHost=0";
         return false;
     }
@@ -118,35 +81,47 @@ bool TAction::registerAction()
 void TAction::compileAll()
 {
     mNeedsToBeCompiled = true;
-    if (!compileScript()) {
-        if (mudlet::debugMode) {
-            TDebug(QColor(Qt::white), QColor(Qt::red)) << "ERROR: Lua compile error. compiling script of action:" << mName << "\n" >> 0;
+    if (!compileScript())
+    {
+        if (mudlet::debugMode)
+        {
+            TDebug(QColor(Qt::white), QColor(Qt::red))
+                    << "ERROR: Lua compile error. compiling script of action:" << mName << "\n" >>
+                0;
         }
         mOK_code = false;
     }
-    for (auto action : *mpMyChildrenList) {
+    for (auto action : *mpMyChildrenList)
+    {
         action->compileAll();
     }
 }
 
 void TAction::compile()
 {
-    if (mNeedsToBeCompiled) {
-        if (!compileScript()) {
-            if (mudlet::debugMode) {
-                TDebug(QColor(Qt::white), QColor(Qt::red)) << "ERROR: Lua compile error. compiling script of action:" << mName << "\n" >> 0;
+    if (mNeedsToBeCompiled)
+    {
+        if (!compileScript())
+        {
+            if (mudlet::debugMode)
+            {
+                TDebug(QColor(Qt::white), QColor(Qt::red))
+                        << "ERROR: Lua compile error. compiling script of action:" << mName << "\n" >>
+                    0;
             }
             mOK_code = false;
         }
     }
-    for (auto action : *mpMyChildrenList) {
+    for (auto action : *mpMyChildrenList)
+    {
         action->compile();
     }
 }
 
-bool TAction::setScript(const QString& script)
+bool TAction::setScript(const QString &script)
 {
-    if (script != mScript) {
+    if (script != mScript)
+    {
         setDataChanged();
     }
     mScript = script;
@@ -160,11 +135,14 @@ bool TAction::compileScript()
     mFuncName = QString("Action") + QString::number(mID);
     QString code = QString("function ") + mFuncName + QString("()\n") + mScript + QString("\nend\n");
     QString error;
-    if (mpHost->mLuaInterpreter.compile(code, error, QString("Button: ") + getName())) {
+    if (mpHost->mLuaInterpreter.compile(code, error, QString("Button: ") + getName()))
+    {
         mNeedsToBeCompiled = false;
         mOK_code = true;
         return true;
-    } else {
+    }
+    else
+    {
         mOK_code = false;
         setError(error);
         return false;
@@ -173,18 +151,27 @@ bool TAction::compileScript()
 
 void TAction::execute()
 {
-    if (mIsPushDownButton) {
-        if (mButtonState) {
-            if (!mCommandButtonDown.isEmpty()) {
+    if (mIsPushDownButton)
+    {
+        if (mButtonState)
+        {
+            if (!mCommandButtonDown.isEmpty())
+            {
                 mpHost->send(mCommandButtonDown);
             }
-        } else {
-            if (!mCommandButtonUp.isEmpty()) {
+        }
+        else
+        {
+            if (!mCommandButtonUp.isEmpty())
+            {
                 mpHost->send(mCommandButtonUp);
             }
         }
-    } else {
-        if (!mCommandButtonDown.isEmpty()) {
+    }
+    else
+    {
+        if (!mCommandButtonDown.isEmpty())
+        {
             mpHost->send(mCommandButtonDown);
         }
     }
@@ -193,8 +180,10 @@ void TAction::execute()
     // the "command"s still work even if the script doesn't!
     mpHost->mpConsole->mButtonState = (mButtonState ? 2 : 1);
 
-    if (mNeedsToBeCompiled) {
-        if (!compileScript()) {
+    if (mNeedsToBeCompiled)
+    {
+        if (!compileScript())
+        {
             mpHost->mpConsole->activateWindow();
             mpHost->mpConsole->setFocus();
             return;
@@ -207,10 +196,12 @@ void TAction::execute()
     mpHost->mpConsole->setFocus();
 }
 
-void TAction::expandToolbar(TToolBar* pT)
+void TAction::expandToolbar(TToolBar *pT)
 {
-    for (auto action : *mpMyChildrenList) {
-        if (!action->isActive()) {
+    for (auto action : *mpMyChildrenList)
+    {
+        if (!action->isActive())
+        {
             // This test and conditional loop abort was missing from this method
             // but is needed so that disabled buttons do not appear on
             // floating toolbars - possible future scope here to have "disabled"
@@ -224,9 +215,12 @@ void TAction::expandToolbar(TToolBar* pT)
         button->setText(name);
         button->setCheckable(action->mIsPushDownButton);
 
-        if (action->mIsPushDownButton) {
+        if (action->mIsPushDownButton)
+        {
             button->setChecked(action->mButtonState);
-        } else {
+        }
+        else
+        {
             // The following was added to ensure a non-Pushdown button is never
             // left in a checked state - Slysven
             button->setChecked(false);
@@ -237,17 +231,18 @@ void TAction::expandToolbar(TToolBar* pT)
         button->setStyleSheet(css);
 
         /*
-		 * CHECK: The other expandToolbar(...) has the following in this position:
-		 *       //FIXME: Heiko April 2012: only run checkbox button scripts, but run them even if unchecked
-		 *       if( action->mIsPushDownButton && mpHost->mIsProfileLoadingSequence )
-		 *       {
-		 *          qDebug()<<"expandToolBar() name="<<action->mName<<" executing script";
-		 *          action->execute();
-		 *       }
-		 * Why does it have this and we do not? - Slysven
-		 */
+         * CHECK: The other expandToolbar(...) has the following in this position:
+         *       //FIXME: Heiko April 2012: only run checkbox button scripts, but run them even if unchecked
+         *       if( action->mIsPushDownButton && mpHost->mIsProfileLoadingSequence )
+         *       {
+         *          qDebug()<<"expandToolBar() name="<<action->mName<<" executing script";
+         *          action->execute();
+         *       }
+         * Why does it have this and we do not? - Slysven
+         */
 
-        if (action->isFolder()) {
+        if (action->isFolder())
+        {
             auto newMenu = new QMenu(pT);
             // This applies the CSS for THIS TAction to a CHILD's own menu - is this right
             newMenu->setStyleSheet(css);
@@ -271,7 +266,7 @@ void TAction::expandToolbar(TToolBar* pT)
 // This seems to be the TToolBar version of TAction::fillMenu(TEasyButtonBar *, QMenu *)
 // Unlike the other this one seems to introduce an "intermediate" single menu
 // item to which the sub-menu is added.
-void TAction::insertActions(TToolBar* pT, QMenu* menu)
+void TAction::insertActions(TToolBar *pT, QMenu *menu)
 {
     mpToolBar = pT;
     QIcon icon(mIcon);
@@ -282,7 +277,8 @@ void TAction::insertActions(TToolBar* pT, QMenu* menu)
     action->setStatusTip(mName);
     menu->addAction(action);
 
-    if (isFolder()) {
+    if (isFolder())
+    {
         // The use of mudlet::self() here meant that the QMenu was not destroyed
         // until the mudlet instance is at the end of the application!
         // Changed to use pT, the toolbar
@@ -290,17 +286,19 @@ void TAction::insertActions(TToolBar* pT, QMenu* menu)
         newMenu->setStyleSheet(css);
         action->setMenu(newMenu);
 
-        for (auto childAction : *mpMyChildrenList) {
+        for (auto childAction : *mpMyChildrenList)
+        {
             childAction->insertActions(pT, newMenu);
         }
     }
 }
 
-
-void TAction::expandToolbar(TEasyButtonBar* pT)
+void TAction::expandToolbar(TEasyButtonBar *pT)
 {
-    for (auto action : *mpMyChildrenList) {
-        if (!action->isActive()) {
+    for (auto action : *mpMyChildrenList)
+    {
+        if (!action->isActive())
+        {
             continue;
         }
         QIcon icon(action->mIcon);
@@ -310,9 +308,12 @@ void TAction::expandToolbar(TEasyButtonBar* pT)
         button->setText(name);
         button->setCheckable(action->mIsPushDownButton);
 
-        if (action->mIsPushDownButton) {
+        if (action->mIsPushDownButton)
+        {
             button->setChecked(action->mButtonState);
-        } else {
+        }
+        else
+        {
             // The following was added to ensure a non-Pushdown button is never
             // left in a checked state - Slysven
             button->setChecked(false);
@@ -322,14 +323,15 @@ void TAction::expandToolbar(TEasyButtonBar* pT)
         // This applies the CSS for THIS TAction to a CHILD's representation on the Toolbar
         button->setStyleSheet(css);
 
-        //FIXME: Heiko April 2012: only run checkbox button scripts, but run them even if unchecked
-        if (action->mIsPushDownButton && mpHost->mIsProfileLoadingSequence) {
+        // FIXME: Heiko April 2012: only run checkbox button scripts, but run them even if unchecked
+        if (action->mIsPushDownButton && mpHost->mIsProfileLoadingSequence)
+        {
             qDebug() << "expandToolBar() name=" << action->mName << " executing script";
             action->execute();
         }
 
-
-        if (action->isFolder()) {
+        if (action->isFolder())
+        {
             // This applied the CSS for THIS TAction to a CHILD's own menu - is this right
             auto newMenu = new QMenu(button);
 
@@ -357,10 +359,12 @@ void TAction::expandToolbar(TEasyButtonBar* pT)
 // This seems to be the second half of TEasyButtonBar version of:
 //   TAction::insertActions( TToolBar *, QMenu * )
 // the need for the split is not yet clear to me! - Slysven
-void TAction::fillMenu(TEasyButtonBar* pT, QMenu* menu)
+void TAction::fillMenu(TEasyButtonBar *pT, QMenu *menu)
 {
-    for (auto action : *mpMyChildrenList) {
-        if (!action->isActive()) {
+    for (auto action : *mpMyChildrenList)
+    {
+        if (!action->isActive())
+        {
             continue;
         }
         mpEasyButtonBar = pT;
@@ -370,18 +374,23 @@ void TAction::fillMenu(TEasyButtonBar* pT, QMenu* menu)
         newAction->mpHost = mpHost;
         newAction->setStatusTip(action->mName);
         newAction->setCheckable(action->mIsPushDownButton);
-        if (action->mIsPushDownButton) {
+        if (action->mIsPushDownButton)
+        {
             newAction->setChecked(action->mButtonState);
-        } else {
+        }
+        else
+        {
             newAction->setChecked(false);
         }
 
-        //FIXME: Heiko April 2012 -> expandToolBar()
-        if (action->mIsPushDownButton && mpHost->mIsProfileLoadingSequence) {
+        // FIXME: Heiko April 2012 -> expandToolBar()
+        if (action->mIsPushDownButton && mpHost->mIsProfileLoadingSequence)
+        {
             action->execute();
         }
 
-        if (action->isFolder()) {
+        if (action->isFolder())
+        {
             // Adding a QWidget derived pointer to new QMenu() means the menu
             // will be destroyed when the pointed to item is, we just need to
             // find the item that it is attached to - ah ha, try the toolbar...
@@ -403,7 +412,7 @@ void TAction::fillMenu(TEasyButtonBar* pT, QMenu* menu)
 
 // This only has code corresponding to the first part of:
 //   TAction::insertActions( TToolBar * pT, QMenu * menu )
-void TAction::insertActions(TEasyButtonBar* pT, QMenu* menu)
+void TAction::insertActions(TEasyButtonBar *pT, QMenu *menu)
 {
     mpEasyButtonBar = pT;
     QIcon icon(mIcon);
@@ -416,12 +425,14 @@ void TAction::insertActions(TEasyButtonBar* pT, QMenu* menu)
     menu->addAction(action);
 }
 
-void TAction::setName(const QString& name)
+void TAction::setName(const QString &name)
 {
-    if (name != mName) {
+    if (name != mName)
+    {
         setDataChanged();
         mName = name;
-        if (mpToolBar) {
+        if (mpToolBar)
+        {
             // Need to revise the objectName and displayed name in the titlebar
             // if floating and the main window context menu:
             mpToolBar->setName(name);

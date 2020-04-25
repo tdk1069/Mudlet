@@ -37,20 +37,20 @@ class IrcUserPrivate
 {
     Q_DECLARE_PUBLIC(IrcUser)
 
-public:
-    void setName(const QString& n);
-    void setPrefix(const QString& p);
-    void setMode(const QString& m);
-    void setServOp(const bool& o);
-    void setAway(const bool& a);
+  public:
+    void setName(const QString &n);
+    void setPrefix(const QString &p);
+    void setMode(const QString &m);
+    void setServOp(const bool &o);
+    void setAway(const bool &a);
 
-    static IrcUserPrivate* get(IrcUser* user)
+    static IrcUserPrivate *get(IrcUser *user)
     {
         return user->d_func();
     }
 
-    IrcUser* q_ptr;
-    IrcChannel* channel;
+    IrcUser *q_ptr;
+    IrcChannel *channel;
     QString name;
     QString prefix;
     QString mode;

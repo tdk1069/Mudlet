@@ -31,10 +31,10 @@
 
 #include <IrcGlobal>
 #include <QtCore/qmap.h>
-#include <QtCore/qobject.h>
-#include <QtCore/qstring.h>
 #include <QtCore/qmetatype.h>
+#include <QtCore/qobject.h>
 #include <QtCore/qscopedpointer.h>
+#include <QtCore/qstring.h>
 
 IRC_BEGIN_NAMESPACE
 
@@ -60,66 +60,66 @@ class IRC_UTIL_EXPORT IrcPalette : public QObject
     Q_PROPERTY(QString gray READ gray WRITE setGray)
     Q_PROPERTY(QString lightGray READ lightGray WRITE setLightGray)
 
-public:
+  public:
     ~IrcPalette();
 
     QMap<int, QString> colorNames() const;
-    void setColorNames(const QMap<int, QString>& names);
+    void setColorNames(const QMap<int, QString> &names);
 
-    QString colorName(int color, const QString& fallback = QLatin1String("black")) const;
-    void setColorName(int color, const QString& name);
+    QString colorName(int color, const QString &fallback = QLatin1String("black")) const;
+    void setColorName(int color, const QString &name);
 
     QString white() const;
-    void setWhite(const QString& color);
+    void setWhite(const QString &color);
 
     QString black() const;
-    void setBlack(const QString& color);
+    void setBlack(const QString &color);
 
     QString blue() const;
-    void setBlue(const QString& color);
+    void setBlue(const QString &color);
 
     QString green() const;
-    void setGreen(const QString& color);
+    void setGreen(const QString &color);
 
     QString red() const;
-    void setRed(const QString& color);
+    void setRed(const QString &color);
 
     QString brown() const;
-    void setBrown(const QString& color);
+    void setBrown(const QString &color);
 
     QString purple() const;
-    void setPurple(const QString& color);
+    void setPurple(const QString &color);
 
     QString orange() const;
-    void setOrange(const QString& color);
+    void setOrange(const QString &color);
 
     QString yellow() const;
-    void setYellow(const QString& color);
+    void setYellow(const QString &color);
 
     QString lightGreen() const;
-    void setLightGreen(const QString& color);
+    void setLightGreen(const QString &color);
 
     QString cyan() const;
-    void setCyan(const QString& color);
+    void setCyan(const QString &color);
 
     QString lightCyan() const;
-    void setLightCyan(const QString& color);
+    void setLightCyan(const QString &color);
 
     QString lightBlue() const;
-    void setLightBlue(const QString& color);
+    void setLightBlue(const QString &color);
 
     QString pink() const;
-    void setPink(const QString& color);
+    void setPink(const QString &color);
 
     QString gray() const;
-    void setGray(const QString& color);
+    void setGray(const QString &color);
 
     QString lightGray() const;
-    void setLightGray(const QString& color);
+    void setLightGray(const QString &color);
 
-private:
+  private:
     friend class IrcTextFormat;
-    explicit IrcPalette(QObject* parent);
+    explicit IrcPalette(QObject *parent);
 
     QScopedPointer<IrcPalettePrivate> d_ptr;
     Q_DECLARE_PRIVATE(IrcPalette)
@@ -128,6 +128,6 @@ private:
 
 IRC_END_NAMESPACE
 
-Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcPalette*))
+Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcPalette *))
 
 #endif // IRCPALETTE_H

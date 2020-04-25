@@ -21,20 +21,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "Tree.h"
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QMutex>
 #include <QPointer>
 #include <QTime>
-#include "post_guard.h"
 
 class Host;
 
 class QTimer;
-
 
 class TTimer : public Tree<TTimer>
 {
@@ -42,43 +39,63 @@ class TTimer : public Tree<TTimer>
     friend class XMLexport;
     friend class XMLimport;
 
-public:
+  public:
     ~TTimer();
-    TTimer(TTimer* parent, Host* pHost);
-    TTimer(const QString& name, QTime time, Host* pHost, bool repeating = false);
+    TTimer(TTimer *parent, Host *pHost);
+    TTimer(const QString &name, QTime time, Host *pHost, bool repeating = false);
     void compileAll();
-    QString& getName() { return mName; }
-    void setName(const QString& name);
-    QTime& getTime() { return mTime; }
+    QString &getName()
+    {
+        return mName;
+    }
+    void setName(const QString &name);
+    QTime &getTime()
+    {
+        return mTime;
+    }
     void compile();
     bool checkRestart();
     bool compileScript();
     void execute();
     void setTime(QTime time);
-    QString getCommand() { return mCommand; }
-    void setCommand(const QString& cmd) { mCommand = cmd; }
-    QString getScript() { return mScript; }
-    bool setScript(const QString& script);
+    QString getCommand()
+    {
+        return mCommand;
+    }
+    void setCommand(const QString &cmd)
+    {
+        mCommand = cmd;
+    }
+    QString getScript()
+    {
+        return mScript;
+    }
+    bool setScript(const QString &script);
     bool canBeUnlocked();
     bool setIsActive(bool);
     void stop();
     void start();
     void enableTimer();
     void disableTimer();
-    void enableTimer(const QString&);
-    void disableTimer(const QString&);
+    void enableTimer(const QString &);
+    void disableTimer(const QString &);
     void enableTimer(int);
     void disableTimer(int);
     void killTimer();
     int remainingTime();
 
     bool isOffsetTimer();
-    QPointer<Host> getHost() { return mpHost; }
-    QTimer* getQTimer() { return mpQTimer; }
+    QPointer<Host> getHost()
+    {
+        return mpHost;
+    }
+    QTimer *getQTimer()
+    {
+        return mpQTimer;
+    }
     // Override the Tree version as we need to insert the id number as a
     // property into the QTimer that mpQTimer points to as well:
     void setID(int) override;
-
 
     // specifies whenever the payload is Lua code as a string
     // or a function
@@ -86,10 +103,10 @@ public:
     bool exportItem;
     bool mModuleMasterFolder;
 
-    static const char* scmProperty_HostName;
-    static const char* scmProperty_TTimerId;
+    static const char *scmProperty_HostName;
+    static const char *scmProperty_TTimerId;
 
-private:
+  private:
     TTimer() = default;
     QString mName;
     QString mScript;
@@ -99,7 +116,7 @@ private:
     QPointer<Host> mpHost;
     bool mNeedsToBeCompiled;
     QMutex mLock;
-    QTimer* mpQTimer;
+    QTimer *mpQTimer;
     bool mModuleMember;
     // temporary timers are single-shot by default, unless repeating is set
     bool mRepeating;

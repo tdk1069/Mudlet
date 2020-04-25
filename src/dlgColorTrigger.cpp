@@ -20,21 +20,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "dlgColorTrigger.h"
 
-
-#include "dlgTriggerEditor.h"
 #include "Host.h"
 #include "TTextEdit.h"
 #include "TTrigger.h"
+#include "dlgTriggerEditor.h"
 #include "mudlet.h"
 
-
-dlgColorTrigger::dlgColorTrigger(QWidget* pF, TTrigger* pT, const bool isBackGround, const QString& title)
-: QDialog(pF)
-, mpTrigger(pT)
-, mIsBackground(isBackGround)
+dlgColorTrigger::dlgColorTrigger(QWidget *pF, TTrigger *pT, const bool isBackGround, const QString &title)
+    : QDialog(pF), mpTrigger(pT), mIsBackground(isBackGround)
 {
     // init generated dialog
     setupUi(this);
@@ -52,24 +47,35 @@ dlgColorTrigger::dlgColorTrigger(QWidget* pF, TTrigger* pT, const bool isBackGro
     buttonBox->button(QDialogButtonBox::Apply)->setText(tr("More colors"));
     buttonBox->button(QDialogButtonBox::Apply)->setCheckable(true);
     buttonBox->button(QDialogButtonBox::Apply)->setToolTip(tr("Click to access all 256 ANSI colors."));
-    connect(buttonBox->button(QDialogButtonBox::Apply), &QAbstractButton::clicked, this, &dlgColorTrigger::slot_moreColorsClicked);
+    connect(buttonBox->button(QDialogButtonBox::Apply), &QAbstractButton::clicked, this,
+            &dlgColorTrigger::slot_moreColorsClicked);
 
-    connect(buttonBox->button(QDialogButtonBox::Ignore), &QAbstractButton::pressed, this, &dlgColorTrigger::slot_resetColorClicked);
-    buttonBox->button(QDialogButtonBox::Ignore)->setToolTip(mudlet::htmlWrapper(mIsBackground
-                                                                                ? tr("<p>Click to make the color trigger ignore the text's background color - however chosing this for both this and the foreground is an error.</p>")
-                                                                                : tr("<p>Click to make the color trigger ignore the text's foreground color - however chosing this for both this and the background is an error.</p>")));
+    connect(buttonBox->button(QDialogButtonBox::Ignore), &QAbstractButton::pressed, this,
+            &dlgColorTrigger::slot_resetColorClicked);
+    buttonBox->button(QDialogButtonBox::Ignore)
+        ->setToolTip(mudlet::htmlWrapper(
+            mIsBackground ? tr("<p>Click to make the color trigger ignore the text's background color - however "
+                               "chosing this for both this and the foreground is an error.</p>")
+                          : tr("<p>Click to make the color trigger ignore the text's foreground color - however "
+                               "chosing this for both this and the background is an error.</p>")));
     // The Reset button means trigger only if the text is not set to anything
     // so is in the "default" colour - what ever THAT is:
-    connect(buttonBox->button(QDialogButtonBox::Reset), &QAbstractButton::pressed, this, &dlgColorTrigger::slot_defaultColorClicked);
+    connect(buttonBox->button(QDialogButtonBox::Reset), &QAbstractButton::pressed, this,
+            &dlgColorTrigger::slot_defaultColorClicked);
     buttonBox->button(QDialogButtonBox::Reset)->setText(tr("Default"));
-    buttonBox->button(QDialogButtonBox::Reset)->setToolTip(mudlet::htmlWrapper(mIsBackground
-                                                                                ? tr("<p>Click to make the color trigger when the text's background color has not been modified from its normal value.</p>")
-                                                                                : tr("<p>Click to make the color trigger when the text's foreground color has not been modified from its normal value.</p>")));
+    buttonBox->button(QDialogButtonBox::Reset)
+        ->setToolTip(mudlet::htmlWrapper(mIsBackground
+                                             ? tr("<p>Click to make the color trigger when the text's background color "
+                                                  "has not been modified from its normal value.</p>")
+                                             : tr("<p>Click to make the color trigger when the text's foreground color "
+                                                  "has not been modified from its normal value.</p>")));
     connect(mSignalMapper, SIGNAL(mapped(int)), this, SLOT(slot_basicColorClicked(int)));
 
-    groupBox_basicColors->setToolTip(mudlet::htmlWrapper(mIsBackground
-                                                         ? tr("<p>Click a color to make the trigger fire only when the text's background color matches the color number indicated.</p>")
-                                                         : tr("<p>Click a color to make the trigger fire only when the text's foreground color matches the color number indicated.</p>")));
+    groupBox_basicColors->setToolTip(
+        mudlet::htmlWrapper(mIsBackground ? tr("<p>Click a color to make the trigger fire only when the text's "
+                                               "background color matches the color number indicated.</p>")
+                                          : tr("<p>Click a color to make the trigger fire only when the text's "
+                                               "foreground color matches the color number indicated.</p>")));
 
     connect(pushButton_setUsingRgbValue, &QAbstractButton::clicked, this, &dlgColorTrigger::slot_rgbColorClicked);
     connect(pushButton_setUsingGrayValue, &QAbstractButton::clicked, this, &dlgColorTrigger::slot_grayColorClicked);
@@ -93,17 +99,23 @@ dlgColorTrigger::dlgColorTrigger(QWidget* pF, TTrigger* pT, const bool isBackGro
     setupBasicButton(pushButton_Lwhite, 15, mpTrigger->mpHost->mLightWhite, tr("Light white"));
 
     // These will correctly set the colours on the value label in their area:
-    if (mIsBackground) {
-        if (mpTrigger->mColorTriggerBgAnsi >= 16 && mpTrigger->mColorTriggerBgAnsi <= 231) {
+    if (mIsBackground)
+    {
+        if (mpTrigger->mColorTriggerBgAnsi >= 16 && mpTrigger->mColorTriggerBgAnsi <= 231)
+        {
             slot_moreColorsClicked();
             horizontalSlider_red->setSliderPosition((mpTrigger->mColorTriggerBgAnsi - 16) / 36);
-            horizontalSlider_green->setSliderPosition((mpTrigger->mColorTriggerBgAnsi - 16 - horizontalSlider_red->value() * 36) / 6);
-            horizontalSlider_blue->setSliderPosition((mpTrigger->mColorTriggerBgAnsi - 16 - horizontalSlider_red->value() * 36) - horizontalSlider_green->value() * 6);
+            horizontalSlider_green->setSliderPosition(
+                (mpTrigger->mColorTriggerBgAnsi - 16 - horizontalSlider_red->value() * 36) / 6);
+            horizontalSlider_blue->setSliderPosition(
+                (mpTrigger->mColorTriggerBgAnsi - 16 - horizontalSlider_red->value() * 36) -
+                horizontalSlider_green->value() * 6);
             slot_rgbColorChanged();
             slot_grayColorChanged(0);
             slot_setRBGButtonFocus();
-
-        } else if (mpTrigger->mColorTriggerBgAnsi >= 232 && mpTrigger->mColorTriggerBgAnsi <= 255) {
+        }
+        else if (mpTrigger->mColorTriggerBgAnsi >= 232 && mpTrigger->mColorTriggerBgAnsi <= 255)
+        {
             slot_moreColorsClicked();
             // The RGB controls will be at zeros so this will set the things up
             // to those
@@ -111,8 +123,9 @@ dlgColorTrigger::dlgColorTrigger(QWidget* pF, TTrigger* pT, const bool isBackGro
             // We can set the gray directly
             slot_grayColorChanged(mpTrigger->mColorTriggerBgAnsi - 232);
             slot_setGreyButtonFocus();
-
-        } else {
+        }
+        else
+        {
             // In the case of default / ignore or one of the basic 16 - colors
             // we will hide the extra ones:
             groupBox_rgbScale->setVisible(false);
@@ -128,21 +141,27 @@ dlgColorTrigger::dlgColorTrigger(QWidget* pF, TTrigger* pT, const bool isBackGro
             // We can set the gray directly
             slot_grayColorChanged(0);
         }
-
-    } else {
-        if (mpTrigger->mColorTriggerFgAnsi >= 16 && mpTrigger->mColorTriggerFgAnsi <= 231) {
+    }
+    else
+    {
+        if (mpTrigger->mColorTriggerFgAnsi >= 16 && mpTrigger->mColorTriggerFgAnsi <= 231)
+        {
             slot_moreColorsClicked();
             // Current background for this trigger is a RGB one so set that
             // control to the matching value:
 
             horizontalSlider_red->setSliderPosition((mpTrigger->mColorTriggerFgAnsi - 16) / 36);
-            horizontalSlider_green->setSliderPosition((mpTrigger->mColorTriggerFgAnsi - 16 - horizontalSlider_red->value() * 36) / 6);
-            horizontalSlider_blue->setSliderPosition((mpTrigger->mColorTriggerFgAnsi - 16 - horizontalSlider_red->value() * 36) - horizontalSlider_green->value() * 6);
+            horizontalSlider_green->setSliderPosition(
+                (mpTrigger->mColorTriggerFgAnsi - 16 - horizontalSlider_red->value() * 36) / 6);
+            horizontalSlider_blue->setSliderPosition(
+                (mpTrigger->mColorTriggerFgAnsi - 16 - horizontalSlider_red->value() * 36) -
+                horizontalSlider_green->value() * 6);
             slot_rgbColorChanged();
             slot_grayColorChanged(0);
             slot_setRBGButtonFocus();
-
-        } else if (mpTrigger->mColorTriggerFgAnsi >= 232 && mpTrigger->mColorTriggerFgAnsi <= 255) {
+        }
+        else if (mpTrigger->mColorTriggerFgAnsi >= 232 && mpTrigger->mColorTriggerFgAnsi <= 255)
+        {
             slot_moreColorsClicked();
             // Current background for this trigger is a Gray one so set that
             // control to the matching value:
@@ -153,8 +172,9 @@ dlgColorTrigger::dlgColorTrigger(QWidget* pF, TTrigger* pT, const bool isBackGro
             // We can set the gray directly
             slot_grayColorChanged(mpTrigger->mColorTriggerFgAnsi - 232);
             slot_setGreyButtonFocus();
-
-        } else {
+        }
+        else
+        {
             // In the case of default / ignore or one of the basic 16 - colors
             // we will hide the extra ones:
             groupBox_rgbScale->setVisible(false);
@@ -172,7 +192,8 @@ dlgColorTrigger::dlgColorTrigger(QWidget* pF, TTrigger* pT, const bool isBackGro
         }
     }
 
-    if (!title.isNull()) {
+    if (!title.isNull())
+    {
         setWindowTitle(title);
     }
 
@@ -192,46 +213,55 @@ dlgColorTrigger::dlgColorTrigger(QWidget* pF, TTrigger* pT, const bool isBackGro
     connect(horizontalSlider_gray, &QAbstractSlider::valueChanged, this, &dlgColorTrigger::slot_setGreyButtonFocus);
 
     // If the current is ignored or default set the focus onto them:
-    if ((mIsBackground && mpTrigger->mColorTriggerBgAnsi == TTrigger::scmDefault) || (!mIsBackground && mpTrigger->mColorTriggerFgAnsi == TTrigger::scmDefault)) {
+    if ((mIsBackground && mpTrigger->mColorTriggerBgAnsi == TTrigger::scmDefault) ||
+        (!mIsBackground && mpTrigger->mColorTriggerFgAnsi == TTrigger::scmDefault))
+    {
 
         buttonBox->button(QDialogButtonBox::Reset)->setFocus();
-
-    } else if ((mIsBackground && mpTrigger->mColorTriggerBgAnsi == TTrigger::scmIgnored) || (!mIsBackground && mpTrigger->mColorTriggerFgAnsi == TTrigger::scmIgnored)) {
+    }
+    else if ((mIsBackground && mpTrigger->mColorTriggerBgAnsi == TTrigger::scmIgnored) ||
+             (!mIsBackground && mpTrigger->mColorTriggerFgAnsi == TTrigger::scmIgnored))
+    {
 
         buttonBox->button(QDialogButtonBox::Ignore)->setFocus();
-
     }
 }
 
-void dlgColorTrigger::setupBasicButton(QPushButton* pButton, const int ansiColor, const QColor& color, const QString& colorText)
+void dlgColorTrigger::setupBasicButton(QPushButton *pButton, const int ansiColor, const QColor &color,
+                                       const QString &colorText)
 {
     // TODO: Eliminate use of QSignalMapper and use a lambda function
     connect(pButton, SIGNAL(clicked()), mSignalMapper, SLOT(map()));
     mSignalMapper->setMapping(pButton, ansiColor);
 
-    if ((mIsBackground && (mpTrigger->mColorTriggerBgAnsi == ansiColor))
-     || (!mIsBackground && (mpTrigger->mColorTriggerFgAnsi == ansiColor))) {
+    if ((mIsBackground && (mpTrigger->mColorTriggerBgAnsi == ansiColor)) ||
+        (!mIsBackground && (mpTrigger->mColorTriggerFgAnsi == ansiColor)))
+    {
 
         pButton->setFocus();
     }
 
     pButton->setText(tr("%1 [%2]",
                         // Intentional comment to separate arguments
-                        "Color Trigger dialog button in basic 16-color set, the first value is the name of the color, the second is the ANSI color number - for most languages modification is not likely to be needed - this text is used in two places")
-                     .arg(colorText, QString::number(ansiColor)));
+                        "Color Trigger dialog button in basic 16-color set, the first value is the name of the color, "
+                        "the second is the ANSI color number - for most languages modification is not likely to be "
+                        "needed - this text is used in two places")
+                         .arg(colorText, QString::number(ansiColor)));
     pButton->setStyleSheet(dlgTriggerEditor::generateButtonStyleSheet(color));
 }
 
 void dlgColorTrigger::slot_rgbColorChanged()
 {
-    mRgbAnsiColorNumber = 16 + 36 * horizontalSlider_red->value() + 6 * horizontalSlider_green->value() + horizontalSlider_blue->value();
-    mRgbAnsiColor = QColor(horizontalSlider_red->value() * 51, horizontalSlider_green->value() * 51, horizontalSlider_blue->value() * 51);
+    mRgbAnsiColorNumber =
+        16 + 36 * horizontalSlider_red->value() + 6 * horizontalSlider_green->value() + horizontalSlider_blue->value();
+    mRgbAnsiColor = QColor(horizontalSlider_red->value() * 51, horizontalSlider_green->value() * 51,
+                           horizontalSlider_blue->value() * 51);
     label_rgbValue->setText(QStringLiteral("[%1]").arg(QString::number(mRgbAnsiColorNumber)));
     // Use the same stylesheet code as in the main editor and for the basic 16
     // color buttons but because this is a QLabel we need to replace one word in
     // the generated stylesheet:
     label_rgbValue->setStyleSheet(dlgTriggerEditor::generateButtonStyleSheet(mRgbAnsiColor)
-                                  .replace(QLatin1String("QPushButton"), QLatin1String("QLabel")));
+                                      .replace(QLatin1String("QPushButton"), QLatin1String("QLabel")));
 }
 
 void dlgColorTrigger::slot_setRBGButtonFocus()
@@ -280,9 +310,10 @@ void dlgColorTrigger::slot_grayColorChanged(int sliderValue)
     // color buttons but because this is a QLabel we need to replace one word in
     // the generated stylesheet:
     label_grayValue->setStyleSheet(dlgTriggerEditor::generateButtonStyleSheet(mGrayAnsiColor)
-                                   .replace(QLatin1String("QPushButton"), QLatin1String("QLabel")));
+                                       .replace(QLatin1String("QPushButton"), QLatin1String("QLabel")));
 
-    if (horizontalSlider_gray->value() != sliderValue) {
+    if (horizontalSlider_gray->value() != sliderValue)
+    {
         // This slot is also used to set the value so it may need to reposition
         // the slider as well - but we do not want to get into a loop so only
         // do this if the values differ:
@@ -297,7 +328,8 @@ void dlgColorTrigger::slot_setGreyButtonFocus()
 
 void dlgColorTrigger::slot_basicColorClicked(int ansiColor)
 {
-    if (!mpTrigger) {
+    if (!mpTrigger)
+    {
         return;
     }
 
@@ -326,10 +358,13 @@ void dlgColorTrigger::slot_basicColorClicked(int ansiColor)
     // clang-format on
 
     mpTrigger->mColorTrigger = true;
-    if (mIsBackground) {
+    if (mIsBackground)
+    {
         mpTrigger->mColorTriggerBgAnsi = ansiColor;
         mpTrigger->mColorTriggerBgColor = choosenColor;
-    } else {
+    }
+    else
+    {
         mpTrigger->mColorTriggerFgAnsi = ansiColor;
         mpTrigger->mColorTriggerFgColor = choosenColor;
     }
@@ -340,10 +375,13 @@ void dlgColorTrigger::slot_basicColorClicked(int ansiColor)
 void dlgColorTrigger::slot_rgbColorClicked()
 {
     mpTrigger->mColorTrigger = true;
-    if (mIsBackground) {
+    if (mIsBackground)
+    {
         mpTrigger->mColorTriggerBgAnsi = mRgbAnsiColorNumber;
         mpTrigger->mColorTriggerBgColor = mRgbAnsiColor;
-    } else {
+    }
+    else
+    {
         mpTrigger->mColorTriggerFgAnsi = mRgbAnsiColorNumber;
         mpTrigger->mColorTriggerFgColor = mRgbAnsiColor;
     }
@@ -354,10 +392,13 @@ void dlgColorTrigger::slot_rgbColorClicked()
 void dlgColorTrigger::slot_grayColorClicked()
 {
     mpTrigger->mColorTrigger = true;
-    if (mIsBackground) {
+    if (mIsBackground)
+    {
         mpTrigger->mColorTriggerBgAnsi = mGrayAnsiColorNumber;
         mpTrigger->mColorTriggerBgColor = mGrayAnsiColor;
-    } else {
+    }
+    else
+    {
         mpTrigger->mColorTriggerFgAnsi = mGrayAnsiColorNumber;
         mpTrigger->mColorTriggerFgColor = mGrayAnsiColor;
     }
@@ -367,26 +408,33 @@ void dlgColorTrigger::slot_grayColorClicked()
 
 void dlgColorTrigger::slot_resetColorClicked()
 {
-    if (mIsBackground) {
+    if (mIsBackground)
+    {
         mpTrigger->mColorTriggerBgAnsi = TTrigger::scmIgnored;
         mpTrigger->mColorTriggerBgColor = QColor();
-    } else {
+    }
+    else
+    {
         mpTrigger->mColorTriggerFgAnsi = TTrigger::scmIgnored;
         mpTrigger->mColorTriggerFgColor = QColor();
     }
 
     // Reset mColorTrigger if NEITHER this one OR the other are set
-    mpTrigger->mColorTrigger = (mpTrigger->mColorTriggerFgAnsi != TTrigger::scmIgnored || mpTrigger->mColorTriggerBgAnsi != TTrigger::scmIgnored);
+    mpTrigger->mColorTrigger = (mpTrigger->mColorTriggerFgAnsi != TTrigger::scmIgnored ||
+                                mpTrigger->mColorTriggerBgAnsi != TTrigger::scmIgnored);
 
     close();
 }
 
 void dlgColorTrigger::slot_defaultColorClicked()
 {
-    if (mIsBackground) {
+    if (mIsBackground)
+    {
         mpTrigger->mColorTriggerBgAnsi = TTrigger::scmDefault;
         mpTrigger->mColorTriggerBgColor = QColor();
-    } else {
+    }
+    else
+    {
         mpTrigger->mColorTriggerFgAnsi = TTrigger::scmDefault;
         mpTrigger->mColorTriggerFgColor = QColor();
     }
@@ -404,11 +452,13 @@ void dlgColorTrigger::slot_moreColorsClicked()
 
     buttonBox->button(QDialogButtonBox::Apply)->setToolTip(tr("All color options are showing."));
 
-    if (groupBox_rgbScale->isHidden()) {
+    if (groupBox_rgbScale->isHidden())
+    {
         groupBox_rgbScale->show();
     }
 
-    if (groupBox_grayScale->isHidden()) {
+    if (groupBox_grayScale->isHidden())
+    {
         groupBox_grayScale->show();
     }
 }

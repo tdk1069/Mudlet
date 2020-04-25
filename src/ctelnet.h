@@ -25,7 +25,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "pre_guard.h"
 #include <QHostAddress>
 #include <QHostInfo>
@@ -36,8 +35,8 @@
 #else
 #include <QSslSocket>
 #endif
-#include <QTime>
 #include "post_guard.h"
+#include <QTime>
 
 #include <zlib.h>
 
@@ -46,8 +45,8 @@
 #include <string>
 
 #if defined(Q_OS_WIN32)
-#include <ws2tcpip.h>
 #include "mstcpip.h"
+#include <ws2tcpip.h>
 #else
 #include <sys/socket.h>
 /*
@@ -55,9 +54,9 @@
  * optional for that OS but is suggested for portability with other OSes also
  * derived from BSD code - it is included in the corresponding FreeBSD manpage!
  */
-#include <sys/types.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <sys/types.h>
 
 #endif
 
@@ -71,7 +70,6 @@ class QTimer;
 
 class Host;
 class dlgComposer;
-
 
 const char TN_BELL = static_cast<char>(7);
 
@@ -96,14 +94,13 @@ const char TN_IAC = static_cast<char>(255);
 const char TNSB_IS = 0;
 const char TNSB_SEND = 1;
 
-
 const char OPT_ECHO = 1;
 const char OPT_STATUS = 5;
 const char OPT_TIMING_MARK = 6;
 const char OPT_TERMINAL_TYPE = 24;
 const char OPT_EOR = 25;
 const char OPT_NAWS = 31;
-const char OPT_MSDP = 69; // http://tintin.sourceforge.net/msdp/
+const char OPT_MSDP = 69;                    // http://tintin.sourceforge.net/msdp/
 const char OPT_MSSP = static_cast<char>(70); // https://tintin.sourceforge.io/protocols/mssp/
 const char OPT_COMPRESS = 85;
 const char OPT_COMPRESS2 = 86;
@@ -123,59 +120,90 @@ const char MSDP_TABLE_CLOSE = 4;
 const char MSDP_ARRAY_OPEN = 5;
 const char MSDP_ARRAY_CLOSE = 6;
 
-
 class cTelnet : public QObject
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(cTelnet)
-    cTelnet(Host* pH, const QString&);
+    cTelnet(Host *pH, const QString &);
     ~cTelnet();
-    void connectIt(const QString& address, int port);
+    void connectIt(const QString &address, int port);
     void reconnect();
     void disconnectIt();
     void abortConnection();
-    bool sendData(QString& data);
-    void setATCPVariables(const QByteArray&);
-    void setGMCPVariables(const QByteArray&);
-    void setMSSPVariables(const QByteArray&);
-    void setMSPVariables(const QByteArray&);
+    bool sendData(QString &data);
+    void setATCPVariables(const QByteArray &);
+    void setGMCPVariables(const QByteArray &);
+    void setMSSPVariables(const QByteArray &);
+    void setMSPVariables(const QByteArray &);
     void atcpComposerCancel();
     void atcpComposerSave(QString);
     void setDisplayDimensions();
     void setAutoReconnect(bool status);
-    void encodingChanged(const QByteArray&);
-    void set_USE_IRE_DRIVER_BUGFIX(bool b) { mUSE_IRE_DRIVER_BUGFIX = b; }
-    void set_LF_ON_GA(bool b) { mLF_ON_GA = b; }
+    void encodingChanged(const QByteArray &);
+    void set_USE_IRE_DRIVER_BUGFIX(bool b)
+    {
+        mUSE_IRE_DRIVER_BUGFIX = b;
+    }
+    void set_LF_ON_GA(bool b)
+    {
+        mLF_ON_GA = b;
+    }
     void recordReplay();
-    bool loadReplay(const QString&, QString* pErrMsg = nullptr);
+    bool loadReplay(const QString &, QString *pErrMsg = nullptr);
     void loadReplayChunk();
-    bool isReplaying() { return loadingReplay; }
-    void setChannel102Variables(const QString&);
-    bool socketOutRaw(std::string& data);
-    const QByteArray & getEncoding() const { return mEncoding; }
-    QPair<bool, QString> setEncoding(const QByteArray&, bool saveValue = true);
+    bool isReplaying()
+    {
+        return loadingReplay;
+    }
+    void setChannel102Variables(const QString &);
+    bool socketOutRaw(std::string &data);
+    const QByteArray &getEncoding() const
+    {
+        return mEncoding;
+    }
+    QPair<bool, QString> setEncoding(const QByteArray &, bool saveValue = true);
     void postMessage(QString);
-    const QByteArrayList & getEncodingsList() const { return mAcceptableEncodings; }
+    const QByteArrayList &getEncodingsList() const
+    {
+        return mAcceptableEncodings;
+    }
     QAbstractSocket::SocketError error();
     QString errorString();
 #if !defined(QT_NO_SSL)
     QSslCertificate getPeerCertificate();
     QList<QSslError> getSslErrors();
 #endif
-    QByteArray decodeBytes(const char*);
-    std::string encodeAndCookBytes(const std::string&);
-    bool isATCPEnabled() const { return enableATCP; }
-    bool isGMCPEnabled() const { return enableGMCP; }
-    bool isMSSPEnabled() const { return enableMSSP; }
-    bool isMSPEnabled() const { return enableMSP; }
-    bool isChannel102Enabled() const { return enableChannel102; }
+    QByteArray decodeBytes(const char *);
+    std::string encodeAndCookBytes(const std::string &);
+    bool isATCPEnabled() const
+    {
+        return enableATCP;
+    }
+    bool isGMCPEnabled() const
+    {
+        return enableGMCP;
+    }
+    bool isMSSPEnabled() const
+    {
+        return enableMSSP;
+    }
+    bool isMSPEnabled() const
+    {
+        return enableMSP;
+    }
+    bool isChannel102Enabled() const
+    {
+        return enableChannel102;
+    }
     void requestDiscordInfo();
     QString decodeOption(const unsigned char) const;
-    QAbstractSocket::SocketState getConnectionState() const { return socket.state(); }
+    QAbstractSocket::SocketState getConnectionState() const
+    {
+        return socket.state();
+    }
     std::pair<QString, int> getConnectionInfo() const;
-
 
     QMap<int, bool> supportedTelnetOptions;
     bool mResponseProcessed;
@@ -185,15 +213,14 @@ public:
     bool mGA_Driver;
     bool mFORCE_GA_OFF;
     QPointer<dlgComposer> mpComposer;
-    QNetworkAccessManager* mpDownloader;
-    QProgressDialog* mpProgressDialog;
+    QNetworkAccessManager *mpDownloader;
+    QProgressDialog *mpProgressDialog;
     QString mServerPackage;
     QString mProfileName;
 
-
-public slots:
+  public slots:
     void setDownloadProgress(qint64, qint64);
-    void replyFinished(QNetworkReply*);
+    void replyFinished(QNetworkReply *);
     void slot_processReplayChunk();
     void handle_socket_signal_hostFound(QHostInfo);
     void handle_socket_signal_connected();
@@ -204,30 +231,28 @@ public slots:
     void slot_send_login();
     void slot_send_pass();
 
-signals:
+  signals:
     // Intended to signal status changes for other parts of application
-    void signal_connecting(Host*);
-    void signal_connected(Host*);
-    void signal_disconnected(Host*);
+    void signal_connecting(Host *);
+    void signal_connected(Host *);
+    void signal_disconnected(Host *);
 
-
-private:
+  private:
     cTelnet() = default;
 
     void processSocketData(char *data, int size);
     void initStreamDecompressor();
-    int decompressBuffer(char*& in_buffer, int& length, char* out_buffer);
+    int decompressBuffer(char *&in_buffer, int &length, char *out_buffer);
     void reset();
 
-    void processTelnetCommand(const std::string& command);
+    void processTelnetCommand(const std::string &command);
     void sendTelnetOption(char type, char option);
-    void gotRest(std::string&);
-    void gotPrompt(std::string&);
+    void gotRest(std::string &);
+    void gotPrompt(std::string &);
     void postData();
-    void raiseProtocolEvent(const QString& name, const QString& protocol);
+    void raiseProtocolEvent(const QString &name, const QString &protocol);
     void setKeepAlive(int socketHandle);
     void processChunks();
-
 
     QPointer<Host> mpHost;
 #if defined(QT_NO_SSL)
@@ -236,11 +261,11 @@ private:
     QSslSocket socket;
 #endif
     QHostAddress mHostAddress;
-//    QTextCodec* incomingDataCodec;
-    QTextCodec* mpOutOfBandDataIncomingCodec;
-    QTextCodec* outgoingDataCodec;
-//    QTextDecoder* incomingDataDecoder;
-    QTextEncoder* outgoingDataEncoder;
+    //    QTextCodec* incomingDataCodec;
+    QTextCodec *mpOutOfBandDataIncomingCodec;
+    QTextCodec *outgoingDataCodec;
+    //    QTextDecoder* incomingDataDecoder;
+    QTextEncoder *outgoingDataEncoder;
     QString hostName;
     int hostPort;
     double networkLatencyMin;
@@ -269,7 +294,7 @@ private:
     int curX, curY;
     QString termType;
     QByteArray mEncoding;
-    QTimer* mpPostingTimer;
+    QTimer *mpPostingTimer;
     bool mUSE_IRE_DRIVER_BUGFIX;
     bool mLF_ON_GA;
 
@@ -277,11 +302,10 @@ private:
     bool mMCCP_version_1;
     bool mMCCP_version_2;
 
-
     std::string mMudData;
     bool mIsTimerPosting;
-    QTimer* mTimerLogin;
-    QTimer* mTimerPass;
+    QTimer *mTimerLogin;
+    QTimer *mTimerPass;
     QTime timeOffset;
     QTime mConnectionTime;
     int lastTimeOffset;
@@ -309,11 +333,10 @@ private:
     // Set if the current connection is via a proxy
     bool mConnectViaProxy;
 
-private slots:
+  private slots:
 #if !defined(QT_NO_SSL)
     void handle_socket_signal_sslError(const QList<QSslError> &errors);
 #endif
-
 };
 
 #endif // MUDLET_CTELNET_H

@@ -27,19 +27,19 @@
 */
 
 #include "ircbuffermodel.h"
-#include "ircbuffermodel_p.h"
-#include "ircchannel_p.h"
 #include "ircbuffer_p.h"
-#include "ircnetwork.h"
+#include "ircbuffermodel_p.h"
 #include "ircchannel.h"
-#include "ircmessage.h"
+#include "ircchannel_p.h"
 #include "irccommand.h"
 #include "ircconnection.h"
-#include <qmetatype.h>
-#include <qmetaobject.h>
+#include "ircmessage.h"
+#include "ircnetwork.h"
 #include <qdatastream.h>
-#include <qvariant.h>
+#include <qmetaobject.h>
+#include <qmetatype.h>
 #include <qtimer.h>
+#include <qvariant.h>
 
 IRC_BEGIN_NAMESPACE
 
@@ -108,104 +108,126 @@ IRC_BEGIN_NAMESPACE
 #ifndef IRC_DOXYGEN
 class IrcBufferLessThan
 {
-public:
-    IrcBufferLessThan(IrcBufferModel* model, Irc::SortMethod method) : model(model), method(method) { }
-    bool operator()(IrcBuffer* b1, IrcBuffer* b2) const { return model->lessThan(b1, b2, method); }
-private:
-    IrcBufferModel* model;
+  public:
+    IrcBufferLessThan(IrcBufferModel *model, Irc::SortMethod method) : model(model), method(method)
+    {
+    }
+    bool operator()(IrcBuffer *b1, IrcBuffer *b2) const
+    {
+        return model->lessThan(b1, b2, method);
+    }
+
+  private:
+    IrcBufferModel *model;
     Irc::SortMethod method;
 };
 
 class IrcBufferGreaterThan
 {
-public:
-    IrcBufferGreaterThan(IrcBufferModel* model, Irc::SortMethod method) : model(model), method(method) { }
-    bool operator()(IrcBuffer* b1, IrcBuffer* b2) const { return model->lessThan(b2, b1, method); }
-private:
-    IrcBufferModel* model;
+  public:
+    IrcBufferGreaterThan(IrcBufferModel *model, Irc::SortMethod method) : model(model), method(method)
+    {
+    }
+    bool operator()(IrcBuffer *b1, IrcBuffer *b2) const
+    {
+        return model->lessThan(b2, b1, method);
+    }
+
+  private:
+    IrcBufferModel *model;
     Irc::SortMethod method;
 };
 
-IrcBufferModelPrivate::IrcBufferModelPrivate() : q_ptr(0), role(Irc::TitleRole),
-    sortMethod(Irc::SortByHand), sortOrder(Qt::AscendingOrder),
-    bufferProto(0), channelProto(0), persistent(false), joinDelay(0),
-    monitorEnabled(false), monitorPending(false)
+IrcBufferModelPrivate::IrcBufferModelPrivate()
+    : q_ptr(0), role(Irc::TitleRole), sortMethod(Irc::SortByHand), sortOrder(Qt::AscendingOrder), bufferProto(0),
+      channelProto(0), persistent(false), joinDelay(0), monitorEnabled(false), monitorPending(false)
 {
 }
 
-bool IrcBufferModelPrivate::messageFilter(IrcMessage* msg)
+bool IrcBufferModelPrivate::messageFilter(IrcMessage *msg)
 {
     Q_Q(IrcBufferModel);
     if (msg->type() == IrcMessage::Join && msg->isOwn())
-        createBuffer(static_cast<IrcJoinMessage*>(msg)->channel());
+        createBuffer(static_cast<IrcJoinMessage *>(msg)->channel());
 
     bool processed = false;
-    switch (msg->type()) {
-        case IrcMessage::Away:
-        case IrcMessage::Nick:
-        case IrcMessage::Quit:
-            foreach (IrcBuffer* buffer, bufferList) {
-                if (buffer->isActive())
-                    IrcBufferPrivate::get(buffer)->processMessage(msg);
-            }
-            if (msg->type() != IrcMessage::Away || !msg->isOwn())
-                processed = true;
-            break;
+    switch (msg->type())
+    {
+    case IrcMessage::Away:
+    case IrcMessage::Nick:
+    case IrcMessage::Quit:
+        foreach (IrcBuffer *buffer, bufferList)
+        {
+            if (buffer->isActive())
+                IrcBufferPrivate::get(buffer)->processMessage(msg);
+        }
+        if (msg->type() != IrcMessage::Away || !msg->isOwn())
+            processed = true;
+        break;
 
-        case IrcMessage::Join:
-        case IrcMessage::Part:
-        case IrcMessage::Kick:
-        case IrcMessage::Names:
-        case IrcMessage::Topic:
-            processed = processMessage(msg->property("channel").toString(), msg);
-            break;
+    case IrcMessage::Join:
+    case IrcMessage::Part:
+    case IrcMessage::Kick:
+    case IrcMessage::Names:
+    case IrcMessage::Topic:
+        processed = processMessage(msg->property("channel").toString(), msg);
+        break;
 
-        case IrcMessage::WhoReply:
-            processed = processMessage(static_cast<IrcWhoReplyMessage*>(msg)->mask(), msg);
-            break;
+    case IrcMessage::WhoReply:
+        processed = processMessage(static_cast<IrcWhoReplyMessage *>(msg)->mask(), msg);
+        break;
 
-        case IrcMessage::Private:
-            if (IrcPrivateMessage* pm = static_cast<IrcPrivateMessage*>(msg))
-                processed = !pm->isRequest() && processMessage(pm->isPrivate() ? pm->nick() : pm->target(), pm, true);
-            break;
+    case IrcMessage::Private:
+        if (IrcPrivateMessage *pm = static_cast<IrcPrivateMessage *>(msg))
+            processed = !pm->isRequest() && processMessage(pm->isPrivate() ? pm->nick() : pm->target(), pm, true);
+        break;
 
-        case IrcMessage::Notice:
-            if (IrcNoticeMessage* no = static_cast<IrcNoticeMessage*>(msg))
-                processed = !no->isReply() && processMessage(no->isPrivate() ? no->nick() : no->target(), no);
-            break;
+    case IrcMessage::Notice:
+        if (IrcNoticeMessage *no = static_cast<IrcNoticeMessage *>(msg))
+            processed = !no->isReply() && processMessage(no->isPrivate() ? no->nick() : no->target(), no);
+        break;
 
-        case IrcMessage::Mode:
-            processed = processMessage(static_cast<IrcModeMessage*>(msg)->target(), msg);
-            break;
+    case IrcMessage::Mode:
+        processed = processMessage(static_cast<IrcModeMessage *>(msg)->target(), msg);
+        break;
 
-        case IrcMessage::Numeric:
-            // TODO: any other special cases besides RPL_NAMREPLY?
-            if (static_cast<IrcNumericMessage*>(msg)->code() == Irc::RPL_NAMREPLY) {
-                const int count = msg->parameters().count();
-                const QString channel = msg->parameters().value(count - 2);
-                processed = processMessage(channel, msg);
-            } else if (static_cast<IrcNumericMessage*>(msg)->code() == Irc::RPL_MONONLINE ||
-                       static_cast<IrcNumericMessage*>(msg)->code() == Irc::RPL_MONOFFLINE) {
-                msg->setFlag(IrcMessage::Implicit);
-                foreach (const QString& target, msg->parameters().value(1).split(QLatin1String(",")))
-                    processed |= processMessage(Irc::nickFromPrefix(target), msg);
-            } else {
-                processed = processMessage(msg->parameters().value(1), msg);
-            }
-            break;
+    case IrcMessage::Numeric:
+        // TODO: any other special cases besides RPL_NAMREPLY?
+        if (static_cast<IrcNumericMessage *>(msg)->code() == Irc::RPL_NAMREPLY)
+        {
+            const int count = msg->parameters().count();
+            const QString channel = msg->parameters().value(count - 2);
+            processed = processMessage(channel, msg);
+        }
+        else if (static_cast<IrcNumericMessage *>(msg)->code() == Irc::RPL_MONONLINE ||
+                 static_cast<IrcNumericMessage *>(msg)->code() == Irc::RPL_MONOFFLINE)
+        {
+            msg->setFlag(IrcMessage::Implicit);
+            foreach (const QString &target, msg->parameters().value(1).split(QLatin1String(",")))
+                processed |= processMessage(Irc::nickFromPrefix(target), msg);
+        }
+        else
+        {
+            processed = processMessage(msg->parameters().value(1), msg);
+        }
+        break;
 
-        default:
-            break;
+    default:
+        break;
     }
 
     if (!processed)
         emit q->messageIgnored(msg);
 
-    if (!msg->testFlag(IrcMessage::Playback)) {
-        if (msg->type() == IrcMessage::Part && msg->isOwn()) {
-            destroyBuffer(static_cast<IrcPartMessage*>(msg)->channel());
-        } else if (msg->type() == IrcMessage::Kick) {
-            const IrcKickMessage* kickMsg = static_cast<IrcKickMessage*>(msg);
+    if (!msg->testFlag(IrcMessage::Playback))
+    {
+        if (msg->type() == IrcMessage::Part && msg->isOwn())
+        {
+            destroyBuffer(static_cast<IrcPartMessage *>(msg)->channel());
+        }
+        else if (msg->type() == IrcMessage::Kick)
+        {
+            const IrcKickMessage *kickMsg = static_cast<IrcKickMessage *>(msg);
             if (!kickMsg->user().compare(msg->connection()->nickName(), Qt::CaseInsensitive))
                 destroyBuffer(kickMsg->channel());
         }
@@ -213,9 +235,10 @@ bool IrcBufferModelPrivate::messageFilter(IrcMessage* msg)
     return false;
 }
 
-bool IrcBufferModelPrivate::commandFilter(IrcCommand* cmd)
+bool IrcBufferModelPrivate::commandFilter(IrcCommand *cmd)
 {
-    if (cmd->type() == IrcCommand::Join) {
+    if (cmd->type() == IrcCommand::Join)
+    {
         const QString channel = cmd->parameters().value(0).toLower();
         const QString key = cmd->parameters().value(1);
         if (!key.isEmpty())
@@ -226,58 +249,66 @@ bool IrcBufferModelPrivate::commandFilter(IrcCommand* cmd)
     return false;
 }
 
-IrcBuffer* IrcBufferModelPrivate::createBufferHelper(const QString& title)
+IrcBuffer *IrcBufferModelPrivate::createBufferHelper(const QString &title)
 {
     Q_Q(IrcBufferModel);
-    IrcBuffer* buffer = 0;
-    const QMetaObject* metaObject = q->metaObject();
+    IrcBuffer *buffer = 0;
+    const QMetaObject *metaObject = q->metaObject();
     int idx = metaObject->indexOfMethod("createBuffer(QVariant)");
-    if (idx != -1) {
+    if (idx != -1)
+    {
         // QML: QVariant createBuffer(QVariant)
         QVariant ret;
         QMetaMethod method = metaObject->method(idx);
         method.invoke(q, Q_RETURN_ARG(QVariant, ret), Q_ARG(QVariant, title));
-        buffer = ret.value<IrcBuffer*>();
-    } else {
+        buffer = ret.value<IrcBuffer *>();
+    }
+    else
+    {
         // C++: IrcBuffer* createBuffer(QString)
         idx = metaObject->indexOfMethod("createBuffer(QString)");
         QMetaMethod method = metaObject->method(idx);
-        method.invoke(q, Q_RETURN_ARG(IrcBuffer*, buffer), Q_ARG(QString, title));
+        method.invoke(q, Q_RETURN_ARG(IrcBuffer *, buffer), Q_ARG(QString, title));
     }
     return buffer;
 }
 
-IrcChannel* IrcBufferModelPrivate::createChannelHelper(const QString& title)
+IrcChannel *IrcBufferModelPrivate::createChannelHelper(const QString &title)
 {
     Q_Q(IrcBufferModel);
-    IrcChannel* channel = 0;
-    const QMetaObject* metaObject = q->metaObject();
+    IrcChannel *channel = 0;
+    const QMetaObject *metaObject = q->metaObject();
     int idx = metaObject->indexOfMethod("createChannel(QVariant)");
-    if (idx != -1) {
+    if (idx != -1)
+    {
         // QML: QVariant createChannel(QVariant)
         QVariant ret;
         QMetaMethod method = metaObject->method(idx);
         method.invoke(q, Q_RETURN_ARG(QVariant, ret), Q_ARG(QVariant, title));
-        channel = ret.value<IrcChannel*>();
-    } else {
+        channel = ret.value<IrcChannel *>();
+    }
+    else
+    {
         // C++: IrcChannel* createChannel(QString)
         idx = metaObject->indexOfMethod("createChannel(QString)");
         QMetaMethod method = metaObject->method(idx);
-        method.invoke(q, Q_RETURN_ARG(IrcChannel*, channel), Q_ARG(QString, title));
+        method.invoke(q, Q_RETURN_ARG(IrcChannel *, channel), Q_ARG(QString, title));
     }
     return channel;
 }
 
-IrcBuffer* IrcBufferModelPrivate::createBuffer(const QString& title)
+IrcBuffer *IrcBufferModelPrivate::createBuffer(const QString &title)
 {
     Q_Q(IrcBufferModel);
-    IrcBuffer* buffer = bufferMap.value(title.toLower());
-    if (!buffer) {
+    IrcBuffer *buffer = bufferMap.value(title.toLower());
+    if (!buffer)
+    {
         if (connection && connection->network()->isChannel(title))
             buffer = createChannelHelper(title);
         else
             buffer = createBufferHelper(title);
-        if (buffer) {
+        if (buffer)
+        {
             IrcBufferPrivate::get(buffer)->init(title, q);
             addBuffer(buffer);
         }
@@ -285,41 +316,47 @@ IrcBuffer* IrcBufferModelPrivate::createBuffer(const QString& title)
     return buffer;
 }
 
-void IrcBufferModelPrivate::destroyBuffer(const QString& title, bool force)
+void IrcBufferModelPrivate::destroyBuffer(const QString &title, bool force)
 {
-    IrcBuffer* buffer = bufferMap.value(title.toLower());
-    if (buffer && (force || (!persistent && !buffer->isPersistent()))) {
+    IrcBuffer *buffer = bufferMap.value(title.toLower());
+    if (buffer && (force || (!persistent && !buffer->isPersistent())))
+    {
         removeBuffer(buffer);
         buffer->deleteLater();
     }
 }
 
-void IrcBufferModelPrivate::addBuffer(IrcBuffer* buffer, bool notify)
+void IrcBufferModelPrivate::addBuffer(IrcBuffer *buffer, bool notify)
 {
     insertBuffer(-1, buffer, notify);
 }
 
-void IrcBufferModelPrivate::insertBuffer(int index, IrcBuffer* buffer, bool notify)
+void IrcBufferModelPrivate::insertBuffer(int index, IrcBuffer *buffer, bool notify)
 {
     Q_Q(IrcBufferModel);
-    if (buffer && !bufferList.contains(buffer)) {
+    if (buffer && !bufferList.contains(buffer))
+    {
         restoreBuffer(buffer);
         const QString title = buffer->title();
         const QString lower = title.toLower();
-        if (bufferMap.contains(lower)) {
+        if (bufferMap.contains(lower))
+        {
             qWarning() << "IrcBufferModel: ignored duplicate buffer" << title;
             return;
         }
         IrcBufferPrivate::get(buffer)->setModel(q);
         const bool isChannel = buffer->isChannel();
-        if (sortMethod != Irc::SortByHand) {
-            QList<IrcBuffer*>::iterator it;
+        if (sortMethod != Irc::SortByHand)
+        {
+            QList<IrcBuffer *>::iterator it;
             if (sortOrder == Qt::AscendingOrder)
                 it = qUpperBound(bufferList.begin(), bufferList.end(), buffer, IrcBufferLessThan(q, sortMethod));
             else
                 it = qUpperBound(bufferList.begin(), bufferList.end(), buffer, IrcBufferGreaterThan(q, sortMethod));
             index = it - bufferList.begin();
-        } else if (index == -1) {
+        }
+        else if (index == -1)
+        {
             index = bufferList.count();
         }
         if (notify)
@@ -327,15 +364,17 @@ void IrcBufferModelPrivate::insertBuffer(int index, IrcBuffer* buffer, bool noti
         q->beginInsertRows(QModelIndex(), index, index);
         bufferList.insert(index, buffer);
         bufferMap.insert(lower, buffer);
-        if (isChannel) {
+        if (isChannel)
+        {
             channels += title;
-            IrcChannel* channel = buffer->toChannel();
+            IrcChannel *channel = buffer->toChannel();
             if (keys.contains(lower) && channel->key().isEmpty())
                 IrcChannelPrivate::get(channel)->setKey(keys.take(lower));
         }
-        q->connect(buffer, SIGNAL(destroyed(IrcBuffer*)), SLOT(_irc_bufferDestroyed(IrcBuffer*)));
+        q->connect(buffer, SIGNAL(destroyed(IrcBuffer *)), SLOT(_irc_bufferDestroyed(IrcBuffer *)));
         q->endInsertRows();
-        if (notify) {
+        if (notify)
+        {
             emit q->added(buffer);
             if (isChannel)
                 emit q->channelsChanged(channels);
@@ -344,9 +383,11 @@ void IrcBufferModelPrivate::insertBuffer(int index, IrcBuffer* buffer, bool noti
             if (bufferList.count() == 1)
                 emit q->emptyChanged(false);
         }
-        if (monitorEnabled && IrcBufferPrivate::get(buffer)->isMonitorable()) {
+        if (monitorEnabled && IrcBufferPrivate::get(buffer)->isMonitorable())
+        {
             connection->sendCommand(IrcCommand::createMonitor("+", buffer->title()));
-            if (!monitorPending) {
+            if (!monitorPending)
+            {
                 monitorPending = true;
                 QTimer::singleShot(1000, q, SLOT(_irc_monitorStatus()));
             }
@@ -354,11 +395,12 @@ void IrcBufferModelPrivate::insertBuffer(int index, IrcBuffer* buffer, bool noti
     }
 }
 
-void IrcBufferModelPrivate::removeBuffer(IrcBuffer* buffer, bool notify)
+void IrcBufferModelPrivate::removeBuffer(IrcBuffer *buffer, bool notify)
 {
     Q_Q(IrcBufferModel);
     int idx = bufferList.indexOf(buffer);
-    if (idx != -1) {
+    if (idx != -1)
+    {
         const QString title = buffer->title();
         const QString lower = title.toLower();
         const bool isChannel = buffer->isChannel();
@@ -371,7 +413,8 @@ void IrcBufferModelPrivate::removeBuffer(IrcBuffer* buffer, bool notify)
         if (isChannel)
             channels.removeOne(title);
         q->endRemoveRows();
-        if (notify) {
+        if (notify)
+        {
             emit q->removed(buffer);
             if (isChannel)
                 emit q->channelsChanged(channels);
@@ -385,23 +428,25 @@ void IrcBufferModelPrivate::removeBuffer(IrcBuffer* buffer, bool notify)
     }
 }
 
-bool IrcBufferModelPrivate::renameBuffer(const QString& from, const QString& to)
+bool IrcBufferModelPrivate::renameBuffer(const QString &from, const QString &to)
 {
     Q_Q(IrcBufferModel);
     const QString fromLower = from.toLower();
     const QString toLower = to.toLower();
     if (bufferMap.contains(toLower))
         destroyBuffer(toLower, true);
-    if (bufferMap.contains(fromLower)) {
-        IrcBuffer* buffer = bufferMap.take(fromLower);
+    if (bufferMap.contains(fromLower))
+    {
+        IrcBuffer *buffer = bufferMap.take(fromLower);
         bufferMap.insert(toLower, buffer);
 
         const int idx = bufferList.indexOf(buffer);
         QModelIndex index = q->index(idx);
         emit q->dataChanged(index, index);
 
-        if (sortMethod != Irc::SortByHand) {
-            QList<IrcBuffer*> buffers = bufferList;
+        if (sortMethod != Irc::SortByHand)
+        {
+            QList<IrcBuffer *> buffers = bufferList;
             const bool notify = false;
             removeBuffer(buffer, notify);
             insertBuffer(-1, buffer, notify);
@@ -413,10 +458,11 @@ bool IrcBufferModelPrivate::renameBuffer(const QString& from, const QString& to)
     return false;
 }
 
-void IrcBufferModelPrivate::promoteBuffer(IrcBuffer* buffer)
+void IrcBufferModelPrivate::promoteBuffer(IrcBuffer *buffer)
 {
     Q_Q(IrcBufferModel);
-    if (sortMethod == Irc::SortByActivity) {
+    if (sortMethod == Irc::SortByActivity)
+    {
         const bool notify = false;
         removeBuffer(buffer, notify);
         insertBuffer(0, buffer, notify);
@@ -424,16 +470,18 @@ void IrcBufferModelPrivate::promoteBuffer(IrcBuffer* buffer)
     }
 }
 
-void IrcBufferModelPrivate::restoreBuffer(IrcBuffer* buffer)
+void IrcBufferModelPrivate::restoreBuffer(IrcBuffer *buffer)
 {
-    const QVariantMap& b = bufferStates.value(buffer->title().toLower()).toMap();
-    if (!b.isEmpty()) {
+    const QVariantMap &b = bufferStates.value(buffer->title().toLower()).toMap();
+    if (!b.isEmpty())
+    {
         buffer->setSticky(b.value("sticky").toBool());
         buffer->setPersistent(b.value("persistent").toBool());
         buffer->setUserData(b.value("userData").toMap());
-        IrcChannel* channel = buffer->toChannel();
-        if (channel && !channel->isActive()) {
-            IrcChannelPrivate* p = IrcChannelPrivate::get(channel);
+        IrcChannel *channel = buffer->toChannel();
+        if (channel && !channel->isActive())
+        {
+            IrcChannelPrivate *p = IrcChannelPrivate::get(channel);
             const QStringList modes = b.value("modes").toStringList();
             const QStringList args = b.value("args").toStringList();
             for (int i = 0; i < modes.count(); ++i)
@@ -443,14 +491,15 @@ void IrcBufferModelPrivate::restoreBuffer(IrcBuffer* buffer)
     }
 }
 
-QVariantMap IrcBufferModelPrivate::saveBuffer(IrcBuffer* buffer) const
+QVariantMap IrcBufferModelPrivate::saveBuffer(IrcBuffer *buffer) const
 {
     QVariantMap b;
     b.insert("title", buffer->title());
     b.insert("name", buffer->name());
     b.insert("prefix", buffer->prefix());
-    if (IrcChannel* channel = buffer->toChannel()) {
-        IrcChannelPrivate* p = IrcChannelPrivate::get(channel);
+    if (IrcChannel *channel = buffer->toChannel())
+    {
+        IrcChannelPrivate *p = IrcChannelPrivate::get(channel);
         b.insert("modes", QStringList(p->modes.keys()));
         b.insert("args", QStringList(p->modes.values()));
         b.insert("topic", channel->topic());
@@ -463,9 +512,9 @@ QVariantMap IrcBufferModelPrivate::saveBuffer(IrcBuffer* buffer) const
     return b;
 }
 
-bool IrcBufferModelPrivate::processMessage(const QString& title, IrcMessage* message, bool create)
+bool IrcBufferModelPrivate::processMessage(const QString &title, IrcMessage *message, bool create)
 {
-    IrcBuffer* buffer = bufferMap.value(title.toLower());
+    IrcBuffer *buffer = bufferMap.value(title.toLower());
     if (!buffer && create && title != QLatin1String("*"))
         buffer = createBuffer(title);
     if (buffer)
@@ -475,7 +524,7 @@ bool IrcBufferModelPrivate::processMessage(const QString& title, IrcMessage* mes
 
 void IrcBufferModelPrivate::_irc_connected()
 {
-    foreach (IrcBuffer* buffer, bufferList)
+    foreach (IrcBuffer *buffer, bufferList)
         IrcBufferPrivate::get(buffer)->connected();
 }
 
@@ -486,14 +535,17 @@ void IrcBufferModelPrivate::_irc_initialized()
         QTimer::singleShot(joinDelay * 1000, q, SLOT(_irc_restoreBuffers()));
 
     bool monitored = false;
-    foreach (IrcBuffer* buffer, bufferList) {
-        if (monitorEnabled && IrcBufferPrivate::get(buffer)->isMonitorable()) {
+    foreach (IrcBuffer *buffer, bufferList)
+    {
+        if (monitorEnabled && IrcBufferPrivate::get(buffer)->isMonitorable())
+        {
             connection->sendCommand(IrcCommand::createMonitor("+", buffer->title()));
             monitored = true;
         }
     }
 
-    if (monitored && !monitorPending) {
+    if (monitored && !monitorPending)
+    {
         monitorPending = true;
         QTimer::singleShot(1000, q, SLOT(_irc_monitorStatus()));
     }
@@ -501,11 +553,11 @@ void IrcBufferModelPrivate::_irc_initialized()
 
 void IrcBufferModelPrivate::_irc_disconnected()
 {
-    foreach (IrcBuffer* buffer, bufferList)
+    foreach (IrcBuffer *buffer, bufferList)
         IrcBufferPrivate::get(buffer)->disconnected();
 }
 
-void IrcBufferModelPrivate::_irc_bufferDestroyed(IrcBuffer* buffer)
+void IrcBufferModelPrivate::_irc_bufferDestroyed(IrcBuffer *buffer)
 {
     removeBuffer(buffer);
 }
@@ -517,8 +569,10 @@ void IrcBufferModelPrivate::_irc_restoreBuffers()
         return;
 
     bool hasActiveChannels = false;
-    foreach (IrcBuffer* buffer, bufferList) {
-        if (buffer->isChannel() && buffer->isActive()) {
+    foreach (IrcBuffer *buffer, bufferList)
+    {
+        if (buffer->isChannel() && buffer->isActive())
+        {
             // this is probably a bouncer connection if there are already
             // active channels. don't restore and re-join channels that were
             // left in another client meanwhile this client was disconnected.
@@ -526,11 +580,14 @@ void IrcBufferModelPrivate::_irc_restoreBuffers()
         }
     }
 
-    if (!hasActiveChannels) {
-        foreach (const QVariant& v, bufferStates) {
+    if (!hasActiveChannels)
+    {
+        foreach (const QVariant &v, bufferStates)
+        {
             QVariantMap b = v.toMap();
-            IrcBuffer* buffer = q->find(b.value("title").toString());
-            if (!buffer) {
+            IrcBuffer *buffer = q->find(b.value("title").toString());
+            if (!buffer)
+            {
                 if (b.value("channel").toBool())
                     buffer = createChannelHelper(b.value("title").toString());
                 else
@@ -542,17 +599,21 @@ void IrcBufferModelPrivate::_irc_restoreBuffers()
         }
 
         QStringList chans, keys;
-        foreach (IrcBuffer* buffer, bufferList) {
-            IrcChannel* channel = buffer->toChannel();
-            if (channel && !channel->isActive()) {
-                IrcChannelPrivate* p = IrcChannelPrivate::get(channel);
-                if (p->enabled) {
+        foreach (IrcBuffer *buffer, bufferList)
+        {
+            IrcChannel *channel = buffer->toChannel();
+            if (channel && !channel->isActive())
+            {
+                IrcChannelPrivate *p = IrcChannelPrivate::get(channel);
+                if (p->enabled)
+                {
                     chans += channel->title();
                     keys += channel->key();
                     p->enabled = true;
                 }
             }
-            if (chans.length() == 3) {
+            if (chans.length() == 3)
+            {
                 connection->sendCommand(IrcCommand::createJoin(chans, keys));
                 chans.clear();
                 keys.clear();
@@ -577,14 +638,13 @@ void IrcBufferModelPrivate::_irc_monitorStatus()
     \note If \a parent is an instance of IrcConnection, it will be
     automatically assigned to \ref IrcBufferModel::connection "connection".
  */
-IrcBufferModel::IrcBufferModel(QObject* parent)
-    : QAbstractListModel(parent), d_ptr(new IrcBufferModelPrivate)
+IrcBufferModel::IrcBufferModel(QObject *parent) : QAbstractListModel(parent), d_ptr(new IrcBufferModelPrivate)
 {
     Q_D(IrcBufferModel);
     d->q_ptr = this;
     setBufferPrototype(new IrcBuffer(this));
     setChannelPrototype(new IrcChannel(this));
-    setConnection(qobject_cast<IrcConnection*>(parent));
+    setConnection(qobject_cast<IrcConnection *>(parent));
 }
 
 /*!
@@ -593,7 +653,8 @@ IrcBufferModel::IrcBufferModel(QObject* parent)
 IrcBufferModel::~IrcBufferModel()
 {
     Q_D(IrcBufferModel);
-    foreach (IrcBuffer* buffer, d->bufferList) {
+    foreach (IrcBuffer *buffer, d->bufferList)
+    {
         buffer->disconnect(this);
         delete buffer;
     }
@@ -612,17 +673,19 @@ IrcBufferModel::~IrcBufferModel()
 
     \warning Changing the connection on the fly is not supported.
  */
-IrcConnection* IrcBufferModel::connection() const
+IrcConnection *IrcBufferModel::connection() const
 {
     Q_D(const IrcBufferModel);
     return d->connection;
 }
 
-void IrcBufferModel::setConnection(IrcConnection* connection)
+void IrcBufferModel::setConnection(IrcConnection *connection)
 {
     Q_D(IrcBufferModel);
-    if (d->connection != connection) {
-        if (d->connection) {
+    if (d->connection != connection)
+    {
+        if (d->connection)
+        {
             qCritical("IrcBufferModel::setConnection(): changing the connection on the fly is not supported.");
             return;
         }
@@ -643,7 +706,7 @@ void IrcBufferModel::setConnection(IrcConnection* connection)
     \par Access functions:
     \li \ref IrcNetwork* <b>network</b>() const
  */
-IrcNetwork* IrcBufferModel::network() const
+IrcNetwork *IrcBufferModel::network() const
 {
     Q_D(const IrcBufferModel);
     return d->connection ? d->connection->network() : 0;
@@ -705,7 +768,7 @@ QStringList IrcBufferModel::channels() const
     \par Notifier signal:
     \li void <b>buffersChanged</b>(const QList<\ref IrcBuffer*>& buffers)
  */
-QList<IrcBuffer*> IrcBufferModel::buffers() const
+QList<IrcBuffer *> IrcBufferModel::buffers() const
 {
     Q_D(const IrcBufferModel);
     return d->bufferList;
@@ -714,7 +777,7 @@ QList<IrcBuffer*> IrcBufferModel::buffers() const
 /*!
     Returns the buffer object at \a index.
  */
-IrcBuffer* IrcBufferModel::get(int index) const
+IrcBuffer *IrcBufferModel::get(int index) const
 {
     Q_D(const IrcBufferModel);
     return d->bufferList.value(index);
@@ -723,7 +786,7 @@ IrcBuffer* IrcBufferModel::get(int index) const
 /*!
     Returns the buffer object for \a title or \c 0 if not found.
  */
-IrcBuffer* IrcBufferModel::find(const QString& title) const
+IrcBuffer *IrcBufferModel::find(const QString &title) const
 {
     Q_D(const IrcBufferModel);
     return d->bufferMap.value(title.toLower());
@@ -732,7 +795,7 @@ IrcBuffer* IrcBufferModel::find(const QString& title) const
 /*!
     Returns \c true if the model contains \a title.
  */
-bool IrcBufferModel::contains(const QString& title) const
+bool IrcBufferModel::contains(const QString &title) const
 {
     Q_D(const IrcBufferModel);
     return d->bufferMap.contains(title.toLower());
@@ -742,7 +805,7 @@ bool IrcBufferModel::contains(const QString& title) const
     Returns the index of the specified \a buffer,
     or \c -1 if the model does not contain the \a buffer.
  */
-int IrcBufferModel::indexOf(IrcBuffer* buffer) const
+int IrcBufferModel::indexOf(IrcBuffer *buffer) const
 {
     Q_D(const IrcBufferModel);
     return d->bufferList.indexOf(buffer);
@@ -751,7 +814,7 @@ int IrcBufferModel::indexOf(IrcBuffer* buffer) const
 /*!
     Adds a buffer with \a title to the model and returns it.
  */
-IrcBuffer* IrcBufferModel::add(const QString& title)
+IrcBuffer *IrcBufferModel::add(const QString &title)
 {
     Q_D(IrcBufferModel);
     return d->createBuffer(title);
@@ -760,7 +823,7 @@ IrcBuffer* IrcBufferModel::add(const QString& title)
 /*!
     Adds the \a buffer to the model.
  */
-void IrcBufferModel::add(IrcBuffer* buffer)
+void IrcBufferModel::add(IrcBuffer *buffer)
 {
     Q_D(IrcBufferModel);
     d->addBuffer(buffer);
@@ -769,7 +832,7 @@ void IrcBufferModel::add(IrcBuffer* buffer)
 /*!
     Removes and destroys a buffer with \a title from the model.
  */
-void IrcBufferModel::remove(const QString& title)
+void IrcBufferModel::remove(const QString &title)
 {
     Q_D(IrcBufferModel);
     d->destroyBuffer(title, true);
@@ -778,7 +841,7 @@ void IrcBufferModel::remove(const QString& title)
 /*!
     Removes and destroys a \a buffer from the model.
  */
-void IrcBufferModel::remove(IrcBuffer* buffer)
+void IrcBufferModel::remove(IrcBuffer *buffer)
 {
     delete buffer;
 }
@@ -835,7 +898,8 @@ bool IrcBufferModel::isPersistent() const
 void IrcBufferModel::setPersistent(bool persistent)
 {
     Q_D(IrcBufferModel);
-    if (d->persistent != persistent) {
+    if (d->persistent != persistent)
+    {
         d->persistent = persistent;
         emit persistentChanged(persistent);
     }
@@ -844,7 +908,7 @@ void IrcBufferModel::setPersistent(bool persistent)
 /*!
     Returns the model index for \a buffer.
  */
-QModelIndex IrcBufferModel::index(IrcBuffer* buffer) const
+QModelIndex IrcBufferModel::index(IrcBuffer *buffer) const
 {
     Q_D(const IrcBufferModel);
     return index(d->bufferList.indexOf(buffer));
@@ -853,12 +917,12 @@ QModelIndex IrcBufferModel::index(IrcBuffer* buffer) const
 /*!
     Returns the buffer for model \a index.
  */
-IrcBuffer* IrcBufferModel::buffer(const QModelIndex& index) const
+IrcBuffer *IrcBufferModel::buffer(const QModelIndex &index) const
 {
     if (!hasIndex(index.row(), index.column()))
         return 0;
 
-    return static_cast<IrcBuffer*>(index.internalPointer());
+    return static_cast<IrcBuffer *>(index.internalPointer());
 }
 
 /*!
@@ -881,7 +945,8 @@ Qt::SortOrder IrcBufferModel::sortOrder() const
 void IrcBufferModel::setSortOrder(Qt::SortOrder order)
 {
     Q_D(IrcBufferModel);
-    if (d->sortOrder != order) {
+    if (d->sortOrder != order)
+    {
         d->sortOrder = order;
         if (d->sortMethod != Irc::SortByHand && !d->bufferList.isEmpty())
             sort(d->sortMethod, d->sortOrder);
@@ -896,9 +961,10 @@ void IrcBufferModel::setSortOrder(Qt::SortOrder order)
     Method              | Description                                                                      | Example
     --------------------|----------------------------------------------------------------------------------|-------------------------------------------------
     Irc::SortByHand     | Buffers are not sorted automatically, but only by calling sort().                | -
-    Irc::SortByName     | Buffers are sorted alphabetically, ignoring any channel prefix.                  | "bot", "#communi", "#freenode", "jpnurmi", "#qt"
-    Irc::SortByTitle    | Buffers are sorted alphabetically, and channels before queries.                  | "#communi", "#freenode", "#qt", "bot", "jpnurmi"
-    Irc::SortByActivity | Buffers are sorted based on their messaging activity, last active buffers first. | -
+    Irc::SortByName     | Buffers are sorted alphabetically, ignoring any channel prefix.                  | "bot",
+   "#communi", "#freenode", "jpnurmi", "#qt" Irc::SortByTitle    | Buffers are sorted alphabetically, and channels
+   before queries.                  | "#communi", "#freenode", "#qt", "bot", "jpnurmi" Irc::SortByActivity | Buffers are
+   sorted based on their messaging activity, last active buffers first. | -
 
     \note Irc::SortByActivity support was added in version \b 3.4.
 
@@ -917,7 +983,8 @@ Irc::SortMethod IrcBufferModel::sortMethod() const
 void IrcBufferModel::setSortMethod(Irc::SortMethod method)
 {
     Q_D(IrcBufferModel);
-    if (d->sortMethod != method) {
+    if (d->sortMethod != method)
+    {
         d->sortMethod = method;
         if (d->sortMethod != Irc::SortByHand && !d->bufferList.isEmpty())
             sort(d->sortMethod, d->sortOrder);
@@ -934,12 +1001,16 @@ void IrcBufferModel::setSortMethod(Irc::SortMethod method)
 void IrcBufferModel::clear()
 {
     Q_D(IrcBufferModel);
-    if (!d->bufferList.isEmpty()) {
+    if (!d->bufferList.isEmpty())
+    {
         bool bufferRemoved = false;
         bool channelRemoved = false;
-        foreach (IrcBuffer* buffer, d->bufferList) {
-            if (!buffer->isPersistent()) {
-                if (!bufferRemoved) {
+        foreach (IrcBuffer *buffer, d->bufferList)
+        {
+            if (!buffer->isPersistent())
+            {
+                if (!bufferRemoved)
+                {
                     beginResetModel();
                     bufferRemoved = true;
                 }
@@ -951,7 +1022,8 @@ void IrcBufferModel::clear()
                 delete buffer;
             }
         }
-        if (bufferRemoved) {
+        if (bufferRemoved)
+        {
             endResetModel();
             if (channelRemoved)
                 emit channelsChanged(d->channels);
@@ -966,7 +1038,7 @@ void IrcBufferModel::clear()
 /*!
     Makes the model receive and handle \a message.
  */
-void IrcBufferModel::receiveMessage(IrcMessage* message)
+void IrcBufferModel::receiveMessage(IrcMessage *message)
 {
     Q_D(IrcBufferModel);
     d->messageFilter(message);
@@ -995,10 +1067,10 @@ void IrcBufferModel::sort(Irc::SortMethod method, Qt::SortOrder order)
 
     emit layoutAboutToBeChanged();
 
-    QList<IrcBuffer*> persistentBuffers;
+    QList<IrcBuffer *> persistentBuffers;
     QModelIndexList oldPersistentIndexes = persistentIndexList();
-    foreach (const QModelIndex& index, oldPersistentIndexes)
-        persistentBuffers += static_cast<IrcBuffer*>(index.internalPointer());
+    foreach (const QModelIndex &index, oldPersistentIndexes)
+        persistentBuffers += static_cast<IrcBuffer *>(index.internalPointer());
 
     if (order == Qt::AscendingOrder)
         qSort(d->bufferList.begin(), d->bufferList.end(), IrcBufferLessThan(this, method));
@@ -1006,7 +1078,7 @@ void IrcBufferModel::sort(Irc::SortMethod method, Qt::SortOrder order)
         qSort(d->bufferList.begin(), d->bufferList.end(), IrcBufferGreaterThan(this, method));
 
     QModelIndexList newPersistentIndexes;
-    foreach (IrcBuffer* buffer, persistentBuffers)
+    foreach (IrcBuffer *buffer, persistentBuffers)
         newPersistentIndexes += index(d->bufferList.indexOf(buffer));
     changePersistentIndexList(oldPersistentIndexes, newPersistentIndexes);
 
@@ -1024,12 +1096,12 @@ void IrcBufferModel::sort(Irc::SortMethod method, Qt::SortOrder order)
 
     \sa bufferPrototype
  */
-IrcBuffer* IrcBufferModel::createBuffer(const QString& title)
+IrcBuffer *IrcBufferModel::createBuffer(const QString &title)
 {
     Q_D(IrcBufferModel);
     Q_UNUSED(title);
-    QObject* instance = d->bufferProto->metaObject()->newInstance(Q_ARG(QObject*, this));
-    return qobject_cast<IrcBuffer*>(instance);
+    QObject *instance = d->bufferProto->metaObject()->newInstance(Q_ARG(QObject *, this));
+    return qobject_cast<IrcBuffer *>(instance);
 }
 
 /*!
@@ -1043,12 +1115,12 @@ IrcBuffer* IrcBufferModel::createBuffer(const QString& title)
 
     \sa channelPrototype
  */
-IrcChannel* IrcBufferModel::createChannel(const QString& title)
+IrcChannel *IrcBufferModel::createChannel(const QString &title)
 {
     Q_D(IrcBufferModel);
     Q_UNUSED(title);
-    QObject* instance = d->channelProto->metaObject()->newInstance(Q_ARG(QObject*, this));
-    return qobject_cast<IrcChannel*>(instance);
+    QObject *instance = d->channelProto->metaObject()->newInstance(Q_ARG(QObject *, this));
+    return qobject_cast<IrcChannel *>(instance);
 }
 
 /*!
@@ -1060,19 +1132,21 @@ IrcChannel* IrcBufferModel::createChannel(const QString& title)
 
     \sa sort(), sortMethod
  */
-bool IrcBufferModel::lessThan(IrcBuffer* one, IrcBuffer* another, Irc::SortMethod method) const
+bool IrcBufferModel::lessThan(IrcBuffer *one, IrcBuffer *another, Irc::SortMethod method) const
 {
     if (one->isSticky() != another->isSticky())
         return one->isSticky();
 
-    if (method == Irc::SortByActivity) {
+    if (method == Irc::SortByActivity)
+    {
         QDateTime ts1 = IrcBufferPrivate::get(one)->activity;
         QDateTime ts2 = IrcBufferPrivate::get(another)->activity;
         if (ts1.isValid() || ts2.isValid())
             return ts1.isValid() && ts1 > ts2;
     }
 
-    if (method == Irc::SortByTitle) {
+    if (method == Irc::SortByTitle)
+    {
         const QStringList prefixes = one->network()->channelTypes();
 
         const QString p1 = one->prefix();
@@ -1124,7 +1198,7 @@ QHash<int, QByteArray> IrcBufferModel::roleNames() const
 /*!
     Returns the number of buffers.
  */
-int IrcBufferModel::rowCount(const QModelIndex& parent) const
+int IrcBufferModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
@@ -1136,16 +1210,17 @@ int IrcBufferModel::rowCount(const QModelIndex& parent) const
 /*!
     Returns the data for specified \a role and user referred to by by the \a index.
  */
-QVariant IrcBufferModel::data(const QModelIndex& index, int role) const
+QVariant IrcBufferModel::data(const QModelIndex &index, int role) const
 {
     Q_D(const IrcBufferModel);
     if (!hasIndex(index.row(), index.column(), index.parent()))
         return QVariant();
 
-    IrcBuffer* buffer = static_cast<IrcBuffer*>(index.internalPointer());
+    IrcBuffer *buffer = static_cast<IrcBuffer *>(index.internalPointer());
     Q_ASSERT(buffer);
 
-    switch (role) {
+    switch (role)
+    {
     case Qt::DisplayRole:
         return data(index, d->role);
     case Irc::BufferRole:
@@ -1166,7 +1241,7 @@ QVariant IrcBufferModel::data(const QModelIndex& index, int role) const
 /*!
     Returns the index of the item in the model specified by the given \a row, \a column and \a parent index.
  */
-QModelIndex IrcBufferModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex IrcBufferModel::index(int row, int column, const QModelIndex &parent) const
 {
     Q_D(const IrcBufferModel);
     if (!hasIndex(row, column, parent))
@@ -1186,16 +1261,17 @@ QModelIndex IrcBufferModel::index(int row, int column, const QModelIndex& parent
     \li \ref IrcBuffer* <b>bufferPrototype</b>() const
     \li void <b>setBufferPrototype</b>(\ref IrcBuffer* prototype)
  */
-IrcBuffer* IrcBufferModel::bufferPrototype() const
+IrcBuffer *IrcBufferModel::bufferPrototype() const
 {
     Q_D(const IrcBufferModel);
     return d->bufferProto;
 }
 
-void IrcBufferModel::setBufferPrototype(IrcBuffer* prototype)
+void IrcBufferModel::setBufferPrototype(IrcBuffer *prototype)
 {
     Q_D(IrcBufferModel);
-    if (d->bufferProto != prototype) {
+    if (d->bufferProto != prototype)
+    {
         if (d->bufferProto && d->bufferProto->parent() == this)
             delete d->bufferProto;
         d->bufferProto = prototype ? prototype : new IrcBuffer(this);
@@ -1214,16 +1290,17 @@ void IrcBufferModel::setBufferPrototype(IrcBuffer* prototype)
     \li \ref IrcChannel* <b>channelPrototype</b>() const
     \li void <b>setChannelPrototype</b>(\ref IrcChannel* prototype)
  */
-IrcChannel* IrcBufferModel::channelPrototype() const
+IrcChannel *IrcBufferModel::channelPrototype() const
 {
     Q_D(const IrcBufferModel);
     return d->channelProto;
 }
 
-void IrcBufferModel::setChannelPrototype(IrcChannel* prototype)
+void IrcBufferModel::setChannelPrototype(IrcChannel *prototype)
 {
     Q_D(IrcBufferModel);
-    if (d->channelProto != prototype) {
+    if (d->channelProto != prototype)
+    {
         if (d->channelProto && d->channelProto->parent() == this)
             delete d->channelProto;
         d->channelProto = prototype ? prototype : new IrcChannel(this);
@@ -1256,7 +1333,8 @@ int IrcBufferModel::joinDelay() const
 void IrcBufferModel::setJoinDelay(int delay)
 {
     Q_D(IrcBufferModel);
-    if (d->joinDelay != delay) {
+    if (d->joinDelay != delay)
+    {
         d->joinDelay = delay;
         emit joinDelayChanged(delay);
     }
@@ -1288,7 +1366,8 @@ bool IrcBufferModel::isMonitorEnabled() const
 void IrcBufferModel::setMonitorEnabled(bool enabled)
 {
     Q_D(IrcBufferModel);
-    if (d->monitorEnabled != enabled) {
+    if (d->monitorEnabled != enabled)
+    {
         d->monitorEnabled = enabled;
         emit monitorEnabledChanged(enabled);
     }
@@ -1308,11 +1387,11 @@ QByteArray IrcBufferModel::saveState(int version) const
     args.insert("version", version);
 
     QVariantMap states = d->bufferStates;
-    foreach (IrcBuffer* buffer, d->bufferList)
+    foreach (IrcBuffer *buffer, d->bufferList)
         states.insert(buffer->title(), d->saveBuffer(buffer));
 
     QVariantList buffers;
-    foreach (const QVariant& b, states)
+    foreach (const QVariant &b, states)
         buffers += b;
     args.insert("buffers", buffers);
 
@@ -1331,7 +1410,7 @@ QByteArray IrcBufferModel::saveState(int version) const
 
     \sa saveState()
  */
-bool IrcBufferModel::restoreState(const QByteArray& state, int version)
+bool IrcBufferModel::restoreState(const QByteArray &state, int version)
 {
     Q_D(IrcBufferModel);
     QVariantMap args;
@@ -1341,7 +1420,8 @@ bool IrcBufferModel::restoreState(const QByteArray& state, int version)
         return false;
 
     const QVariantList buffers = args.value("buffers").toList();
-    foreach (const QVariant& v, buffers) {
+    foreach (const QVariant &v, buffers)
+    {
         const QVariantMap b = v.toMap();
         d->bufferStates.insert(b.value("title").toString(), b);
     }

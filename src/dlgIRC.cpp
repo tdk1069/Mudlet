@@ -21,19 +21,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "dlgIRC.h"
 #include "Host.h"
 #include "ircmessageformatter.h"
 
 #include "mudlet.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QDesktopServices>
 #include <QScrollBar>
 #include <QShortcut>
-#include "post_guard.h"
-
 
 QString dlgIRC::HostNameCfgItem = QStringLiteral("irc_host");
 QString dlgIRC::HostPortCfgItem = QStringLiteral("irc_port");
@@ -45,7 +43,8 @@ QString dlgIRC::DefaultNickName = QStringLiteral("Mudlet");
 QStringList dlgIRC::DefaultChannels = QStringList() << QStringLiteral("#mudlet");
 int dlgIRC::DefaultMessageBufferLimit = 5000;
 
-dlgIRC::dlgIRC(Host* pHost) : mReadyForSending(false), mpHost(pHost), mIrcStarted(false), mInputHistoryMax(8), mConnectedHostName()
+dlgIRC::dlgIRC(Host *pHost)
+    : mReadyForSending(false), mpHost(pHost), mIrcStarted(false), mInputHistoryMax(8), mConnectedHostName()
 {
     mInputHistoryMax = 8;
     mInputHistoryIdxNext = 0;
@@ -55,8 +54,10 @@ dlgIRC::dlgIRC(Host* pHost) : mReadyForSending(false), mpHost(pHost), mIrcStarte
     setWindowIcon(QIcon(QStringLiteral(":/icons/mudlet_irc.png")));
 
     bool isIntOk = false;
-    mMessageBufferLimit = mudlet::self()->mpSettings->value("ircMessageBufferLimit", dlgIRC::DefaultMessageBufferLimit).toInt(&isIntOk);
-    if (!isIntOk) {
+    mMessageBufferLimit =
+        mudlet::self()->mpSettings->value("ircMessageBufferLimit", dlgIRC::DefaultMessageBufferLimit).toInt(&isIntOk);
+    if (!isIntOk)
+    {
         mMessageBufferLimit = dlgIRC::DefaultMessageBufferLimit;
     }
 
@@ -71,8 +72,8 @@ dlgIRC::dlgIRC(Host* pHost) : mReadyForSending(false), mpHost(pHost), mIrcStarte
     completer = new IrcCompleter(this);
     completer->setParser(commandParser);
     connect(completer, &IrcCompleter::completed, this, &dlgIRC::slot_nameCompleted);
-    QShortcut* shortcut = new QShortcut(Qt::Key_Tab, this);
-    QShortcut* shortcut2 = new QShortcut(Qt::Key_Up, this);
+    QShortcut *shortcut = new QShortcut(Qt::Key_Tab, this);
+    QShortcut *shortcut2 = new QShortcut(Qt::Key_Up, this);
     connect(shortcut, &QShortcut::activated, this, &dlgIRC::slot_nameCompletion);
     connect(shortcut2, &QShortcut::activated, this, &dlgIRC::slot_onHistoryCompletion);
     connect(lineEdit, &QLineEdit::returnPressed, this, &dlgIRC::slot_onTextEntered);
@@ -109,13 +110,15 @@ dlgIRC::~dlgIRC()
 {
     writeQSettings();
 
-    if (connection->isActive()) {
+    if (connection->isActive())
+    {
         const QString quitMsg = tr("%1 closed their client.").arg(mNickName);
         connection->quit(quitMsg);
         connection->close();
     }
 
-    if (mudlet::self() && mudlet::self()->mpIrcClientMap.value(mpHost)) {
+    if (mudlet::self() && mudlet::self()->mpIrcClientMap.value(mpHost))
+    {
         mudlet::self()->mpIrcClientMap.remove(mpHost);
     }
 }
@@ -127,7 +130,8 @@ void dlgIRC::setClientWindowTitle()
 
 void dlgIRC::startClient()
 {
-    if (mIrcStarted) {
+    if (mIrcStarted)
+    {
         return;
     }
 
@@ -137,24 +141,29 @@ void dlgIRC::startClient()
     setupBuffers();
 
     ircBrowser->append(IrcMessageFormatter::formatMessage(tr("$ Starting Mudlet IRC Client...")));
-    ircBrowser->append(IrcMessageFormatter::formatMessage(tr("$ Host: %1:%2").arg(mHostName, QString::number(mHostPort))));
+    ircBrowser->append(
+        IrcMessageFormatter::formatMessage(tr("$ Host: %1:%2").arg(mHostName, QString::number(mHostPort))));
     ircBrowser->append(IrcMessageFormatter::formatMessage(tr("$ Nick: %1").arg(mNickName)));
     ircBrowser->append(IrcMessageFormatter::formatMessage(tr("$ Auto-Join Channels: %1").arg(mChannels.join(" "))));
-    ircBrowser->append(IrcMessageFormatter::formatMessage(tr("$ This client supports Auto-Completion using the Tab key.")));
-    ircBrowser->append(IrcMessageFormatter::formatMessage(tr("$ Type <b>/help</b> for commands or <b>/help [command]</b> for command syntax.")));
+    ircBrowser->append(
+        IrcMessageFormatter::formatMessage(tr("$ This client supports Auto-Completion using the Tab key.")));
+    ircBrowser->append(IrcMessageFormatter::formatMessage(
+        tr("$ Type <b>/help</b> for commands or <b>/help [command]</b> for command syntax.")));
     ircBrowser->append(QStringLiteral("\n"));
 
     mIrcStarted = true;
 }
 
-QPair<bool, QString> dlgIRC::sendMsg(const QString& target, const QString& message)
+QPair<bool, QString> dlgIRC::sendMsg(const QString &target, const QString &message)
 {
-    if (message.isEmpty()) {
+    if (message.isEmpty())
+    {
         return QPair<bool, QString>(true, QStringLiteral("message processed by client"));
     }
 
     QString msgTarget = target;
-    if (target.isEmpty()) {
+    if (target.isEmpty())
+    {
         msgTarget = mChannels.first();
     }
 
@@ -162,35 +171,40 @@ QPair<bool, QString> dlgIRC::sendMsg(const QString& target, const QString& messa
     // parses the message and then reverts the target to avoid confusing our UI.
     QString lastParserTarget = commandParser->target();
     commandParser->setTarget(msgTarget);
-    IrcCommand* command = commandParser->parse(message);
+    IrcCommand *command = commandParser->parse(message);
     commandParser->setTarget(lastParserTarget);
 
-    if (!command) {
+    if (!command)
+    {
         return QPair<bool, QString>(false, QStringLiteral("message could not be parsed"));
     }
 
     bool isCustomCommand = processCustomCommand(command);
-    if (isCustomCommand) {
+    if (isCustomCommand)
+    {
         return QPair<bool, QString>(true, QStringLiteral("command processed by client"));
     }
 
     // update ping-started time if this command was a ping
-    if (command->type() == IrcCommand::Ping) {
+    if (command->type() == IrcCommand::Ping)
+    {
         mPingStarted = QDateTime::currentMSecsSinceEpoch();
     }
 
     connection->sendCommand(command);
 
     // if the command was a quit command we should close the IRC window.
-    if (command->type() == IrcCommand::Quit) {
+    if (command->type() == IrcCommand::Quit)
+    {
         setAttribute(Qt::WA_DeleteOnClose);
         close();
         return QPair<bool, QString>(true, QStringLiteral("closing client"));
     }
 
     // echo own messages (servers do not send our own messages back)
-    if (command->type() == IrcCommand::Message || command->type() == IrcCommand::CtcpAction) {
-        IrcMessage* msg = command->toMessage(connection->nickName(), connection);
+    if (command->type() == IrcCommand::Message || command->type() == IrcCommand::CtcpAction)
+    {
+        IrcMessage *msg = command->toMessage(connection->nickName(), connection);
         slot_receiveMessage(msg);
         delete msg;
     }
@@ -204,13 +218,16 @@ void dlgIRC::ircRestart(bool reloadConfigs)
     ircBrowser->append(IrcMessageFormatter::formatMessage("! %1.").arg(msg));
 
     // issue a quit message to the network if we're connected.
-    if (connection->isConnected()) {
+    if (connection->isConnected())
+    {
         connection->quit(msg);
     }
 
     // remove the old buffers.
-    for (QString chName : qAsConst(mChannels)) {
-        if (chName == serverBuffer->name()) {
+    for (QString chName : qAsConst(mChannels))
+    {
+        if (chName == serverBuffer->name())
+        {
             continue; // skip the server-buffer.
         }
         bufferModel->remove(chName);
@@ -218,7 +235,8 @@ void dlgIRC::ircRestart(bool reloadConfigs)
 
     connection->close();
 
-    if (reloadConfigs) {
+    if (reloadConfigs)
+    {
         mHostName = readIrcHostName(mpHost);
         mHostPort = readIrcHostPort(mpHost);
         mNickName = readIrcNickName(mpHost);
@@ -275,12 +293,25 @@ void dlgIRC::setupCommandParser()
     commandParser->addCommand(IrcCommand::Whois, QStringLiteral("WHOIS <user>"));
     commandParser->addCommand(IrcCommand::Whowas, QStringLiteral("WHOWAS <user>"));
 
-    commandParser->addCommand(IrcCommand::Custom, QStringLiteral("MSG <target> <message...>")); // replaces the old /msg command.
-    commandParser->addCommand(IrcCommand::Custom, QStringLiteral("CLEAR (<buffer>)"));          // clears the given buffer, or the current active if none are given.
-    commandParser->addCommand(IrcCommand::Custom, QStringLiteral("CLOSE (<buffer>)"));          // closes the buffer and removes it from the list, uses current active buffer if none are given.
-    commandParser->addCommand(IrcCommand::Custom, QStringLiteral("RECONNECT"));                 // Issues a Quit command and closes the IRC connection then reconnects to the IRC server.
-    commandParser->addCommand(IrcCommand::Custom, QStringLiteral("HELP (<command>)"));          // displays some help information about a given command or lists all available commands.
-    commandParser->addCommand(IrcCommand::Custom, QStringLiteral("MSGLIMIT <limit> (<buffer>)"));  // sets buffer limit on all buffers and updates settings, or sets buffer limit on given buffer.
+    commandParser->addCommand(IrcCommand::Custom,
+                              QStringLiteral("MSG <target> <message...>")); // replaces the old /msg command.
+    commandParser->addCommand(
+        IrcCommand::Custom,
+        QStringLiteral("CLEAR (<buffer>)")); // clears the given buffer, or the current active if none are given.
+    commandParser->addCommand(IrcCommand::Custom,
+                              QStringLiteral("CLOSE (<buffer>)")); // closes the buffer and removes it from the list,
+                                                                   // uses current active buffer if none are given.
+    commandParser->addCommand(
+        IrcCommand::Custom,
+        QStringLiteral(
+            "RECONNECT")); // Issues a Quit command and closes the IRC connection then reconnects to the IRC server.
+    commandParser->addCommand(IrcCommand::Custom,
+                              QStringLiteral("HELP (<command>)")); // displays some help information about a given
+                                                                   // command or lists all available commands.
+    commandParser->addCommand(
+        IrcCommand::Custom,
+        QStringLiteral("MSGLIMIT <limit> (<buffer>)")); // sets buffer limit on all buffers and updates settings, or
+                                                        // sets buffer limit on given buffer.
 }
 
 void dlgIRC::setupBuffers()
@@ -299,96 +330,122 @@ void dlgIRC::setupBuffers()
     connect(bufferModel, &IrcBufferModel::messageIgnored, serverBuffer, &IrcBuffer::receiveMessage);
 }
 
-bool dlgIRC::processCustomCommand(IrcCommand* cmd)
+bool dlgIRC::processCustomCommand(IrcCommand *cmd)
 {
-    if (cmd->type() != IrcCommand::Custom || cmd->parameters().count() < 1) {
+    if (cmd->type() != IrcCommand::Custom || cmd->parameters().count() < 1)
+    {
         return false;
     }
 
     const QString cmdName = QString(cmd->parameters().at(0)).toUpper();
-    if (cmdName == "CLEAR") {
-        auto * buffer = bufferList->currentIndex().data(Irc::BufferRole).value<IrcBuffer*>();
-        if (cmd->parameters().count() > 1) {
+    if (cmdName == "CLEAR")
+    {
+        auto *buffer = bufferList->currentIndex().data(Irc::BufferRole).value<IrcBuffer *>();
+        if (cmd->parameters().count() > 1)
+        {
             QString bufferName = cmd->parameters().at(1);
-            //QString cBufferName = buffer->title();
-            if (!bufferName.isEmpty()) {
+            // QString cBufferName = buffer->title();
+            if (!bufferName.isEmpty())
+            {
                 buffer = bufferModel->find(bufferName);
             }
         }
-        if (buffer) {
+        if (buffer)
+        {
             bufferTexts.value(buffer)->clear();
         }
         return true;
     }
-    if (cmdName == "CLOSE") {
-        auto * buffer = bufferList->currentIndex().data(Irc::BufferRole).value<IrcBuffer*>();
-        if (cmd->parameters().count() > 1) {
+    if (cmdName == "CLOSE")
+    {
+        auto *buffer = bufferList->currentIndex().data(Irc::BufferRole).value<IrcBuffer *>();
+        if (cmd->parameters().count() > 1)
+        {
             const QString bufferName = cmd->parameters().at(1);
-            if (!bufferName.isEmpty()) {
+            if (!bufferName.isEmpty())
+            {
                 buffer = bufferModel->find(bufferName);
             }
         }
-        if (buffer && buffer->title() != serverBuffer->title()) {
+        if (buffer && buffer->title() != serverBuffer->title())
+        {
             bufferList->setCurrentIndex(bufferModel->index(bufferModel->find(connection->host())));
             buffer->close();
         }
         return true;
     }
-    if (cmdName == "HELP") {
+    if (cmdName == "HELP")
+    {
         QString hName = QString();
-        if (cmd->parameters().count() > 1) {
+        if (cmd->parameters().count() > 1)
+        {
             hName = QString(cmd->parameters().at(1)).toUpper();
         }
         displayHelp(hName);
         return true;
     }
-    if (cmdName == "RECONNECT") {
+    if (cmdName == "RECONNECT")
+    {
         ircRestart();
 
         return true;
     }
-    if (cmdName == "MSG") {
+    if (cmdName == "MSG")
+    {
         QString target;
         QString msgText;
-        if (cmd->parameters().count() > 1) {
+        if (cmd->parameters().count() > 1)
+        {
             target = QString(cmd->parameters().at(1));
         }
-        if (target.isEmpty()) {
-            target = bufferList->currentIndex().data(Irc::BufferRole).value<IrcBuffer*>()->title();
+        if (target.isEmpty())
+        {
+            target = bufferList->currentIndex().data(Irc::BufferRole).value<IrcBuffer *>()->title();
         }
-        if (cmd->parameters().count() > 2) {
+        if (cmd->parameters().count() > 2)
+        {
             msgText = QString(cmd->parameters().mid(2).join(" "));
         }
 
         sendMsg(target, msgText);
         return true;
     }
-    if (cmdName == "MSGLIMIT") {
+    if (cmdName == "MSGLIMIT")
+    {
         int limit = 0;
-        if (cmd->parameters().count() > 1) {
+        if (cmd->parameters().count() > 1)
+        {
             bool isIntOk = false;
             limit = cmd->parameters().at(1).toInt(&isIntOk);
-            if (!isIntOk) {
+            if (!isIntOk)
+            {
                 limit = 0;
             }
         }
-        if (limit <= 0) {
+        if (limit <= 0)
+        {
             QString error = tr("[Error] MSGLIMIT requires <limit> to be a whole number greater than zero!");
             ircBrowser->append(IrcMessageFormatter::formatMessage(error, QStringLiteral("indianred")));
             return true;
         }
-        if (cmd->parameters().count() > 2) {
+        if (cmd->parameters().count() > 2)
+        {
             QString bufferName = cmd->parameters().at(2);
-            if (!bufferName.isEmpty()) {
-                IrcBuffer* buffer = bufferModel->find(bufferName);
-                if (buffer) {
-                    auto* document = bufferTexts.value(buffer);
+            if (!bufferName.isEmpty())
+            {
+                IrcBuffer *buffer = bufferModel->find(bufferName);
+                if (buffer)
+                {
+                    auto *document = bufferTexts.value(buffer);
                     document->setMaximumBlockCount(limit);
                     return true;
                 }
             }
-        } else {
-            for (auto* document : bufferTexts.values()) {
+        }
+        else
+        {
+            for (auto *document : bufferTexts.values())
+            {
                 document->setMaximumBlockCount(limit);
             }
             mMessageBufferLimit = limit;
@@ -399,13 +456,19 @@ bool dlgIRC::processCustomCommand(IrcCommand* cmd)
     return true;
 }
 
-void dlgIRC::displayHelp(const QString& cmdName = "")
+void dlgIRC::displayHelp(const QString &cmdName = "")
 {
     QString help;
-    if (cmdName.isEmpty()) {
+    if (cmdName.isEmpty())
+    {
         help = tr("[HELP] Available Commands: %1").arg(commandParser->commands().join(QStringLiteral("  ")));
-    } else {
-        help = tr("[HELP] Syntax: %1").arg(commandParser->syntax(cmdName).replace(QStringLiteral("<"), QStringLiteral("&lt;")).replace(QStringLiteral(">"), QStringLiteral("&gt;")));
+    }
+    else
+    {
+        help = tr("[HELP] Syntax: %1")
+                   .arg(commandParser->syntax(cmdName)
+                            .replace(QStringLiteral("<"), QStringLiteral("&lt;"))
+                            .replace(QStringLiteral(">"), QStringLiteral("&gt;")));
     }
 
     ircBrowser->append(IrcMessageFormatter::formatMessage(help));
@@ -414,7 +477,8 @@ void dlgIRC::displayHelp(const QString& cmdName = "")
 void dlgIRC::slot_onConnected()
 {
     ircBrowser->append(IrcMessageFormatter::formatMessage(tr("! Connected to %1.")).arg(mHostName));
-    ircBrowser->append(IrcMessageFormatter::formatMessage(tr("! Joining %1...")).arg(mChannels.join(QStringLiteral(" "))));
+    ircBrowser->append(
+        IrcMessageFormatter::formatMessage(tr("! Joining %1...")).arg(mChannels.join(QStringLiteral(" "))));
 }
 
 void dlgIRC::slot_onConnecting()
@@ -438,30 +502,38 @@ void dlgIRC::slot_onTextEntered()
     QString input = lineEdit->text();
 
     // add this line to our history list.
-    if (!input.isEmpty()) {
-        if (mInputHistoryIdxNext >= mInputHistoryMax) {
+    if (!input.isEmpty())
+    {
+        if (mInputHistoryIdxNext >= mInputHistoryMax)
+        {
             mInputHistoryIdxNext = 0;
         }
-        if (mInputHistory.count() > mInputHistoryIdxNext) {
+        if (mInputHistory.count() > mInputHistoryIdxNext)
+        {
             mInputHistory[mInputHistoryIdxNext] = input;
-        } else {
+        }
+        else
+        {
             mInputHistory << input;
         }
         mInputHistoryIdxCurrent = mInputHistoryIdxNext;
         ++mInputHistoryIdxNext;
     }
 
-    IrcCommand* command = commandParser->parse(input);
-    if (command) {
+    IrcCommand *command = commandParser->parse(input);
+    if (command)
+    {
         // handle custom commands
         bool isCustomCommand = processCustomCommand(command);
-        if (isCustomCommand) {
+        if (isCustomCommand)
+        {
             lineEdit->clear();
             return;
         }
 
         // update ping-started time if this command was a ping
-        if (command->type() == IrcCommand::Ping) {
+        if (command->type() == IrcCommand::Ping)
+        {
             mPingStarted = QDateTime::currentMSecsSinceEpoch();
         }
 
@@ -469,24 +541,31 @@ void dlgIRC::slot_onTextEntered()
         connection->sendCommand(command);
 
         // if the command was a quit command we should close this window.
-        if (command->type() == IrcCommand::Quit) {
+        if (command->type() == IrcCommand::Quit)
+        {
             setAttribute(Qt::WA_DeleteOnClose);
             close();
             return;
         }
 
         // echo own messages (servers do not send our own messages back)
-        if (command->type() == IrcCommand::Message || command->type() == IrcCommand::CtcpAction) {
-            IrcMessage* msg = command->toMessage(connection->nickName(), connection);
+        if (command->type() == IrcCommand::Message || command->type() == IrcCommand::CtcpAction)
+        {
+            IrcMessage *msg = command->toMessage(connection->nickName(), connection);
             slot_receiveMessage(msg);
             delete msg;
         }
         lineEdit->clear();
-    } else if (input.length() > 1) {
+    }
+    else if (input.length() > 1)
+    {
         QString error;
         QString command = lineEdit->text().mid(1).split(" ", QString::SkipEmptyParts).value(0).toUpper();
         if (commandParser->commands().contains(command))
-            error = tr("[ERROR] Syntax: %1").arg(commandParser->syntax(command).replace(QStringLiteral("<"), QStringLiteral("&lt;")).replace(QStringLiteral(">"), QStringLiteral("&gt;")));
+            error = tr("[ERROR] Syntax: %1")
+                        .arg(commandParser->syntax(command)
+                                 .replace(QStringLiteral("<"), QStringLiteral("&lt;"))
+                                 .replace(QStringLiteral(">"), QStringLiteral("&gt;")));
         else
             error = tr("[ERROR] Unknown command: %1").arg(command);
         ircBrowser->append(IrcMessageFormatter::formatMessage(error, QStringLiteral("indianred")));
@@ -499,7 +578,7 @@ void dlgIRC::slot_nameCompletion()
     completer->complete(lineEdit->text(), lineEdit->cursorPosition());
 }
 
-void dlgIRC::slot_nameCompleted(const QString& text, int cursor)
+void dlgIRC::slot_nameCompleted(const QString &text, int cursor)
 {
     lineEdit->setText(text);
     lineEdit->setCursorPosition(cursor);
@@ -507,11 +586,13 @@ void dlgIRC::slot_nameCompleted(const QString& text, int cursor)
 
 void dlgIRC::slot_onHistoryCompletion()
 {
-    if (mInputHistoryIdxCurrent >= mInputHistory.count()) {
+    if (mInputHistoryIdxCurrent >= mInputHistory.count())
+    {
         mInputHistoryIdxCurrent = 0;
     }
 
-    if (mInputHistory.count() == 0) {
+    if (mInputHistory.count() == 0)
+    {
         return;
     }
 
@@ -519,16 +600,16 @@ void dlgIRC::slot_onHistoryCompletion()
     ++mInputHistoryIdxCurrent;
 }
 
-void dlgIRC::slot_onBufferAdded(IrcBuffer* buffer)
+void dlgIRC::slot_onBufferAdded(IrcBuffer *buffer)
 {
     // joined a buffer - start listening to buffer specific messages
     connect(buffer, &IrcBuffer::messageReceived, this, &dlgIRC::slot_receiveMessage);
     // create a document for storing the buffer specific messages
-    auto * document = new QTextDocument(buffer);
+    auto *document = new QTextDocument(buffer);
     document->setMaximumBlockCount(mMessageBufferLimit);
     bufferTexts.insert(buffer, document);
     // create a sorted model for buffer users
-    auto * userModel = new IrcUserModel(buffer);
+    auto *userModel = new IrcUserModel(buffer);
     userModel->setSortMethod(Irc::SortByTitle);
     userModels.insert(buffer, userModel);
     // activate the new buffer
@@ -537,114 +618,132 @@ void dlgIRC::slot_onBufferAdded(IrcBuffer* buffer)
         bufferList->setCurrentIndex(bufferModel->index(idx));
 }
 
-void dlgIRC::slot_onBufferRemoved(IrcBuffer* buffer)
+void dlgIRC::slot_onBufferRemoved(IrcBuffer *buffer)
 {
     // the buffer specific models and documents are no longer needed
     delete userModels.take(buffer);
     delete bufferTexts.take(buffer);
 }
 
-void dlgIRC::slot_onBufferActivated(const QModelIndex& index)
+void dlgIRC::slot_onBufferActivated(const QModelIndex &index)
 {
-    auto * buffer = index.data(Irc::BufferRole).value<IrcBuffer*>();
+    auto *buffer = index.data(Irc::BufferRole).value<IrcBuffer *>();
     // document, user list and nick completion for the current buffer
     ircBrowser->setDocument(bufferTexts.value(buffer));
     ircBrowser->verticalScrollBar()->triggerAction(QScrollBar::SliderToMaximum);
     userList->setModel(userModels.value(buffer));
     completer->setBuffer(buffer);
     // keep the command parser aware of the context
-    if (buffer) {
+    if (buffer)
+    {
         commandParser->setTarget(buffer->title());
     }
 }
 
-void dlgIRC::slot_onUserActivated(const QModelIndex& index)
+void dlgIRC::slot_onUserActivated(const QModelIndex &index)
 {
-    auto * user = index.data(Irc::UserRole).value<IrcUser*>();
-    if (user) {
+    auto *user = index.data(Irc::UserRole).value<IrcUser *>();
+    if (user)
+    {
         // ensure the "user" isn't our own client, can only do this by name.
-        if (user->name() == mNickName) {
+        if (user->name() == mNickName)
+        {
             return;
         }
-        IrcBuffer* buffer = bufferModel->add(user->name());
+        IrcBuffer *buffer = bufferModel->add(user->name());
         // activate the new query
         int idx = bufferModel->buffers().indexOf(buffer);
-        if (idx != -1) {
+        if (idx != -1)
+        {
             bufferList->setCurrentIndex(bufferModel->index(idx));
         }
     }
 }
 
-void dlgIRC::appendHtml(QTextDocument* document, const QString& html)
+void dlgIRC::appendHtml(QTextDocument *document, const QString &html)
 {
     QTextCursor cursor(document);
     cursor.beginEditBlock();
     cursor.movePosition(QTextCursor::End);
-    if (!document->isEmpty()) {
+    if (!document->isEmpty())
+    {
         cursor.insertBlock();
     }
     cursor.insertHtml(html);
     cursor.endEditBlock();
 }
 
-void dlgIRC::slot_receiveMessage(IrcMessage* message)
+void dlgIRC::slot_receiveMessage(IrcMessage *message)
 {
     // update timestamp of ping/pong messages.
-    if (message->type() == IrcMessage::Pong && mPingStarted) {
+    if (message->type() == IrcMessage::Pong && mPingStarted)
+    {
         message->setTimeStamp(QDateTime::fromMSecsSinceEpoch(mPingStarted));
         mPingStarted = 0;
     }
 
-    auto * buffer = qobject_cast<IrcBuffer*>(sender());
-    if (!buffer) {
-        buffer = bufferList->currentIndex().data(Irc::BufferRole).value<IrcBuffer*>();
+    auto *buffer = qobject_cast<IrcBuffer *>(sender());
+    if (!buffer)
+    {
+        buffer = bufferList->currentIndex().data(Irc::BufferRole).value<IrcBuffer *>();
     }
-    QTextDocument* document = bufferTexts.value(buffer);
-    if (document) {
+    QTextDocument *document = bufferTexts.value(buffer);
+    if (document)
+    {
         QString html = IrcMessageFormatter::formatMessage(message);
-        if (!html.isEmpty()) {
+        if (!html.isEmpty())
+        {
             // send a plain-text formatted copy of the message to Lua, as long as it isn't our own.
-            if (!message->isOwn()) {
+            if (!message->isOwn())
+            {
                 QString textToLua = IrcMessageFormatter::formatMessage(message, true);
-                if (!textToLua.isEmpty()) {
+                if (!textToLua.isEmpty())
+                {
                     QString from = message->nick();
                     QString to = getMessageTarget(message, buffer->title());
-                    if (!isDefaultHostClient()) {
+                    if (!isDefaultHostClient())
+                    {
                         mpHost->postIrcMessage(from, to, textToLua);
                     }
                 }
             }
 
             // add the HTML formatted copy to the buffer.
-            if (document == ircBrowser->document()) {
+            if (document == ircBrowser->document())
+            {
                 ircBrowser->append(html);
-            } else {
+            }
+            else
+            {
                 dlgIRC::appendHtml(document, html);
             }
         }
     }
 }
 
-void dlgIRC::slot_onAnchorClicked(const QUrl& link)
+void dlgIRC::slot_onAnchorClicked(const QUrl &link)
 {
     QDesktopServices::openUrl(link);
 }
 
-void dlgIRC::slot_nickNameRequired(const QString& reserved, QString* alt)
+void dlgIRC::slot_nickNameRequired(const QString &reserved, QString *alt)
 {
     QString newNick = QStringLiteral("%1_%2").arg(reserved, QString::number(rand() % 10000));
-    ircBrowser->append(IrcMessageFormatter::formatMessage(tr("! The Nickname %1 is reserved. Automatically changing Nickname to: %2").arg(reserved, newNick)));
+    ircBrowser->append(IrcMessageFormatter::formatMessage(
+        tr("! The Nickname %1 is reserved. Automatically changing Nickname to: %2").arg(reserved, newNick)));
     connection->setNickName(newNick);
 }
 
-void dlgIRC::slot_nickNameChanged(const QString& nick)
+void dlgIRC::slot_nickNameChanged(const QString &nick)
 {
-    if (nick == mNickName) {
+    if (nick == mNickName)
+    {
         return;
     }
 
     // send a notice to Lua about the nick name change.
-    if (!isDefaultHostClient()) {
+    if (!isDefaultHostClient())
+    {
         mpHost->postIrcMessage(mNickName, nick, tr("Your nick has changed."));
     }
     mNickName = nick;
@@ -652,64 +751,72 @@ void dlgIRC::slot_nickNameChanged(const QString& nick)
     setClientWindowTitle();
 }
 
-void dlgIRC::slot_joinedChannel(IrcJoinMessage* message)
+void dlgIRC::slot_joinedChannel(IrcJoinMessage *message)
 {
-    if (!mReadyForSending) {
+    if (!mReadyForSending)
+    {
         mReadyForSending = true;
     }
 
     QString chan = message->channel();
-    if (!mChannels.contains(chan)) {
+    if (!mChannels.contains(chan))
+    {
         mChannels << chan;
     }
 
-    if (message->isOwn()) {
-        QString luaText = IrcMessageFormatter::formatMessage(static_cast<IrcMessage*>(message), true);
-        if (!isDefaultHostClient()) {
+    if (message->isOwn())
+    {
+        QString luaText = IrcMessageFormatter::formatMessage(static_cast<IrcMessage *>(message), true);
+        if (!isDefaultHostClient())
+        {
             mpHost->postIrcMessage(message->nick(), message->channel(), luaText);
         }
     }
 }
 
-void dlgIRC::slot_partedChannel(IrcPartMessage* message)
+void dlgIRC::slot_partedChannel(IrcPartMessage *message)
 {
     QString chan = message->channel();
-    if (mChannels.contains(chan)) {
+    if (mChannels.contains(chan))
+    {
         mChannels.removeAll(chan);
     }
 
-    if (message->isOwn() && !isDefaultHostClient()) {
-        QString luaText = IrcMessageFormatter::formatMessage(static_cast<IrcMessage*>(message), true);
+    if (message->isOwn() && !isDefaultHostClient())
+    {
+        QString luaText = IrcMessageFormatter::formatMessage(static_cast<IrcMessage *>(message), true);
         mpHost->postIrcMessage(message->nick(), message->channel(), luaText);
     }
 }
 
-void dlgIRC::slot_receiveNumericMessage(IrcNumericMessage* msg)
+void dlgIRC::slot_receiveNumericMessage(IrcNumericMessage *msg)
 {
     // set the connected host name and update the serverBuffer name to match it.
-    if (msg->code() == Irc::RPL_YOURHOST) {
+    if (msg->code() == Irc::RPL_YOURHOST)
+    {
         serverBuffer->setName(msg->nick());
         mConnectedHostName = msg->nick();
     }
 }
 
-void dlgIRC::showEvent(QShowEvent* event)
+void dlgIRC::showEvent(QShowEvent *event)
 {
     startClient();
     event->ignore();
 }
 
-QString dlgIRC::getMessageTarget(IrcMessage* msg, const QString& bufferName)
+QString dlgIRC::getMessageTarget(IrcMessage *msg, const QString &bufferName)
 {
     QString target = bufferName;
-    switch (msg->type()) {
+    switch (msg->type())
+    {
     case IrcMessage::Notice: {
-        auto * msgNotice = static_cast<IrcNoticeMessage*>(msg);
+        auto *msgNotice = static_cast<IrcNoticeMessage *>(msg);
         target = msgNotice->target();
         break;
     }
     case IrcMessage::Private: {
-        auto * msgPrivate = static_cast<IrcPrivateMessage*>(msg);
+        auto *msgPrivate = static_cast<IrcPrivateMessage *>(msg);
         target = msgPrivate->target();
         break;
     }
@@ -717,36 +824,42 @@ QString dlgIRC::getMessageTarget(IrcMessage* msg, const QString& bufferName)
     return target;
 }
 
-QString dlgIRC::readIrcHostName(Host* pH)
+QString dlgIRC::readIrcHostName(Host *pH)
 {
     QString hostname = pH->readProfileData(dlgIRC::HostNameCfgItem);
-    if (hostname.isEmpty()) {
+    if (hostname.isEmpty())
+    {
         hostname = dlgIRC::DefaultHostName;
     }
     return hostname;
 }
 
-int dlgIRC::readIrcHostPort(Host* pH)
+int dlgIRC::readIrcHostPort(Host *pH)
 {
     QString portStr = pH->readProfileData(dlgIRC::HostPortCfgItem);
     bool ok;
     int port = portStr.toInt(&ok);
-    if (portStr.isEmpty() || !ok) {
+    if (portStr.isEmpty() || !ok)
+    {
         port = dlgIRC::DefaultHostPort;
-    } else if (port > 65535 || port < 1) {
+    }
+    else if (port > 65535 || port < 1)
+    {
         port = dlgIRC::DefaultHostPort;
     }
     return port;
 }
 
-QString dlgIRC::readIrcNickName(Host* pH)
+QString dlgIRC::readIrcNickName(Host *pH)
 {
     QString nick = pH->readProfileData(dlgIRC::NickNameCfgItem);
-    if (nick.isEmpty()) {
+    if (nick.isEmpty())
+    {
         // if the new config doesn't exist, try loading the old one.
         nick = readAppDefaultIrcNick();
 
-        if (nick.isEmpty()) {
+        if (nick.isEmpty())
+        {
             nick = QStringLiteral("%1%2").arg(dlgIRC::DefaultNickName, QString::number(rand() % 10000));
         }
     }
@@ -758,9 +871,11 @@ QString dlgIRC::readAppDefaultIrcNick()
     QFile file(mudlet::getMudletPath(mudlet::mainDataItemPath, QStringLiteral("irc_nick")));
     bool opened = file.open(QIODevice::ReadOnly);
     QString rstr;
-    if (opened) {
+    if (opened)
+    {
         QDataStream ifs(&file);
-        if (mudlet::scmRunTimeQtVersion >= QVersionNumber(5, 13, 0)) {
+        if (mudlet::scmRunTimeQtVersion >= QVersionNumber(5, 13, 0))
+        {
             ifs.setVersion(mudlet::scmQDataStreamFormat_5_12);
         }
         ifs >> rstr;
@@ -769,13 +884,15 @@ QString dlgIRC::readAppDefaultIrcNick()
     return rstr;
 }
 
-void dlgIRC::writeAppDefaultIrcNick(const QString& nick)
+void dlgIRC::writeAppDefaultIrcNick(const QString &nick)
 {
     QFile file(mudlet::getMudletPath(mudlet::mainDataItemPath, QStringLiteral("irc_nick")));
     bool opened = file.open(QIODevice::WriteOnly);
-    if (opened) {
+    if (opened)
+    {
         QDataStream ofs(&file);
-        if (mudlet::scmRunTimeQtVersion >= QVersionNumber(5, 13, 0)) {
+        if (mudlet::scmRunTimeQtVersion >= QVersionNumber(5, 13, 0))
+        {
             ofs.setVersion(mudlet::scmQDataStreamFormat_5_12);
         }
         ofs << nick;
@@ -783,29 +900,32 @@ void dlgIRC::writeAppDefaultIrcNick(const QString& nick)
     }
 }
 
-QStringList dlgIRC::readIrcChannels(Host* pH)
+QStringList dlgIRC::readIrcChannels(Host *pH)
 {
     QStringList channels;
     QString channelstr = pH->readProfileData(dlgIRC::ChannelsCfgItem);
-    if (channelstr.isEmpty()) {
+    if (channelstr.isEmpty())
+    {
         channels << dlgIRC::DefaultChannels;
-    } else {
+    }
+    else
+    {
         channels = channelstr.split(QStringLiteral(" "), QString::SkipEmptyParts);
     }
     return channels;
 }
 
-QPair<bool, QString> dlgIRC::writeIrcHostName(Host* pH, const QString& hostname)
+QPair<bool, QString> dlgIRC::writeIrcHostName(Host *pH, const QString &hostname)
 {
     return pH->writeProfileData(dlgIRC::HostNameCfgItem, hostname);
 }
 
-QPair<bool, QString> dlgIRC::writeIrcHostPort(Host* pH, int port)
+QPair<bool, QString> dlgIRC::writeIrcHostPort(Host *pH, int port)
 {
     return pH->writeProfileData(dlgIRC::HostPortCfgItem, QString::number(port));
 }
 
-QPair<bool, QString> dlgIRC::writeIrcNickName(Host* pH, const QString& nickname)
+QPair<bool, QString> dlgIRC::writeIrcNickName(Host *pH, const QString &nickname)
 {
     // update app-wide file to set a default nick as whatever the last-used nick was.
     writeAppDefaultIrcNick(nickname);
@@ -813,14 +933,15 @@ QPair<bool, QString> dlgIRC::writeIrcNickName(Host* pH, const QString& nickname)
     return pH->writeProfileData(dlgIRC::NickNameCfgItem, nickname);
 }
 
-QPair<bool, QString> dlgIRC::writeIrcChannels(Host* pH, const QStringList& channels)
+QPair<bool, QString> dlgIRC::writeIrcChannels(Host *pH, const QStringList &channels)
 {
     return pH->writeProfileData(dlgIRC::ChannelsCfgItem, channels.join(QStringLiteral(" ")));
 }
 
 void dlgIRC::writeQSettings()
 {
-    if (mudlet::self()) {
+    if (mudlet::self())
+    {
         mudlet::self()->mpSettings->setValue("ircMessageBufferLimit", mMessageBufferLimit);
     }
 }

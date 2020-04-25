@@ -27,12 +27,12 @@
 */
 
 #include "irc.h"
-#include "irccore.h"
 #include "irccommand.h"
 #include "ircconnection.h"
+#include "irccore.h"
 #include "ircmessage_p.h"
-#include <QMetaEnum>
 #include <QDebug>
+#include <QMetaEnum>
 #ifndef QT_NO_SSL
 #include <QSslSocket>
 #endif // QT_NO_SSL
@@ -104,19 +104,11 @@ QStringList Irc::supportedSaslMechanisms()
  */
 QStringList Irc::supportedCapabilities()
 {
-    return QStringList() << QLatin1String("account-notify")
-                         << QLatin1String("account-tag")
-                         << QLatin1String("away-notify")
-                         << QLatin1String("batch")
-                         << QLatin1String("cap-notify")
-                         << QLatin1String("chghost")
-                         << QLatin1String("echo-message")
-                         << QLatin1String("extended-join")
-                         << QLatin1String("invite-notify")
-                         << QLatin1String("multi-prefix")
-                         << QLatin1String("sasl")
-                         << QLatin1String("server-time")
-                         << QLatin1String("userhost-in-names");
+    return QStringList() << QLatin1String("account-notify") << QLatin1String("account-tag")
+                         << QLatin1String("away-notify") << QLatin1String("batch") << QLatin1String("cap-notify")
+                         << QLatin1String("chghost") << QLatin1String("echo-message") << QLatin1String("extended-join")
+                         << QLatin1String("invite-notify") << QLatin1String("multi-prefix") << QLatin1String("sasl")
+                         << QLatin1String("server-time") << QLatin1String("userhost-in-names");
 }
 
 /*!
@@ -152,7 +144,7 @@ QString Irc::codeToString(int code)
 
     \sa IrcMessage::prefix, IrcMessage::nick
  */
-QString Irc::nickFromPrefix(const QString& prefix)
+QString Irc::nickFromPrefix(const QString &prefix)
 {
     QString nick;
     IrcMessagePrivate::parsePrefix(prefix, &nick, 0, 0);
@@ -169,7 +161,7 @@ QString Irc::nickFromPrefix(const QString& prefix)
 
     \sa IrcMessage::prefix, IrcMessage::ident
  */
-QString Irc::identFromPrefix(const QString& prefix)
+QString Irc::identFromPrefix(const QString &prefix)
 {
     QString ident;
     IrcMessagePrivate::parsePrefix(prefix, 0, &ident, 0);
@@ -186,7 +178,7 @@ QString Irc::identFromPrefix(const QString& prefix)
 
     \sa IrcMessage::prefix, IrcMessage::host
  */
-QString Irc::hostFromPrefix(const QString& prefix)
+QString Irc::hostFromPrefix(const QString &prefix)
 {
     QString host;
     IrcMessagePrivate::parsePrefix(prefix, 0, 0, &host);
@@ -206,7 +198,7 @@ QDebug operator<<(QDebug debug, Irc::Code code)
 {
     const int index = Irc::staticMetaObject.indexOfEnumerator("Code");
     QMetaEnum enumerator = Irc::staticMetaObject.enumerator(index);
-    const char* key = enumerator.valueToKey(code);
+    const char *key = enumerator.valueToKey(code);
     debug << (key ? key : "Unknown");
     return debug;
 }
@@ -215,7 +207,7 @@ QDebug operator<<(QDebug debug, Irc::DataRole role)
 {
     const int index = Irc::staticMetaObject.indexOfEnumerator("DataRole");
     QMetaEnum enumerator = Irc::staticMetaObject.enumerator(index);
-    const char* key = enumerator.valueToKey(role);
+    const char *key = enumerator.valueToKey(role);
     debug << (key ? key : "Unknown");
     return debug;
 }
@@ -224,7 +216,7 @@ QDebug operator<<(QDebug debug, Irc::Color color)
 {
     const int index = Irc::staticMetaObject.indexOfEnumerator("Color");
     QMetaEnum enumerator = Irc::staticMetaObject.enumerator(index);
-    const char* key = enumerator.valueToKey(color);
+    const char *key = enumerator.valueToKey(color);
     debug << (key ? key : "Unknown");
     return debug;
 }
@@ -233,7 +225,7 @@ QDebug operator<<(QDebug debug, Irc::SortMethod method)
 {
     const int index = Irc::staticMetaObject.indexOfEnumerator("SortMethod");
     QMetaEnum enumerator = Irc::staticMetaObject.enumerator(index);
-    const char* key = enumerator.valueToKey(method);
+    const char *key = enumerator.valueToKey(method);
     debug << (key ? key : "Unknown");
     return debug;
 }

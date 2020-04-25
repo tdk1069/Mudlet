@@ -46,48 +46,53 @@ IRC_BEGIN_NAMESPACE
 */
 
 #ifndef IRC_DOXYGEN
-void IrcUserPrivate::setName(const QString& n)
+void IrcUserPrivate::setName(const QString &n)
 {
     Q_Q(IrcUser);
-    if (name != n) {
+    if (name != n)
+    {
         name = n;
         emit q->nameChanged(name);
         emit q->titleChanged(q->title());
     }
 }
 
-void IrcUserPrivate::setPrefix(const QString& p)
+void IrcUserPrivate::setPrefix(const QString &p)
 {
     Q_Q(IrcUser);
-    if (prefix != p) {
+    if (prefix != p)
+    {
         prefix = p;
         emit q->prefixChanged(prefix);
         emit q->titleChanged(q->title());
     }
 }
 
-void IrcUserPrivate::setMode(const QString& m)
+void IrcUserPrivate::setMode(const QString &m)
 {
     Q_Q(IrcUser);
-    if (mode != m) {
+    if (mode != m)
+    {
         mode = m;
         emit q->modeChanged(mode);
     }
 }
 
-void IrcUserPrivate::setServOp(const bool& o)
+void IrcUserPrivate::setServOp(const bool &o)
 {
     Q_Q(IrcUser);
-    if (servOp != o) {
+    if (servOp != o)
+    {
         servOp = o;
         emit q->servOpChanged(servOp);
     }
 }
 
-void IrcUserPrivate::setAway(const bool& a)
+void IrcUserPrivate::setAway(const bool &a)
 {
     Q_Q(IrcUser);
-    if (away != a) {
+    if (away != a)
+    {
         away = a;
         emit q->awayChanged(away);
     }
@@ -97,8 +102,7 @@ void IrcUserPrivate::setAway(const bool& a)
 /*!
     Constructs a new user with \a parent.
  */
-IrcUser::IrcUser(QObject* parent)
-    : QObject(parent), d_ptr(new IrcUserPrivate)
+IrcUser::IrcUser(QObject *parent) : QObject(parent), d_ptr(new IrcUserPrivate)
 {
     Q_D(IrcUser);
     d->q_ptr = this;
@@ -250,18 +254,18 @@ bool IrcUser::isAway() const
     \par Access function:
     \li \ref IrcChannel* <b>channel</b>() const
  */
-IrcChannel* IrcUser::channel() const
+IrcChannel *IrcUser::channel() const
 {
     Q_D(const IrcUser);
     return d->channel;
 }
 
 #ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug debug, const IrcUser* user)
+QDebug operator<<(QDebug debug, const IrcUser *user)
 {
     if (!user)
         return debug << "IrcUser(0x0) ";
-    debug.nospace() << user->metaObject()->className() << '(' << (void*) user;
+    debug.nospace() << user->metaObject()->className() << '(' << (void *)user;
     if (!user->objectName().isEmpty())
         debug.nospace() << ", name=" << qPrintable(user->objectName());
     if (!user->name().isEmpty())

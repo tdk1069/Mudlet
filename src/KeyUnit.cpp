@@ -19,50 +19,41 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "KeyUnit.h"
-
 
 #include "Host.h"
 #include "TKey.h"
 
-KeyUnit::KeyUnit(Host* pHost)
-: statsKeyTotal(0)
-, statsTempKeys(0)
-, statsActiveKeys(0)
-, statsActiveKeysMax(0)
-, statsActiveKeysMin(0)
-, statsActiveKeysAverage(0)
-, statsTempKeysCreated(0)
-, statsTempKeysKilled(0)
-, mRunAllKeyMatches(false)
-, mpHost(pHost)
-, mMaxID(0)
-, mModuleMember(false)
+KeyUnit::KeyUnit(Host *pHost)
+    : statsKeyTotal(0), statsTempKeys(0), statsActiveKeys(0), statsActiveKeysMax(0), statsActiveKeysMin(0),
+      statsActiveKeysAverage(0), statsTempKeysCreated(0), statsTempKeysKilled(0), mRunAllKeyMatches(false),
+      mpHost(pHost), mMaxID(0), mModuleMember(false)
 {
     setupKeyNames();
 }
 
-
-void KeyUnit::_uninstall(TKey* pChild, const QString& packageName)
+void KeyUnit::_uninstall(TKey *pChild, const QString &packageName)
 {
-    std::list<TKey*>* childrenList = pChild->mpMyChildrenList;
-    for (auto key : *childrenList) {
+    std::list<TKey *> *childrenList = pChild->mpMyChildrenList;
+    for (auto key : *childrenList)
+    {
         _uninstall(key, packageName);
         uninstallList.append(key);
     }
 }
 
-
-void KeyUnit::uninstall(const QString& packageName)
+void KeyUnit::uninstall(const QString &packageName)
 {
-    for (auto rootKey : mKeyRootNodeList) {
-        if (rootKey->mPackageName == packageName) {
+    for (auto rootKey : mKeyRootNodeList)
+    {
+        if (rootKey->mPackageName == packageName)
+        {
             _uninstall(rootKey, packageName);
             uninstallList.append(rootKey);
         }
     }
-    for (auto& key : uninstallList) {
+    for (auto &key : uninstallList)
+    {
         unregisterKey(key);
     }
     uninstallList.clear();
@@ -71,11 +62,16 @@ void KeyUnit::uninstall(const QString& packageName)
 bool KeyUnit::processDataStream(int key, int modifier)
 {
     bool isMatchFound = false;
-    for (auto keyObject : mKeyRootNodeList) {
-        if (keyObject->match(key, modifier, mRunAllKeyMatches)) {
-            if (!mRunAllKeyMatches) {
+    for (auto keyObject : mKeyRootNodeList)
+    {
+        if (keyObject->match(key, modifier, mRunAllKeyMatches))
+        {
+            if (!mRunAllKeyMatches)
+            {
                 return true;
-            } else {
+            }
+            else
+            {
                 isMatchFound = true;
             }
         }
@@ -86,8 +82,10 @@ bool KeyUnit::processDataStream(int key, int modifier)
 
 void KeyUnit::compileAll()
 {
-    for (auto key : mKeyRootNodeList) {
-        if (key->isActive()) {
+    for (auto key : mKeyRootNodeList)
+    {
+        if (key->isActive())
+        {
             key->compileAll();
         }
     }
@@ -95,33 +93,37 @@ void KeyUnit::compileAll()
 
 void KeyUnit::stopAllTriggers()
 {
-    for (auto key : mKeyRootNodeList) {
+    for (auto key : mKeyRootNodeList)
+    {
         key->disableFamily();
     }
 }
 
 void KeyUnit::reenableAllTriggers()
 {
-    for (auto key : mKeyRootNodeList) {
+    for (auto key : mKeyRootNodeList)
+    {
         key->enableFamily();
     }
 }
 
-TKey* KeyUnit::findFirstKey(QString& name)
+TKey *KeyUnit::findFirstKey(QString &name)
 {
-    QMap<QString, TKey*>::const_iterator it = mLookupTable.constFind(name);
-    if (it != mLookupTable.cend() && it.key() == name) {
+    QMap<QString, TKey *>::const_iterator it = mLookupTable.constFind(name);
+    if (it != mLookupTable.cend() && it.key() == name)
+    {
         return it.value();
     }
     return nullptr;
 }
 
-bool KeyUnit::enableKey(const QString& name)
+bool KeyUnit::enableKey(const QString &name)
 {
     bool found = false;
-    QMap<QString, TKey*>::const_iterator it = mLookupTable.constFind(name);
-    while (it != mLookupTable.cend() && it.key() == name) {
-        TKey* pT = it.value();
+    QMap<QString, TKey *>::const_iterator it = mLookupTable.constFind(name);
+    while (it != mLookupTable.cend() && it.key() == name)
+    {
+        TKey *pT = it.value();
         // Unlike the TTriggerUnit version of this code we directly set
         // the mActive flag (and it shows up in the editor) rather than the
         // mUserActiveState one (which does not)
@@ -133,12 +135,13 @@ bool KeyUnit::enableKey(const QString& name)
     return found;
 }
 
-bool KeyUnit::disableKey(const QString& name)
+bool KeyUnit::disableKey(const QString &name)
 {
     bool found = false;
-    QMap<QString, TKey*>::const_iterator it = mLookupTable.constFind(name);
-    while (it != mLookupTable.cend() && it.key() == name) {
-        TKey* pT = it.value();
+    QMap<QString, TKey *>::const_iterator it = mLookupTable.constFind(name);
+    while (it != mLookupTable.cend() && it.key() == name)
+    {
+        TKey *pT = it.value();
         // Unlike the TTriggerUnit version of this code we directly clear
         // the mActive flag (and it shows up in the editor) rather than the
         // mUserActiveState one (which does not)
@@ -150,14 +153,19 @@ bool KeyUnit::disableKey(const QString& name)
     return found;
 }
 
-bool KeyUnit::killKey(QString& name)
+bool KeyUnit::killKey(QString &name)
 {
-    for (auto pChild : mKeyRootNodeList) {
-        if (pChild->getName() == name) {
+    for (auto pChild : mKeyRootNodeList)
+    {
+        if (pChild->getName() == name)
+        {
             // only temporary Keys can be killed
-            if (!pChild->isTemporary()) {
+            if (!pChild->isTemporary())
+            {
                 return false;
-            } else {
+            }
+            else
+            {
                 pChild->setIsActive(false);
                 markCleanup(pChild);
                 return true;
@@ -169,30 +177,39 @@ bool KeyUnit::killKey(QString& name)
 
 void KeyUnit::removeAllTempKeys()
 {
-    for (auto key : mKeyRootNodeList) {
-        if (key->isTemporary()) {
+    for (auto key : mKeyRootNodeList)
+    {
+        if (key->isTemporary())
+        {
             key->setIsActive(false);
             markCleanup(key);
         }
     }
 }
 
-void KeyUnit::addKeyRootNode(TKey* pT, int parentPosition, int childPosition, bool moveKey)
+void KeyUnit::addKeyRootNode(TKey *pT, int parentPosition, int childPosition, bool moveKey)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
-    if (!pT->getID()) {
+    if (!pT->getID())
+    {
         pT->setID(getNewID());
     }
 
-    if ((parentPosition == -1) || (childPosition >= static_cast<int>(mKeyRootNodeList.size()))) {
+    if ((parentPosition == -1) || (childPosition >= static_cast<int>(mKeyRootNodeList.size())))
+    {
         mKeyRootNodeList.push_back(pT);
-    } else {
+    }
+    else
+    {
         // insert item at proper position
         int cnt = 0;
-        for (auto it = mKeyRootNodeList.begin(); it != mKeyRootNodeList.end(); it++) {
-            if (cnt >= childPosition) {
+        for (auto it = mKeyRootNodeList.begin(); it != mKeyRootNodeList.end(); it++)
+        {
+            if (cnt >= childPosition)
+            {
                 mKeyRootNodeList.insert(it, pT);
                 break;
             }
@@ -200,7 +217,8 @@ void KeyUnit::addKeyRootNode(TKey* pT, int parentPosition, int childPosition, bo
         }
     }
 
-    if (!moveKey) {
+    if (!moveKey)
+    {
         mKeyMap.insert(pT->getID(), pT);
     }
 }
@@ -209,97 +227,122 @@ void KeyUnit::reParentKey(int childID, int oldParentID, int newParentID, int par
 {
     QMutexLocker locker(&mKeyUnitLock);
 
-    TKey* pOldParent = getKeyPrivate(oldParentID);
-    TKey* pNewParent = getKeyPrivate(newParentID);
-    TKey* pChild = getKeyPrivate(childID);
-    if (!pChild) {
+    TKey *pOldParent = getKeyPrivate(oldParentID);
+    TKey *pNewParent = getKeyPrivate(newParentID);
+    TKey *pChild = getKeyPrivate(childID);
+    if (!pChild)
+    {
         return;
     }
-    if (pOldParent) {
+    if (pOldParent)
+    {
         pOldParent->popChild(pChild);
-    } else {
+    }
+    else
+    {
         mKeyRootNodeList.remove(pChild);
     }
-    if (pNewParent) {
+    if (pNewParent)
+    {
         pNewParent->addChild(pChild, parentPosition, childPosition);
         pChild->setParent(pNewParent);
-    } else {
+    }
+    else
+    {
         pChild->Tree<TKey>::setParent(nullptr);
         addKeyRootNode(pChild, parentPosition, childPosition, true);
     }
 }
 
-void KeyUnit::removeKeyRootNode(TKey* pT)
+void KeyUnit::removeKeyRootNode(TKey *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
-    if (!pT->isTemporary()) {
+    if (!pT->isTemporary())
+    {
         mLookupTable.remove(pT->getName(), pT);
-    } else {
+    }
+    else
+    {
         mLookupTable.remove(pT->getName());
     }
     mKeyMap.remove(pT->getID());
     mKeyRootNodeList.remove(pT);
 }
 
-TKey* KeyUnit::getKey(int id)
+TKey *KeyUnit::getKey(int id)
 {
     QMutexLocker locker(&mKeyUnitLock);
-    if (mKeyMap.find(id) != mKeyMap.end()) {
+    if (mKeyMap.find(id) != mKeyMap.end())
+    {
         return mKeyMap.value(id);
-    } else {
+    }
+    else
+    {
         return nullptr;
     }
 }
 
-
-TKey* KeyUnit::getKeyPrivate(int id)
+TKey *KeyUnit::getKeyPrivate(int id)
 {
-    if (mKeyMap.find(id) != mKeyMap.end()) {
+    if (mKeyMap.find(id) != mKeyMap.end())
+    {
         return mKeyMap.value(id);
-    } else {
+    }
+    else
+    {
         return nullptr;
     }
 }
 
-bool KeyUnit::registerKey(TKey* pT)
+bool KeyUnit::registerKey(TKey *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return false;
     }
 
-    if (pT->getParent()) {
+    if (pT->getParent())
+    {
         addKey(pT);
         return true;
-    } else {
+    }
+    else
+    {
         addKeyRootNode(pT);
         return true;
     }
 }
 
-void KeyUnit::unregisterKey(TKey* pT)
+void KeyUnit::unregisterKey(TKey *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
-    if (pT->getParent()) {
+    if (pT->getParent())
+    {
         removeKey(pT);
         return;
-    } else {
+    }
+    else
+    {
         removeKeyRootNode(pT);
         return;
     }
 }
 
-
-void KeyUnit::addKey(TKey* pT)
+void KeyUnit::addKey(TKey *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
 
-    if (!pT->getID()) {
+    if (!pT->getID())
+    {
         // Only get a new Id if it has not been previously set (the default is 0)
         pT->setID(getNewID());
     }
@@ -307,19 +350,22 @@ void KeyUnit::addKey(TKey* pT)
     mKeyMap.insert(pT->getID(), pT);
 }
 
-void KeyUnit::removeKey(TKey* pT)
+void KeyUnit::removeKey(TKey *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
-    if (!pT->isTemporary()) {
+    if (!pT->isTemporary())
+    {
         mLookupTable.remove(pT->getName(), pT);
-    } else {
+    }
+    else
+    {
         mLookupTable.remove(pT->getName());
     }
     mKeyMap.remove(pT->getID());
 }
-
 
 int KeyUnit::getNewID()
 {
@@ -338,31 +384,41 @@ QString KeyUnit::getKeyName(int keyCode, int modifierCode)
      Qt::KeypadModifier  0x20000000 A keypad button is pressed.
      Qt::GroupSwitchModifier 0x40000000 X11 only. A Mode_switch key on the keyboard is pressed.
     */
-    if (modifierCode == 0x00000000) {
+    if (modifierCode == 0x00000000)
+    {
         name += "no modifiers + ";
     }
-    if (modifierCode & 0x02000000) {
+    if (modifierCode & 0x02000000)
+    {
         name += "shift + ";
     }
-    if (modifierCode & 0x04000000) {
+    if (modifierCode & 0x04000000)
+    {
         name += "control + ";
     }
-    if (modifierCode & 0x08000000) {
+    if (modifierCode & 0x08000000)
+    {
         name += "alt + ";
     }
-    if (modifierCode & 0x10000000) {
+    if (modifierCode & 0x10000000)
+    {
         name += "meta + ";
     }
-    if (modifierCode & 0x20000000) {
+    if (modifierCode & 0x20000000)
+    {
         name += "keypad + ";
     }
-    if (modifierCode & 0x40000000) {
+    if (modifierCode & 0x40000000)
+    {
         name += "groupswitch + ";
     }
-    if (mKeys.contains(keyCode)) {
+    if (mKeys.contains(keyCode))
+    {
         name += mKeys[keyCode];
         return name;
-    } else {
+    }
+    else
+    {
         return QString("undefined key");
     }
 }
@@ -379,15 +435,18 @@ void KeyUnit::initStats()
     statsTempKeysKilled = 0;
 }
 
-void KeyUnit::_assembleReport(TKey* pChild)
+void KeyUnit::_assembleReport(TKey *pChild)
 {
-    std::list<TKey*>* childrenList = pChild->mpMyChildrenList;
-    for (auto pT : *childrenList) {
+    std::list<TKey *> *childrenList = pChild->mpMyChildrenList;
+    for (auto pT : *childrenList)
+    {
         _assembleReport(pT);
-        if (pT->isActive()) {
+        if (pT->isActive())
+        {
             statsActiveKeys++;
         }
-        if (pT->isTemporary()) {
+        if (pT->isTemporary())
+        {
             statsTempKeys++;
         }
         statsKeyTotal++;
@@ -399,21 +458,27 @@ QString KeyUnit::assembleReport()
     statsActiveKeys = 0;
     statsKeyTotal = 0;
     statsTempKeys = 0;
-    for (auto pChild : mKeyRootNodeList) {
-        if (pChild->isActive()) {
+    for (auto pChild : mKeyRootNodeList)
+    {
+        if (pChild->isActive())
+        {
             statsActiveKeys++;
         }
-        if (pChild->isTemporary()) {
+        if (pChild->isTemporary())
+        {
             statsTempKeys++;
         }
         statsKeyTotal++;
-        std::list<TKey*>* childrenList = pChild->mpMyChildrenList;
-        for (auto pT : *childrenList) {
+        std::list<TKey *> *childrenList = pChild->mpMyChildrenList;
+        for (auto pT : *childrenList)
+        {
             _assembleReport(pT);
-            if (pT->isActive()) {
+            if (pT->isActive())
+            {
                 statsActiveKeys++;
             }
-            if (pT->isTemporary()) {
+            if (pT->isTemporary())
+            {
                 statsTempKeys++;
             }
             statsKeyTotal++;
@@ -426,10 +491,12 @@ QString KeyUnit::assembleReport()
     return msg.join("");
 }
 
-void KeyUnit::markCleanup(TKey* pT)
+void KeyUnit::markCleanup(TKey *pT)
 {
-    for (auto key : mCleanupList) {
-        if (key == pT) {
+    for (auto key : mCleanupList)
+    {
+        if (key == pT)
+        {
             return;
         }
     }
@@ -438,7 +505,8 @@ void KeyUnit::markCleanup(TKey* pT)
 
 void KeyUnit::doCleanup()
 {
-    for (auto key : mCleanupList) {
+    for (auto key : mCleanupList)
+    {
         delete key;
     }
     mCleanupList.clear();

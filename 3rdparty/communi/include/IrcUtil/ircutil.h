@@ -38,8 +38,9 @@
 
 IRC_BEGIN_NAMESPACE
 
-namespace IrcUtil {
-    IRC_UTIL_EXPORT void registerMetaTypes();
+namespace IrcUtil
+{
+IRC_UTIL_EXPORT void registerMetaTypes();
 }
 
 IRC_END_NAMESPACE

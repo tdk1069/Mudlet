@@ -18,11 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "dlgAliasMainArea.h"
 
-
-dlgAliasMainArea::dlgAliasMainArea(QWidget* pF) : QWidget(pF)
+dlgAliasMainArea::dlgAliasMainArea(QWidget *pF) : QWidget(pF)
 {
     // init generated dialog
     setupUi(this);

@@ -23,17 +23,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TMap.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QApplication>
 #include <QColor>
 #include <QHash>
 #include <QMap>
 #include <QVector3D>
-#include "post_guard.h"
-
 
 #define DIR_NORTH 1
 #define DIR_NORTHEAST 2
@@ -57,8 +55,8 @@ class TRoom
 {
     Q_DECLARE_TR_FUNCTIONS(TRoom) // Needed so we can use tr() even though TRoom is NOT derived from QObject
 
-public:
-    TRoom(TRoomDB* pRDB);
+  public:
+    TRoom(TRoomDB *pRDB);
     ~TRoom();
     void setId(int);
     bool setExit(int to, int direction);
@@ -67,71 +65,147 @@ public:
     bool hasExit(int direction) const;
     void setWeight(int);
     void setExitLock(int, bool);
-    void setSpecialExitLock(int to, const QString& cmd, bool doLock);
-    bool setSpecialExitLock(const QString& cmd, bool doLock);
+    void setSpecialExitLock(int to, const QString &cmd, bool doLock);
+    bool setSpecialExitLock(const QString &cmd, bool doLock);
     bool hasExitLock(int to);
-    bool hasSpecialExitLock(int, const QString&);
+    bool hasSpecialExitLock(int, const QString &);
     void removeAllSpecialExitsToRoom(int _id);
-    void setSpecialExit(int to, const QString& cmd);
+    void setSpecialExit(int to, const QString &cmd);
     void clearSpecialExits();
-    const QMultiMap<int, QString>& getOtherMap() const { return other; }
-    const QMap<QString, int>& getExitWeights() const { return exitWeights; }
-    void setExitWeight(const QString& cmd, int w);
-    bool hasExitWeight(const QString& cmd);
-    bool setDoor(const QString& cmd, int doorStatus); //0=no door, 1=open door, 2=closed, 3=locked
-    int getDoor(const QString& cmd);
+    const QMultiMap<int, QString> &getOtherMap() const
+    {
+        return other;
+    }
+    const QMap<QString, int> &getExitWeights() const
+    {
+        return exitWeights;
+    }
+    void setExitWeight(const QString &cmd, int w);
+    bool hasExitWeight(const QString &cmd);
+    bool setDoor(const QString &cmd, int doorStatus); // 0=no door, 1=open door, 2=closed, 3=locked
+    int getDoor(const QString &cmd);
     bool hasExitStub(int direction);
     void setExitStub(int direction, bool status);
     void calcRoomDimensions();
     bool setArea(int, bool isToDeferAreaRelatedRecalculations = false);
-    int getExitWeight(const QString& cmd);
+    int getExitWeight(const QString &cmd);
 
-    int getWeight() { return weight; }
-    int getNorth() { return north; }
-    void setNorth(int id) { north = id; }
-    int getNorthwest() { return northwest; }
-    void setNorthwest(int id) { northwest = id; }
-    int getNortheast() { return northeast; }
-    void setNortheast(int id) { northeast = id; }
-    int getSouth() { return south; }
-    void setSouth(int id) { south = id; }
-    int getSouthwest() { return southwest; }
-    void setSouthwest(int id) { southwest = id; }
-    int getSoutheast() { return southeast; }
-    void setSoutheast(int id) { southeast = id; }
-    int getWest() { return west; }
-    void setWest(int id) { west = id; }
-    int getEast() { return east; }
-    void setEast(int id) { east = id; }
-    int getUp() { return up; }
-    void setUp(int id) { up = id; }
-    int getDown() { return down; }
-    void setDown(int id) { down = id; }
-    int getIn() { return in; }
-    void setIn(int id) { in = id; }
-    int getOut() { return out; }
-    void setOut(int id) { out = id; }
-    int getId() { return id; }
-    int getArea() { return area; }
+    int getWeight()
+    {
+        return weight;
+    }
+    int getNorth()
+    {
+        return north;
+    }
+    void setNorth(int id)
+    {
+        north = id;
+    }
+    int getNorthwest()
+    {
+        return northwest;
+    }
+    void setNorthwest(int id)
+    {
+        northwest = id;
+    }
+    int getNortheast()
+    {
+        return northeast;
+    }
+    void setNortheast(int id)
+    {
+        northeast = id;
+    }
+    int getSouth()
+    {
+        return south;
+    }
+    void setSouth(int id)
+    {
+        south = id;
+    }
+    int getSouthwest()
+    {
+        return southwest;
+    }
+    void setSouthwest(int id)
+    {
+        southwest = id;
+    }
+    int getSoutheast()
+    {
+        return southeast;
+    }
+    void setSoutheast(int id)
+    {
+        southeast = id;
+    }
+    int getWest()
+    {
+        return west;
+    }
+    void setWest(int id)
+    {
+        west = id;
+    }
+    int getEast()
+    {
+        return east;
+    }
+    void setEast(int id)
+    {
+        east = id;
+    }
+    int getUp()
+    {
+        return up;
+    }
+    void setUp(int id)
+    {
+        up = id;
+    }
+    int getDown()
+    {
+        return down;
+    }
+    void setDown(int id)
+    {
+        down = id;
+    }
+    int getIn()
+    {
+        return in;
+    }
+    void setIn(int id)
+    {
+        in = id;
+    }
+    int getOut()
+    {
+        return out;
+    }
+    void setOut(int id)
+    {
+        out = id;
+    }
+    int getId()
+    {
+        return id;
+    }
+    int getArea()
+    {
+        return area;
+    }
     void audit(QHash<int, int>, QHash<int, int>);
     void auditExits(QHash<int, int>);
-    /*bool*/ void restore(QDataStream& ifs, int roomID, int version);
-    void auditExit(int&,
-                   int,
-                   QString,
-                   QString,
-                   QMap<QString, int>&,
-                   QSet<int>&,
-                   QSet<int>&,
-                   QMap<QString, int>&,
-                   QMap<QString, QList<QPointF>>&,
-                   QMap<QString, QColor>&,
-                   QMap<QString, Qt::PenStyle>&,
-                   QMap<QString, bool>&,
-                   QHash<int, int>);
+    /*bool*/ void restore(QDataStream &ifs, int roomID, int version);
+    void auditExit(int &, int, QString, QString, QMap<QString, int> &, QSet<int> &, QSet<int> &, QMap<QString, int> &,
+                   QMap<QString, QList<QPointF>> &, QMap<QString, QColor> &, QMap<QString, Qt::PenStyle> &,
+                   QMap<QString, bool> &, QHash<int, int>);
     const QString dirCodeToDisplayName(int dirCode);
-    bool hasExitOrSpecialExit(const QString&) const;
-
+    bool hasExitOrSpecialExit(const QString &) const;
 
     int x;
     int y;
@@ -146,7 +220,7 @@ public:
     QString mSymbol;
     QString name;
     QVector3D v;
-    QList<int> exitStubs; //contains a list of: exittype (according to defined values above)
+    QList<int> exitStubs; // contains a list of: exittype (according to defined values above)
     QMap<QString, QString> userData;
     QList<int> exitLocks;
     QMap<QString, QList<QPointF>> customLines;
@@ -158,10 +232,9 @@ public:
     QColor highlightColor2;
     float highlightRadius;
     bool rendered;
-    QMap<QString, int> doors; //0=no door 1=open 2=closed 3=locked
+    QMap<QString, int> doors; // 0=no door 1=open 2=closed 3=locked
 
-
-private:
+  private:
     int id;
     int area;
     int weight;
@@ -183,9 +256,9 @@ private:
     // Also, move the special exit being locked OUT of being a prefix on the
     // QString part:
     QMultiMap<int, QString> other; // es knnen mehrere exits zum gleichen raum verlaufen
-                                   //verbotene exits werden mit 0 geprefixed, offene mit 1
+                                   // verbotene exits werden mit 0 geprefixed, offene mit 1
 
-    TRoomDB* mpRoomDB;
+    TRoomDB *mpRoomDB;
     friend class XMLimport;
     friend class XMLexport;
 };

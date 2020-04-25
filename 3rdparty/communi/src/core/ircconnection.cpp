@@ -27,27 +27,27 @@
 */
 
 #include "ircconnection.h"
-#include "ircconnection_p.h"
-#include "ircnetwork_p.h"
-#include "irccommand_p.h"
-#include "ircprotocol.h"
-#include "ircnetwork.h"
+#include "irc.h"
 #include "irccommand.h"
-#include "ircmessage.h"
+#include "irccommand_p.h"
+#include "ircconnection_p.h"
 #include "ircdebug_p.h"
 #include "ircfilter.h"
-#include "irc.h"
-#include <QLocale>
-#include <QRegExp>
+#include "ircmessage.h"
+#include "ircnetwork.h"
+#include "ircnetwork_p.h"
+#include "ircprotocol.h"
 #include <QDateTime>
+#include <QLocale>
+#include <QMetaEnum>
+#include <QMetaMethod>
+#include <QMetaObject>
+#include <QRegExp>
 #include <QTcpSocket>
 #include <QTextCodec>
-#include <QMetaObject>
-#include <QMetaMethod>
-#include <QMetaEnum>
 #ifndef QT_NO_SSL
-#include <QSslSocket>
 #include <QSslError>
+#include <QSslSocket>
 #endif // QT_NO_SSL
 #include <QDataStream>
 #include <QVariantMap>
@@ -247,26 +247,14 @@ IRC_BEGIN_NAMESPACE
  */
 
 #ifndef IRC_DOXYGEN
-IrcConnectionPrivate::IrcConnectionPrivate() :
-    q_ptr(0),
-    encoding("ISO-8859-15"),
-    network(0),
-    protocol(0),
-    socket(0),
-    host(),
-    port(6667),
-    currentServer(-1),
-    userName(),
-    nickName(),
-    realName(),
-    enabled(true),
-    status(IrcConnection::Inactive),
-    pendingOpen(false),
-    closed(false)
+IrcConnectionPrivate::IrcConnectionPrivate()
+    : q_ptr(0), encoding("ISO-8859-15"), network(0), protocol(0), socket(0), host(), port(6667), currentServer(-1),
+      userName(), nickName(), realName(), enabled(true), status(IrcConnection::Inactive), pendingOpen(false),
+      closed(false)
 {
 }
 
-void IrcConnectionPrivate::init(IrcConnection* connection)
+void IrcConnectionPrivate::init(IrcConnection *connection)
 {
     q_ptr = connection;
     network = IrcNetworkPrivate::create(connection);
@@ -297,11 +285,15 @@ void IrcConnectionPrivate::_irc_disconnected()
 void IrcConnectionPrivate::_irc_error(QAbstractSocket::SocketError error)
 {
     Q_Q(IrcConnection);
-    if (error == QAbstractSocket::SslHandshakeFailedError) {
+    if (error == QAbstractSocket::SslHandshakeFailedError)
+    {
         ircDebug(q, IrcDebug::Error) << error;
         setStatus(IrcConnection::Error);
         emit q->secureError();
-    } else if (!closed || (error != QAbstractSocket::RemoteHostClosedError && error != QAbstractSocket::UnknownSocketError)) {
+    }
+    else if (!closed ||
+             (error != QAbstractSocket::RemoteHostClosedError && error != QAbstractSocket::UnknownSocketError))
+    {
         ircDebug(q, IrcDebug::Error) << error;
         emit q->socketError(error);
         setStatus(IrcConnection::Error);
@@ -314,9 +306,10 @@ void IrcConnectionPrivate::_irc_sslErrors()
     Q_Q(IrcConnection);
     QStringList errors;
 #ifndef QT_NO_SSL
-    QSslSocket* ssl = qobject_cast<QSslSocket*>(socket);
-    if (ssl) {
-        foreach (const QSslError& error, ssl->sslErrors())
+    QSslSocket *ssl = qobject_cast<QSslSocket *>(socket);
+    if (ssl)
+    {
+        foreach (const QSslError &error, ssl->sslErrors())
             errors += error.errorString();
     }
 #endif
@@ -327,7 +320,8 @@ void IrcConnectionPrivate::_irc_sslErrors()
 void IrcConnectionPrivate::_irc_state(QAbstractSocket::SocketState state)
 {
     Q_Q(IrcConnection);
-    switch (state) {
+    switch (state)
+    {
     case QAbstractSocket::UnconnectedState:
         if (closed)
             setStatus(IrcConnection::Closed);
@@ -349,7 +343,8 @@ void IrcConnectionPrivate::_irc_state(QAbstractSocket::SocketState state)
 void IrcConnectionPrivate::_irc_reconnect()
 {
     Q_Q(IrcConnection);
-    if (!q->isActive()) {
+    if (!q->isActive())
+    {
         reconnecter.stop();
         q->open();
     }
@@ -360,13 +355,13 @@ void IrcConnectionPrivate::_irc_readData()
     protocol->read();
 }
 
-void IrcConnectionPrivate::_irc_filterDestroyed(QObject* filter)
+void IrcConnectionPrivate::_irc_filterDestroyed(QObject *filter)
 {
     messageFilters.removeAll(filter);
     commandFilters.removeAll(filter);
 }
 
-static bool parseServer(const QString& server, QString* host, int* port, bool* ssl)
+static bool parseServer(const QString &server, QString *host, int *port, bool *ssl)
 {
     QStringList p = server.split(QRegExp("[: ]"), QString::SkipEmptyParts);
     *host = p.value(0);
@@ -381,12 +376,18 @@ static bool parseServer(const QString& server, QString* host, int* port, bool* s
 void IrcConnectionPrivate::open()
 {
     Q_Q(IrcConnection);
-    if (q->isActive()) {
+    if (q->isActive())
+    {
         pendingOpen = true;
-    } else {
+    }
+    else
+    {
         closed = false;
-        if (!servers.isEmpty()) {
-            QString h; int p; bool s;
+        if (!servers.isEmpty())
+        {
+            QString h;
+            int p;
+            bool s;
             QString server = servers.value((++currentServer) % servers.count());
             if (!parseServer(server, &h, &p, &s))
                 qWarning() << "IrcConnection::servers: malformed line" << server;
@@ -400,17 +401,20 @@ void IrcConnectionPrivate::open()
 
 void IrcConnectionPrivate::reconnect()
 {
-    if (enabled && (status != IrcConnection::Closed || !closed || pendingOpen) && !reconnecter.isActive() && reconnecter.interval() > 0) {
+    if (enabled && (status != IrcConnection::Closed || !closed || pendingOpen) && !reconnecter.isActive() &&
+        reconnecter.interval() > 0)
+    {
         pendingOpen = false;
         reconnecter.start();
         setStatus(IrcConnection::Waiting);
     }
 }
 
-void IrcConnectionPrivate::setNick(const QString& nick)
+void IrcConnectionPrivate::setNick(const QString &nick)
 {
     Q_Q(IrcConnection);
-    if (nickName != nick) {
+    if (nickName != nick)
+    {
         nickName = nick;
         emit q->nickNameChanged(nick);
     }
@@ -419,14 +423,16 @@ void IrcConnectionPrivate::setNick(const QString& nick)
 void IrcConnectionPrivate::setStatus(IrcConnection::Status value)
 {
     Q_Q(IrcConnection);
-    if (status != value) {
+    if (status != value)
+    {
         const bool wasConnected = q->isConnected();
         status = value;
         emit q->statusChanged(value);
 
-        if (!wasConnected && q->isConnected()) {
+        if (!wasConnected && q->isConnected())
+        {
             emit q->connected();
-            foreach (const QByteArray& data, pendingData)
+            foreach (const QByteArray &data, pendingData)
                 q->sendRaw(data);
             pendingData.clear();
         }
@@ -434,28 +440,35 @@ void IrcConnectionPrivate::setStatus(IrcConnection::Status value)
     }
 }
 
-void IrcConnectionPrivate::setInfo(const QHash<QString, QString>& info)
+void IrcConnectionPrivate::setInfo(const QHash<QString, QString> &info)
 {
     Q_Q(IrcConnection);
     const QString oldName = q->displayName();
-    IrcNetworkPrivate* priv = IrcNetworkPrivate::get(network);
+    IrcNetworkPrivate *priv = IrcNetworkPrivate::get(network);
     priv->setInfo(info);
     const QString newName = q->displayName();
     if (oldName != newName)
         emit q->displayNameChanged(newName);
 }
 
-bool IrcConnectionPrivate::receiveMessage(IrcMessage* msg)
+bool IrcConnectionPrivate::receiveMessage(IrcMessage *msg)
 {
     Q_Q(IrcConnection);
-    if (msg->type() == IrcMessage::Join && msg->isOwn()) {
+    if (msg->type() == IrcMessage::Join && msg->isOwn())
+    {
         replies.clear();
-    } else if (msg->type() == IrcMessage::Numeric) {
-        int code = static_cast<IrcNumericMessage*>(msg)->code();
-        if (code == Irc::RPL_NAMREPLY || code == Irc::RPL_ENDOFNAMES) {
+    }
+    else if (msg->type() == IrcMessage::Numeric)
+    {
+        int code = static_cast<IrcNumericMessage *>(msg)->code();
+        if (code == Irc::RPL_NAMREPLY || code == Irc::RPL_ENDOFNAMES)
+        {
             if (!replies.contains(Irc::RPL_ENDOFNAMES))
                 msg->setFlag(IrcMessage::Implicit);
-        } else if (code == Irc::RPL_TOPIC || code == Irc::RPL_NOTOPIC || code == Irc::RPL_TOPICWHOTIME || code == Irc::RPL_CHANNEL_URL || code == Irc::RPL_CREATIONTIME) {
+        }
+        else if (code == Irc::RPL_TOPIC || code == Irc::RPL_NOTOPIC || code == Irc::RPL_TOPICWHOTIME ||
+                 code == Irc::RPL_CHANNEL_URL || code == Irc::RPL_CREATIONTIME)
+        {
             if (!replies.contains(code))
                 msg->setFlag(IrcMessage::Implicit);
         }
@@ -463,87 +476,90 @@ bool IrcConnectionPrivate::receiveMessage(IrcMessage* msg)
     }
 
     bool filtered = false;
-    for (int i = messageFilters.count() - 1; !filtered && i >= 0; --i) {
-        IrcMessageFilter* filter = qobject_cast<IrcMessageFilter*>(messageFilters.at(i));
+    for (int i = messageFilters.count() - 1; !filtered && i >= 0; --i)
+    {
+        IrcMessageFilter *filter = qobject_cast<IrcMessageFilter *>(messageFilters.at(i));
         if (filter)
             filtered |= filter->messageFilter(msg);
     }
 
-    if (!filtered) {
+    if (!filtered)
+    {
         emit q->messageReceived(msg);
 
-        switch (msg->type()) {
+        switch (msg->type())
+        {
         case IrcMessage::Account:
-            emit q->accountMessageReceived(static_cast<IrcAccountMessage*>(msg));
+            emit q->accountMessageReceived(static_cast<IrcAccountMessage *>(msg));
             break;
         case IrcMessage::Away:
-            emit q->awayMessageReceived(static_cast<IrcAwayMessage*>(msg));
+            emit q->awayMessageReceived(static_cast<IrcAwayMessage *>(msg));
             break;
         case IrcMessage::Batch:
-            emit q->batchMessageReceived(static_cast<IrcBatchMessage*>(msg));
+            emit q->batchMessageReceived(static_cast<IrcBatchMessage *>(msg));
             break;
         case IrcMessage::Capability:
-            emit q->capabilityMessageReceived(static_cast<IrcCapabilityMessage*>(msg));
+            emit q->capabilityMessageReceived(static_cast<IrcCapabilityMessage *>(msg));
             break;
         case IrcMessage::Error:
-            emit q->errorMessageReceived(static_cast<IrcErrorMessage*>(msg));
+            emit q->errorMessageReceived(static_cast<IrcErrorMessage *>(msg));
             break;
         case IrcMessage::HostChange:
-            emit q->hostChangeMessageReceived(static_cast<IrcHostChangeMessage*>(msg));
+            emit q->hostChangeMessageReceived(static_cast<IrcHostChangeMessage *>(msg));
             break;
         case IrcMessage::Invite:
-            emit q->inviteMessageReceived(static_cast<IrcInviteMessage*>(msg));
+            emit q->inviteMessageReceived(static_cast<IrcInviteMessage *>(msg));
             break;
         case IrcMessage::Join:
-            emit q->joinMessageReceived(static_cast<IrcJoinMessage*>(msg));
+            emit q->joinMessageReceived(static_cast<IrcJoinMessage *>(msg));
             break;
         case IrcMessage::Kick:
-            emit q->kickMessageReceived(static_cast<IrcKickMessage*>(msg));
+            emit q->kickMessageReceived(static_cast<IrcKickMessage *>(msg));
             break;
         case IrcMessage::Mode:
-            emit q->modeMessageReceived(static_cast<IrcModeMessage*>(msg));
+            emit q->modeMessageReceived(static_cast<IrcModeMessage *>(msg));
             break;
         case IrcMessage::Motd:
-            emit q->motdMessageReceived(static_cast<IrcMotdMessage*>(msg));
+            emit q->motdMessageReceived(static_cast<IrcMotdMessage *>(msg));
             break;
         case IrcMessage::Names:
-            emit q->namesMessageReceived(static_cast<IrcNamesMessage*>(msg));
+            emit q->namesMessageReceived(static_cast<IrcNamesMessage *>(msg));
             break;
         case IrcMessage::Nick:
-            emit q->nickMessageReceived(static_cast<IrcNickMessage*>(msg));
+            emit q->nickMessageReceived(static_cast<IrcNickMessage *>(msg));
             break;
         case IrcMessage::Notice:
-            emit q->noticeMessageReceived(static_cast<IrcNoticeMessage*>(msg));
+            emit q->noticeMessageReceived(static_cast<IrcNoticeMessage *>(msg));
             break;
         case IrcMessage::Numeric:
-            emit q->numericMessageReceived(static_cast<IrcNumericMessage*>(msg));
+            emit q->numericMessageReceived(static_cast<IrcNumericMessage *>(msg));
             break;
         case IrcMessage::Part:
-            emit q->partMessageReceived(static_cast<IrcPartMessage*>(msg));
+            emit q->partMessageReceived(static_cast<IrcPartMessage *>(msg));
             break;
         case IrcMessage::Ping:
-            emit q->pingMessageReceived(static_cast<IrcPingMessage*>(msg));
+            emit q->pingMessageReceived(static_cast<IrcPingMessage *>(msg));
             break;
         case IrcMessage::Pong:
-            emit q->pongMessageReceived(static_cast<IrcPongMessage*>(msg));
+            emit q->pongMessageReceived(static_cast<IrcPongMessage *>(msg));
             break;
         case IrcMessage::Private:
-            emit q->privateMessageReceived(static_cast<IrcPrivateMessage*>(msg));
+            emit q->privateMessageReceived(static_cast<IrcPrivateMessage *>(msg));
             break;
         case IrcMessage::Quit:
-            emit q->quitMessageReceived(static_cast<IrcQuitMessage*>(msg));
+            emit q->quitMessageReceived(static_cast<IrcQuitMessage *>(msg));
             break;
         case IrcMessage::Topic:
-            emit q->topicMessageReceived(static_cast<IrcTopicMessage*>(msg));
+            emit q->topicMessageReceived(static_cast<IrcTopicMessage *>(msg));
             break;
         case IrcMessage::Whois:
-            emit q->whoisMessageReceived(static_cast<IrcWhoisMessage*>(msg));
+            emit q->whoisMessageReceived(static_cast<IrcWhoisMessage *>(msg));
             break;
         case IrcMessage::Whowas:
-            emit q->whowasMessageReceived(static_cast<IrcWhowasMessage*>(msg));
+            emit q->whowasMessageReceived(static_cast<IrcWhowasMessage *>(msg));
             break;
         case IrcMessage::WhoReply:
-            emit q->whoReplyMessageReceived(static_cast<IrcWhoReplyMessage*>(msg));
+            emit q->whoReplyMessageReceived(static_cast<IrcWhoReplyMessage *>(msg));
             break;
         case IrcMessage::Unknown:
         default:
@@ -557,23 +573,26 @@ bool IrcConnectionPrivate::receiveMessage(IrcMessage* msg)
     return !filtered;
 }
 
-IrcCommand* IrcConnectionPrivate::createCtcpReply(IrcPrivateMessage* request)
+IrcCommand *IrcConnectionPrivate::createCtcpReply(IrcPrivateMessage *request)
 {
     Q_Q(IrcConnection);
-    IrcCommand* reply = 0;
-    const QMetaObject* metaObject = q->metaObject();
+    IrcCommand *reply = 0;
+    const QMetaObject *metaObject = q->metaObject();
     int idx = metaObject->indexOfMethod("createCtcpReply(QVariant)");
-    if (idx != -1) {
+    if (idx != -1)
+    {
         // QML: QVariant createCtcpReply(QVariant)
         QVariant ret;
         QMetaMethod method = metaObject->method(idx);
         method.invoke(q, Q_RETURN_ARG(QVariant, ret), Q_ARG(QVariant, QVariant::fromValue(request)));
-        reply = ret.value<IrcCommand*>();
-    } else {
+        reply = ret.value<IrcCommand *>();
+    }
+    else
+    {
         // C++: IrcCommand* createCtcpReply(IrcPrivateMessage*)
         idx = metaObject->indexOfMethod("createCtcpReply(IrcPrivateMessage*)");
         QMetaMethod method = metaObject->method(idx);
-        method.invoke(q, Q_RETURN_ARG(IrcCommand*, reply), Q_ARG(IrcPrivateMessage*, request));
+        method.invoke(q, Q_RETURN_ARG(IrcCommand *, reply), Q_ARG(IrcPrivateMessage *, request));
     }
     return reply;
 }
@@ -582,7 +601,7 @@ IrcCommand* IrcConnectionPrivate::createCtcpReply(IrcPrivateMessage* request)
 /*!
     Constructs a new IRC connection with \a parent.
  */
-IrcConnection::IrcConnection(QObject* parent) : QObject(parent), d_ptr(new IrcConnectionPrivate)
+IrcConnection::IrcConnection(QObject *parent) : QObject(parent), d_ptr(new IrcConnectionPrivate)
 {
     Q_D(IrcConnection);
     d->init(this);
@@ -591,7 +610,7 @@ IrcConnection::IrcConnection(QObject* parent) : QObject(parent), d_ptr(new IrcCo
 /*!
     Constructs a new IRC connection with \a host and \a parent.
  */
-IrcConnection::IrcConnection(const QString& host, QObject* parent) : QObject(parent), d_ptr(new IrcConnectionPrivate)
+IrcConnection::IrcConnection(const QString &host, QObject *parent) : QObject(parent), d_ptr(new IrcConnectionPrivate)
 {
     Q_D(IrcConnection);
     d->init(this);
@@ -612,9 +631,9 @@ IrcConnection::~IrcConnection()
 
     Clones the IRC connection.
  */
-IrcConnection* IrcConnection::clone(QObject *parent) const
+IrcConnection *IrcConnection::clone(QObject *parent) const
 {
-    IrcConnection* connection = new IrcConnection(parent);
+    IrcConnection *connection = new IrcConnection(parent);
     connection->setHost(host());
     connection->setPort(port());
     connection->setServers(servers());
@@ -655,11 +674,12 @@ QByteArray IrcConnection::encoding() const
     return d->encoding;
 }
 
-void IrcConnection::setEncoding(const QByteArray& encoding)
+void IrcConnection::setEncoding(const QByteArray &encoding)
 {
     Q_D(IrcConnection);
-    extern bool irc_is_supported_encoding(const QByteArray& encoding); // ircmessagedecoder.cpp
-    if (!irc_is_supported_encoding(encoding)) {
+    extern bool irc_is_supported_encoding(const QByteArray &encoding); // ircmessagedecoder.cpp
+    if (!irc_is_supported_encoding(encoding))
+    {
         qWarning() << "IrcConnection::setEncoding(): unsupported encoding" << encoding;
         return;
     }
@@ -682,10 +702,11 @@ QString IrcConnection::host() const
     return d->host;
 }
 
-void IrcConnection::setHost(const QString& host)
+void IrcConnection::setHost(const QString &host)
 {
     Q_D(IrcConnection);
-    if (d->host != host) {
+    if (d->host != host)
+    {
         if (isActive())
             qWarning("IrcConnection::setHost() has no effect until re-connect");
         const QString oldName = displayName();
@@ -718,7 +739,8 @@ int IrcConnection::port() const
 void IrcConnection::setPort(int port)
 {
     Q_D(IrcConnection);
-    if (d->port != port) {
+    if (d->port != port)
+    {
         if (isActive())
             qWarning("IrcConnection::setPort() has no effect until re-connect");
         d->port = port;
@@ -748,10 +770,11 @@ QStringList IrcConnection::servers() const
     return d->servers;
 }
 
-void IrcConnection::setServers(const QStringList& servers)
+void IrcConnection::setServers(const QStringList &servers)
 {
     Q_D(IrcConnection);
-    if (d->servers != servers) {
+    if (d->servers != servers)
+    {
         d->servers = servers;
         emit serversChanged(servers);
     }
@@ -770,9 +793,11 @@ void IrcConnection::setServers(const QStringList& servers)
 
     \sa servers
  */
-bool IrcConnection::isValidServer(const QString& server)
+bool IrcConnection::isValidServer(const QString &server)
 {
-    QString h; int p; bool s;
+    QString h;
+    int p;
+    bool s;
     return parseServer(server, &h, &p, &s);
 }
 
@@ -794,11 +819,12 @@ QString IrcConnection::userName() const
     return d->userName;
 }
 
-void IrcConnection::setUserName(const QString& name)
+void IrcConnection::setUserName(const QString &name)
 {
     Q_D(IrcConnection);
     QString user = name.split(" ", QString::SkipEmptyParts).value(0).trimmed();
-    if (d->userName != user) {
+    if (d->userName != user)
+    {
         if (isActive())
             qWarning("IrcConnection::setUserName() has no effect until re-connect");
         d->userName = user;
@@ -824,11 +850,12 @@ QString IrcConnection::nickName() const
     return d->nickName;
 }
 
-void IrcConnection::setNickName(const QString& name)
+void IrcConnection::setNickName(const QString &name)
 {
     Q_D(IrcConnection);
     QString nick = name.split(" ", QString::SkipEmptyParts).value(0).trimmed();
-    if (d->nickName != nick) {
+    if (d->nickName != nick)
+    {
         if (isActive())
             sendCommand(IrcCommand::createNick(nick));
         else
@@ -854,10 +881,11 @@ QString IrcConnection::realName() const
     return d->realName;
 }
 
-void IrcConnection::setRealName(const QString& name)
+void IrcConnection::setRealName(const QString &name)
 {
     Q_D(IrcConnection);
-    if (d->realName != name) {
+    if (d->realName != name)
+    {
         if (isActive())
             qWarning("IrcConnection::setRealName() has no effect until re-connect");
         d->realName = name;
@@ -881,10 +909,11 @@ QString IrcConnection::password() const
     return d->password;
 }
 
-void IrcConnection::setPassword(const QString& password)
+void IrcConnection::setPassword(const QString &password)
 {
     Q_D(IrcConnection);
-    if (d->password != password) {
+    if (d->password != password)
+    {
         if (isActive())
             qWarning("IrcConnection::setPassword() has no effect until re-connect");
         d->password = password;
@@ -916,10 +945,11 @@ QStringList IrcConnection::nickNames() const
     return d->nickNames;
 }
 
-void IrcConnection::setNickNames(const QStringList& names)
+void IrcConnection::setNickNames(const QStringList &names)
 {
     Q_D(IrcConnection);
-    if (d->nickNames != names) {
+    if (d->nickNames != names)
+    {
         d->nickNames = names;
         emit nickNamesChanged(names);
     }
@@ -949,10 +979,11 @@ QString IrcConnection::displayName() const
     return name;
 }
 
-void IrcConnection::setDisplayName(const QString& name)
+void IrcConnection::setDisplayName(const QString &name)
 {
     Q_D(IrcConnection);
-    if (d->displayName != name) {
+    if (d->displayName != name)
+    {
         d->displayName = name;
         emit displayNameChanged(name);
     }
@@ -976,10 +1007,11 @@ QVariantMap IrcConnection::userData() const
     return d->userData;
 }
 
-void IrcConnection::setUserData(const QVariantMap& data)
+void IrcConnection::setUserData(const QVariantMap &data)
 {
     Q_D(IrcConnection);
-    if (d->userData != data) {
+    if (d->userData != data)
+    {
         d->userData = data;
         emit userDataChanged(data);
     }
@@ -1062,7 +1094,8 @@ bool IrcConnection::isEnabled() const
 void IrcConnection::setEnabled(bool enabled)
 {
     Q_D(IrcConnection);
-    if (d->enabled != enabled) {
+    if (d->enabled != enabled)
+    {
         d->enabled = enabled;
         emit enabledChanged(enabled);
     }
@@ -1100,7 +1133,8 @@ void IrcConnection::setReconnectDelay(int seconds)
 {
     Q_D(IrcConnection);
     const int interval = qMax(0, seconds) * 1000;
-    if (d->reconnecter.interval() != interval) {
+    if (d->reconnecter.interval() != interval)
+    {
         d->reconnecter.setInterval(interval);
         emit reconnectDelayChanged(interval);
     }
@@ -1120,29 +1154,34 @@ void IrcConnection::setReconnectDelay(int seconds)
 
     \sa IrcConnection::secure
  */
-QAbstractSocket* IrcConnection::socket() const
+QAbstractSocket *IrcConnection::socket() const
 {
     Q_D(const IrcConnection);
     return d->socket;
 }
 
-void IrcConnection::setSocket(QAbstractSocket* socket)
+void IrcConnection::setSocket(QAbstractSocket *socket)
 {
     Q_D(IrcConnection);
-    if (d->socket != socket) {
-        if (d->socket) {
+    if (d->socket != socket)
+    {
+        if (d->socket)
+        {
             d->socket->disconnect(this);
             if (d->socket->parent() == this)
                 d->socket->deleteLater();
         }
 
         d->socket = socket;
-        if (socket) {
+        if (socket)
+        {
             connect(socket, SIGNAL(connected()), this, SLOT(_irc_connected()));
             connect(socket, SIGNAL(disconnected()), this, SLOT(_irc_disconnected()));
             connect(socket, SIGNAL(readyRead()), this, SLOT(_irc_readData()));
-            connect(socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(_irc_error(QAbstractSocket::SocketError)));
-            connect(socket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(_irc_state(QAbstractSocket::SocketState)));
+            connect(socket, SIGNAL(error(QAbstractSocket::SocketError)), this,
+                    SLOT(_irc_error(QAbstractSocket::SocketError)));
+            connect(socket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this,
+                    SLOT(_irc_state(QAbstractSocket::SocketState)));
             if (isSecure())
                 connect(socket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(_irc_sslErrors()));
         }
@@ -1183,30 +1222,35 @@ bool IrcConnection::isSecure() const
 #ifdef QT_NO_SSL
     return false;
 #else
-    return qobject_cast<QSslSocket*>(socket());
+    return qobject_cast<QSslSocket *>(socket());
 #endif // QT_NO_SSL
 }
 
 void IrcConnection::setSecure(bool secure)
 {
 #ifdef QT_NO_SSL
-    if (secure) {
+    if (secure)
+    {
         qWarning("IrcConnection::setSecure(): the Qt build does not support SSL");
         return;
     }
 #else
-    if (secure && !QSslSocket::supportsSsl()) {
+    if (secure && !QSslSocket::supportsSsl())
+    {
         qWarning("IrcConnection::setSecure(): the platform does not support SSL - try installing OpenSSL");
         return;
     }
 
-    QSslSocket* sslSocket = qobject_cast<QSslSocket*>(socket());
-    if (secure && !sslSocket) {
+    QSslSocket *sslSocket = qobject_cast<QSslSocket *>(socket());
+    if (secure && !sslSocket)
+    {
         sslSocket = new QSslSocket(this);
         sslSocket->setPeerVerifyMode(QSslSocket::QueryPeer);
         setSocket(sslSocket);
         emit secureChanged(true);
-    } else if (!secure && sslSocket) {
+    }
+    else if (!secure && sslSocket)
+    {
         setSocket(new QTcpSocket(this));
         emit secureChanged(false);
     }
@@ -1239,14 +1283,16 @@ QString IrcConnection::saslMechanism() const
     return d->saslMechanism;
 }
 
-void IrcConnection::setSaslMechanism(const QString& mechanism)
+void IrcConnection::setSaslMechanism(const QString &mechanism)
 {
     Q_D(IrcConnection);
-    if (!mechanism.isEmpty() && !supportedSaslMechanisms().contains(mechanism.toUpper())) {
+    if (!mechanism.isEmpty() && !supportedSaslMechanisms().contains(mechanism.toUpper()))
+    {
         qWarning("IrcConnection::setSaslMechanism(): unsupported mechanism: '%s'", qPrintable(mechanism));
         return;
     }
-    if (d->saslMechanism != mechanism) {
+    if (d->saslMechanism != mechanism)
+    {
         if (isActive())
             qWarning("IrcConnection::setSaslMechanism() has no effect until re-connect");
         d->saslMechanism = mechanism.toUpper();
@@ -1288,10 +1334,11 @@ QVariantMap IrcConnection::ctcpReplies() const
     return d->ctcpReplies;
 }
 
-void IrcConnection::setCtcpReplies(const QVariantMap& replies)
+void IrcConnection::setCtcpReplies(const QVariantMap &replies)
 {
     Q_D(IrcConnection);
-    if (d->ctcpReplies != replies) {
+    if (d->ctcpReplies != replies)
+    {
         d->ctcpReplies = replies;
         emit ctcpRepliesChanged(replies);
     }
@@ -1303,7 +1350,7 @@ void IrcConnection::setCtcpReplies(const QVariantMap& replies)
     \par Access function:
     \li IrcNetwork* <b>network</b>() const
  */
-IrcNetwork* IrcConnection::network() const
+IrcNetwork *IrcConnection::network() const
 {
     Q_D(const IrcConnection);
     return d->network;
@@ -1321,19 +1368,23 @@ IrcNetwork* IrcConnection::network() const
 void IrcConnection::open()
 {
     Q_D(IrcConnection);
-    if (d->host.isEmpty() && d->servers.isEmpty()) {
+    if (d->host.isEmpty() && d->servers.isEmpty())
+    {
         qWarning("IrcConnection::open(): host is empty!");
         return;
     }
-    if (d->userName.isEmpty()) {
+    if (d->userName.isEmpty())
+    {
         qWarning("IrcConnection::open(): userName is empty!");
         return;
     }
-    if (d->nickName.isEmpty() && d->nickNames.isEmpty()) {
+    if (d->nickName.isEmpty() && d->nickNames.isEmpty())
+    {
         qWarning("IrcConnection::open(): nickNames is empty!");
         return;
     }
-    if (d->realName.isEmpty()) {
+    if (d->realName.isEmpty())
+    {
         qWarning("IrcConnection::open(): realName is empty!");
         return;
     }
@@ -1368,7 +1419,8 @@ void IrcConnection::open()
 void IrcConnection::close()
 {
     Q_D(IrcConnection);
-    if (d->socket) {
+    if (d->socket)
+    {
         d->closed = true;
         d->pendingOpen = false;
         d->socket->flush();
@@ -1391,7 +1443,7 @@ void IrcConnection::close()
 
     \sa IrcCommand::createQuit()
  */
-void IrcConnection::quit(const QString& reason)
+void IrcConnection::quit(const QString &reason)
 {
     if (isConnected())
         sendCommand(IrcCommand::createQuit(reason));
@@ -1415,26 +1467,32 @@ void IrcConnection::quit(const QString& reason)
 
     \sa sendData()
  */
-bool IrcConnection::sendCommand(IrcCommand* command)
+bool IrcConnection::sendCommand(IrcCommand *command)
 {
     Q_D(IrcConnection);
     bool res = false;
-    if (command) {
+    if (command)
+    {
         bool filtered = false;
         IrcCommandPrivate::get(command)->connection = this;
-        for (int i = d->commandFilters.count() - 1; !filtered && i >= 0; --i) {
-            QObject* filter = d->commandFilters.at(i);
-            IrcCommandFilter* commandFilter = qobject_cast<IrcCommandFilter*>(filter);
-            if (commandFilter && !d->activeCommandFilters.contains(filter)) {
+        for (int i = d->commandFilters.count() - 1; !filtered && i >= 0; --i)
+        {
+            QObject *filter = d->commandFilters.at(i);
+            IrcCommandFilter *commandFilter = qobject_cast<IrcCommandFilter *>(filter);
+            if (commandFilter && !d->activeCommandFilters.contains(filter))
+            {
                 d->activeCommandFilters.push(filter);
                 filtered |= commandFilter->commandFilter(command);
                 d->activeCommandFilters.pop();
             }
         }
-        if (filtered) {
+        if (filtered)
+        {
             res = false;
-        } else {
-            QTextCodec* codec = QTextCodec::codecForName(command->encoding());
+        }
+        else
+        {
+            QTextCodec *codec = QTextCodec::codecForName(command->encoding());
             Q_ASSERT(codec);
             res = sendData(codec->fromUnicode(command->toString()));
         }
@@ -1449,22 +1507,27 @@ bool IrcConnection::sendCommand(IrcCommand* command)
 
     \sa sendCommand()
  */
-bool IrcConnection::sendData(const QByteArray& data)
+bool IrcConnection::sendData(const QByteArray &data)
 {
     Q_D(IrcConnection);
-    if (d->socket) {
-        if (isActive()) {
+    if (d->socket)
+    {
+        if (isActive())
+        {
             const QByteArray cmd = data.left(5).toUpper();
             if (cmd.startsWith("PASS "))
                 ircDebug(this, IrcDebug::Write) << data.left(5) + QByteArray(data.mid(5).length(), 'x');
             else
                 ircDebug(this, IrcDebug::Write) << data;
-            if (!d->closed && data.length() >= 4) {
+            if (!d->closed && data.length() >= 4)
+            {
                 if (cmd.startsWith("QUIT") && (data.length() == 4 || QChar(data.at(4)).isSpace()))
                     d->closed = true;
             }
             return d->protocol->write(data);
-        } else {
+        }
+        else
+        {
             d->pendingData += data;
         }
     }
@@ -1476,7 +1539,7 @@ bool IrcConnection::sendData(const QByteArray& data)
 
     \sa sendData(), sendCommand()
  */
-bool IrcConnection::sendRaw(const QString& message)
+bool IrcConnection::sendRaw(const QString &message)
 {
     return sendData(message.toUtf8());
 }
@@ -1494,13 +1557,15 @@ bool IrcConnection::sendRaw(const QString& message)
 
     \sa removeMessageFilter()
  */
-void IrcConnection::installMessageFilter(QObject* filter)
+void IrcConnection::installMessageFilter(QObject *filter)
 {
     Q_D(IrcConnection);
-    IrcMessageFilter* msgFilter = qobject_cast<IrcMessageFilter*>(filter);
-    if (msgFilter) {
+    IrcMessageFilter *msgFilter = qobject_cast<IrcMessageFilter *>(filter);
+    if (msgFilter)
+    {
         d->messageFilters += filter;
-        connect(filter, SIGNAL(destroyed(QObject*)), this, SLOT(_irc_filterDestroyed(QObject*)), Qt::UniqueConnection);
+        connect(filter, SIGNAL(destroyed(QObject *)), this, SLOT(_irc_filterDestroyed(QObject *)),
+                Qt::UniqueConnection);
     }
 }
 
@@ -1513,13 +1578,14 @@ void IrcConnection::installMessageFilter(QObject* filter)
 
     \sa installMessageFilter()
  */
-void IrcConnection::removeMessageFilter(QObject* filter)
+void IrcConnection::removeMessageFilter(QObject *filter)
 {
     Q_D(IrcConnection);
-    IrcMessageFilter* msgFilter = qobject_cast<IrcMessageFilter*>(filter);
-    if (msgFilter) {
+    IrcMessageFilter *msgFilter = qobject_cast<IrcMessageFilter *>(filter);
+    if (msgFilter)
+    {
         d->messageFilters.removeAll(filter);
-        disconnect(filter, SIGNAL(destroyed(QObject*)), this, SLOT(_irc_filterDestroyed(QObject*)));
+        disconnect(filter, SIGNAL(destroyed(QObject *)), this, SLOT(_irc_filterDestroyed(QObject *)));
     }
 }
 
@@ -1536,13 +1602,15 @@ void IrcConnection::removeMessageFilter(QObject* filter)
 
     \sa removeCommandFilter()
  */
-void IrcConnection::installCommandFilter(QObject* filter)
+void IrcConnection::installCommandFilter(QObject *filter)
 {
     Q_D(IrcConnection);
-    IrcCommandFilter* cmdFilter = qobject_cast<IrcCommandFilter*>(filter);
-    if (cmdFilter) {
+    IrcCommandFilter *cmdFilter = qobject_cast<IrcCommandFilter *>(filter);
+    if (cmdFilter)
+    {
         d->commandFilters += filter;
-        connect(filter, SIGNAL(destroyed(QObject*)), this, SLOT(_irc_filterDestroyed(QObject*)), Qt::UniqueConnection);
+        connect(filter, SIGNAL(destroyed(QObject *)), this, SLOT(_irc_filterDestroyed(QObject *)),
+                Qt::UniqueConnection);
     }
 }
 
@@ -1555,13 +1623,14 @@ void IrcConnection::installCommandFilter(QObject* filter)
 
     \sa installCommandFilter()
  */
-void IrcConnection::removeCommandFilter(QObject* filter)
+void IrcConnection::removeCommandFilter(QObject *filter)
 {
     Q_D(IrcConnection);
-    IrcCommandFilter* cmdFilter = qobject_cast<IrcCommandFilter*>(filter);
-    if (cmdFilter) {
+    IrcCommandFilter *cmdFilter = qobject_cast<IrcCommandFilter *>(filter);
+    if (cmdFilter)
+    {
         d->commandFilters.removeAll(filter);
-        disconnect(filter, SIGNAL(destroyed(QObject*)), this, SLOT(_irc_filterDestroyed(QObject*)));
+        disconnect(filter, SIGNAL(destroyed(QObject *)), this, SLOT(_irc_filterDestroyed(QObject *)));
     }
 }
 
@@ -1608,7 +1677,7 @@ QByteArray IrcConnection::saveState(int version) const
 
     \sa saveState()
  */
-bool IrcConnection::restoreState(const QByteArray& state, int version)
+bool IrcConnection::restoreState(const QByteArray &state, int version)
 {
     Q_D(IrcConnection);
     if (isActive())
@@ -1653,7 +1722,7 @@ bool IrcConnection::restoreState(const QByteArray& state, int version)
 
     \sa ctcpReplies
  */
-IrcCommand* IrcConnection::createCtcpReply(IrcPrivateMessage* request) const
+IrcCommand *IrcConnection::createCtcpReply(IrcPrivateMessage *request) const
 {
     Q_D(const IrcConnection);
     QString reply;
@@ -1686,16 +1755,17 @@ IrcCommand* IrcConnection::createCtcpReply(IrcPrivateMessage* request) const
     \li \ref IrcProtocol* <b>protocol</b>() const
     \li void <b>setProtocol</b>(\ref IrcProtocol* protocol)
  */
-IrcProtocol* IrcConnection::protocol() const
+IrcProtocol *IrcConnection::protocol() const
 {
     Q_D(const IrcConnection);
     return d->protocol;
 }
 
-void IrcConnection::setProtocol(IrcProtocol* proto)
+void IrcConnection::setProtocol(IrcProtocol *proto)
 {
     Q_D(IrcConnection);
-    if (d->protocol != proto) {
+    if (d->protocol != proto)
+    {
         if (d->protocol && d->protocol->parent() == this)
             delete d->protocol;
         d->protocol = proto;
@@ -1707,16 +1777,16 @@ QDebug operator<<(QDebug debug, IrcConnection::Status status)
 {
     const int index = IrcConnection::staticMetaObject.indexOfEnumerator("Status");
     QMetaEnum enumerator = IrcConnection::staticMetaObject.enumerator(index);
-    const char* key = enumerator.valueToKey(status);
+    const char *key = enumerator.valueToKey(status);
     debug << (key ? key : "Unknown");
     return debug;
 }
 
-QDebug operator<<(QDebug debug, const IrcConnection* connection)
+QDebug operator<<(QDebug debug, const IrcConnection *connection)
 {
     if (!connection)
         return debug << "IrcConnection(0x0) ";
-    debug.nospace() << connection->metaObject()->className() << '(' << (void*) connection;
+    debug.nospace() << connection->metaObject()->className() << '(' << (void *)connection;
     if (!connection->displayName().isEmpty())
         debug.nospace() << ", " << qPrintable(connection->displayName());
     debug.nospace() << ')';

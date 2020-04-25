@@ -19,16 +19,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "dlgTriggerPatternEdit.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QAction>
-#include "post_guard.h"
 
-dlgTriggerPatternEdit::dlgTriggerPatternEdit(QWidget* pF)
-: QWidget(pF)
-, mRow()
+dlgTriggerPatternEdit::dlgTriggerPatternEdit(QWidget *pF) : QWidget(pF), mRow()
 {
     // init generated dialog
     setupUi(this);
@@ -36,7 +33,8 @@ dlgTriggerPatternEdit::dlgTriggerPatternEdit(QWidget* pF)
     mAction_typeIndication = new QAction(this);
     lineEdit_pattern->addAction(mAction_typeIndication, QLineEdit::LeadingPosition);
 
-    connect(comboBox_patternType, qOverload<int>(&QComboBox::currentIndexChanged), this, &dlgTriggerPatternEdit::slot_triggerTypeComboBoxChanged);
+    connect(comboBox_patternType, qOverload<int>(&QComboBox::currentIndexChanged), this,
+            &dlgTriggerPatternEdit::slot_triggerTypeComboBoxChanged);
 }
 
 void dlgTriggerPatternEdit::slot_triggerTypeComboBoxChanged(const int index)

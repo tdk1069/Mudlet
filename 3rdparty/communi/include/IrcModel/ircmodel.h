@@ -37,8 +37,9 @@
 
 IRC_BEGIN_NAMESPACE
 
-namespace IrcModel {
-    IRC_MODEL_EXPORT void registerMetaTypes();
+namespace IrcModel
+{
+IRC_MODEL_EXPORT void registerMetaTypes();
 }
 
 IRC_END_NAMESPACE

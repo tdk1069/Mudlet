@@ -29,25 +29,25 @@
 #ifndef IRCLAGTIMER_P_H
 #define IRCLAGTIMER_P_H
 
-#include "irclagtimer.h"
 #include "ircfilter.h"
+#include "irclagtimer.h"
 #include <QTimer>
 
 IRC_BEGIN_NAMESPACE
 
 class IrcPongMessage;
 
-class IrcLagTimerPrivate : public QObject,  public IrcMessageFilter
+class IrcLagTimerPrivate : public QObject, public IrcMessageFilter
 {
     Q_OBJECT
     Q_INTERFACES(IrcMessageFilter)
     Q_DECLARE_PUBLIC(IrcLagTimer)
 
-public:
+  public:
     IrcLagTimerPrivate();
 
-    bool messageFilter(IrcMessage* msg);
-    bool processPongReply(IrcPongMessage* msg);
+    bool messageFilter(IrcMessage *msg);
+    bool processPongReply(IrcPongMessage *msg);
 
     void _irc_connected();
     void _irc_pingServer();
@@ -56,8 +56,8 @@ public:
     void updateTimer();
     void updateLag(qint64 value);
 
-    IrcLagTimer* q_ptr;
-    IrcConnection* connection;
+    IrcLagTimer *q_ptr;
+    IrcConnection *connection;
     QTimer timer;
     int interval;
     qint64 lag;

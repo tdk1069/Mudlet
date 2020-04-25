@@ -27,16 +27,16 @@
 */
 
 #include "ircmessage.h"
-#include "ircmessage_p.h"
+#include "irc.h"
+#include "irccommand.h"
 #include "ircconnection.h"
 #include "ircconnection_p.h"
+#include "ircmessage_p.h"
 #include "ircmessagecomposer_p.h"
 #include "ircnetwork_p.h"
-#include "irccommand.h"
-#include "irc.h"
+#include <QDebug>
 #include <QMetaEnum>
 #include <QVariant>
-#include <QDebug>
 
 IRC_BEGIN_NAMESPACE
 
@@ -241,10 +241,11 @@ IRC_BEGIN_NAMESPACE
     \brief The message is an implicit "reply" after joining a channel.
  */
 
-static const QMetaObject* irc_command_meta_object(const QString& command)
+static const QMetaObject *irc_command_meta_object(const QString &command)
 {
-    static QHash<QString, const QMetaObject*> metaObjects;
-    if (metaObjects.isEmpty()) {
+    static QHash<QString, const QMetaObject *> metaObjects;
+    if (metaObjects.isEmpty())
+    {
         metaObjects.insert("ACCOUNT", &IrcAccountMessage::staticMetaObject);
         metaObjects.insert("AWAY", &IrcAwayMessage::staticMetaObject);
         metaObjects.insert("BATCH", &IrcBatchMessage::staticMetaObject);
@@ -265,8 +266,9 @@ static const QMetaObject* irc_command_meta_object(const QString& command)
         metaObjects.insert("TOPIC", &IrcTopicMessage::staticMetaObject);
     }
 
-    const QMetaObject* metaObject = metaObjects.value(command.toUpper());
-    if (!metaObject) {
+    const QMetaObject *metaObject = metaObjects.value(command.toUpper());
+    if (!metaObject)
+    {
         bool ok = false;
         command.toInt(&ok);
         if (ok)
@@ -280,7 +282,7 @@ static const QMetaObject* irc_command_meta_object(const QString& command)
 /*!
     Constructs a new IrcMessage with \a connection.
  */
-IrcMessage::IrcMessage(IrcConnection* connection) : QObject(connection), d_ptr(new IrcMessagePrivate)
+IrcMessage::IrcMessage(IrcConnection *connection) : QObject(connection), d_ptr(new IrcMessagePrivate)
 {
     Q_D(IrcMessage);
     d->connection = connection;
@@ -299,7 +301,7 @@ IrcMessage::~IrcMessage()
     \par Access function:
     \li \ref IrcConnection* <b>connection</b>() const
  */
-IrcConnection* IrcMessage::connection() const
+IrcConnection *IrcMessage::connection() const
 {
     Q_D(const IrcMessage);
     return d->connection;
@@ -311,7 +313,7 @@ IrcConnection* IrcMessage::connection() const
     \par Access function:
     \li \ref IrcNetwork* <b>network</b>() const
  */
-IrcNetwork* IrcMessage::network() const
+IrcNetwork *IrcMessage::network() const
 {
     Q_D(const IrcMessage);
     return d->connection ? d->connection->network() : 0;
@@ -376,7 +378,8 @@ bool IrcMessage::isImplicit() const
 IrcMessage::Flags IrcMessage::flags() const
 {
     Q_D(const IrcMessage);
-    if (d->flags == -1) {
+    if (d->flags == -1)
+    {
         d->flags = IrcMessage::None;
         if (d->connection && !d->prefix().isEmpty() && d->nick() == d->connection->nickName())
             d->flags |= IrcMessage::Own;
@@ -430,7 +433,7 @@ QString IrcMessage::command() const
     return d->command();
 }
 
-void IrcMessage::setCommand(const QString& command)
+void IrcMessage::setCommand(const QString &command)
 {
     Q_D(IrcMessage);
     d->setCommand(command);
@@ -454,7 +457,7 @@ QString IrcMessage::prefix() const
     return d->prefix();
 }
 
-void IrcMessage::setPrefix(const QString& prefix)
+void IrcMessage::setPrefix(const QString &prefix)
 {
     Q_D(IrcMessage);
     d->setPrefix(prefix);
@@ -543,7 +546,7 @@ QStringList IrcMessage::parameters() const
     return d->params();
 }
 
-void IrcMessage::setParameters(const QStringList& parameters)
+void IrcMessage::setParameters(const QStringList &parameters)
 {
     Q_D(IrcMessage);
     d->setParams(parameters);
@@ -565,7 +568,7 @@ QString IrcMessage::parameter(int index) const
 
     Sets the \a parameter at the specified \a index.
  */
-void IrcMessage::setParameter(int index, const QString& parameter)
+void IrcMessage::setParameter(int index, const QString &parameter)
 {
     Q_D(IrcMessage);
     QStringList params = d->params();
@@ -593,7 +596,7 @@ QDateTime IrcMessage::timeStamp() const
     return d->timeStamp;
 }
 
-void IrcMessage::setTimeStamp(const QDateTime& timeStamp)
+void IrcMessage::setTimeStamp(const QDateTime &timeStamp)
 {
     Q_D(IrcMessage);
     d->timeStamp = timeStamp;
@@ -621,11 +624,12 @@ QByteArray IrcMessage::encoding() const
     return d->encoding;
 }
 
-void IrcMessage::setEncoding(const QByteArray& encoding)
+void IrcMessage::setEncoding(const QByteArray &encoding)
 {
     Q_D(IrcMessage);
-    extern bool irc_is_supported_encoding(const QByteArray& encoding); // ircmessagedecoder.cpp
-    if (!irc_is_supported_encoding(encoding)) {
+    extern bool irc_is_supported_encoding(const QByteArray &encoding); // ircmessagedecoder.cpp
+    if (!irc_is_supported_encoding(encoding))
+    {
         qWarning() << "IrcMessage::setEncoding(): unsupported encoding" << encoding;
         return;
     }
@@ -650,7 +654,7 @@ QVariantMap IrcMessage::tags() const
     return d->tags();
 }
 
-void IrcMessage::setTags(const QVariantMap& tags)
+void IrcMessage::setTags(const QVariantMap &tags)
 {
     Q_D(IrcMessage);
     d->setTags(tags);
@@ -663,7 +667,7 @@ void IrcMessage::setTags(const QVariantMap& tags)
 
     \sa \ref ircv3
  */
-QVariant IrcMessage::tag(const QString& name) const
+QVariant IrcMessage::tag(const QString &name) const
 {
     Q_D(const IrcMessage);
     return d->tags().value(name);
@@ -676,7 +680,7 @@ QVariant IrcMessage::tag(const QString& name) const
 
     \sa \ref ircv3
  */
-void IrcMessage::setTag(const QString& name, const QVariant& value)
+void IrcMessage::setTag(const QString &name, const QVariant &value)
 {
     Q_D(IrcMessage);
     QVariantMap tags = d->tags();
@@ -687,17 +691,19 @@ void IrcMessage::setTag(const QString& name, const QVariant& value)
 /*!
     Creates a new message from \a data and \a connection.
  */
-IrcMessage* IrcMessage::fromData(const QByteArray& data, IrcConnection* connection)
+IrcMessage *IrcMessage::fromData(const QByteArray &data, IrcConnection *connection)
 {
-    IrcMessage* message = 0;
+    IrcMessage *message = 0;
     IrcMessageData md = IrcMessageData::fromData(data);
-    const QMetaObject* metaObject = irc_command_meta_object(md.command);
-    if (metaObject) {
-        message = qobject_cast<IrcMessage*>(metaObject->newInstance(Q_ARG(IrcConnection*, connection)));
+    const QMetaObject *metaObject = irc_command_meta_object(md.command);
+    if (metaObject)
+    {
+        message = qobject_cast<IrcMessage *>(metaObject->newInstance(Q_ARG(IrcConnection *, connection)));
         Q_ASSERT(message);
         message->d_ptr->data = md;
         QByteArray tag = md.tags.value("time");
-        if (!tag.isEmpty()) {
+        if (!tag.isEmpty())
+        {
             QDateTime ts = QDateTime::fromString(QString::fromUtf8(tag), Qt::ISODate);
             if (ts.isValid())
                 message->d_ptr->timeStamp = ts.toTimeSpec(Qt::LocalTime);
@@ -709,12 +715,14 @@ IrcMessage* IrcMessage::fromData(const QByteArray& data, IrcConnection* connecti
 /*!
     Creates a new message from \a prefix, \a command and \a parameters with \a connection.
  */
-IrcMessage* IrcMessage::fromParameters(const QString& prefix, const QString& command, const QStringList& parameters, IrcConnection* connection)
+IrcMessage *IrcMessage::fromParameters(const QString &prefix, const QString &command, const QStringList &parameters,
+                                       IrcConnection *connection)
 {
-    IrcMessage* message = 0;
-    const QMetaObject* metaObject = irc_command_meta_object(command);
-    if (metaObject) {
-        message = qobject_cast<IrcMessage*>(metaObject->newInstance(Q_ARG(IrcConnection*, connection)));
+    IrcMessage *message = 0;
+    const QMetaObject *metaObject = irc_command_meta_object(command);
+    if (metaObject)
+    {
+        message = qobject_cast<IrcMessage *>(metaObject->newInstance(Q_ARG(IrcConnection *, connection)));
         Q_ASSERT(message);
         message->setPrefix(prefix);
         message->setCommand(command);
@@ -728,18 +736,19 @@ IrcMessage* IrcMessage::fromParameters(const QString& prefix, const QString& com
 
     Clones the message.
  */
-IrcMessage* IrcMessage::clone(QObject* parent) const
+IrcMessage *IrcMessage::clone(QObject *parent) const
 {
     Q_D(const IrcMessage);
-    IrcMessage* msg = qobject_cast<IrcMessage*>(metaObject()->newInstance(Q_ARG(IrcConnection*, d->connection)));
-    if (msg) {
+    IrcMessage *msg = qobject_cast<IrcMessage *>(metaObject()->newInstance(Q_ARG(IrcConnection *, d->connection)));
+    if (msg)
+    {
         msg->setParent(parent);
-        IrcMessagePrivate* p = IrcMessagePrivate::get(msg);
+        IrcMessagePrivate *p = IrcMessagePrivate::get(msg);
         p->timeStamp = d->timeStamp;
         p->encoding = d->encoding;
         p->flags = d->flags;
         p->data = d->data;
-        foreach (IrcMessage* bm, d->batch)
+        foreach (IrcMessage *bm, d->batch)
             p->batch += bm->clone(msg);
         p->m_nick = d->m_nick;
         p->m_ident = d->m_ident;
@@ -787,7 +796,7 @@ QByteArray IrcMessage::toData() const
 /*!
     Constructs a new IrcAwayMessage with \a connection.
  */
-IrcAwayMessage::IrcAwayMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcAwayMessage::IrcAwayMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Away;
@@ -836,8 +845,7 @@ bool IrcAwayMessage::isAway() const
 {
     Q_D(const IrcMessage);
     int rpl = d->command().toInt();
-    return rpl == Irc::RPL_AWAY || rpl == Irc::RPL_NOWAWAY
-            || (d->command() == "AWAY" && !d->param(0).isEmpty());
+    return rpl == Irc::RPL_AWAY || rpl == Irc::RPL_NOWAWAY || (d->command() == "AWAY" && !d->param(0).isEmpty());
 }
 
 bool IrcAwayMessage::isValid() const
@@ -856,7 +864,7 @@ bool IrcAwayMessage::isValid() const
 /*!
     Constructs a new IrcAccountMessage with \a connection.
  */
-IrcAccountMessage::IrcAccountMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcAccountMessage::IrcAccountMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Account;
@@ -896,7 +904,7 @@ bool IrcAccountMessage::isValid() const
 /*!
     Constructs a new IrcBatchMessage with \a connection.
  */
-IrcBatchMessage::IrcBatchMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcBatchMessage::IrcBatchMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Batch;
@@ -932,7 +940,7 @@ QString IrcBatchMessage::batch() const
     \par Access function:
     \li QList<IrcMessage*> <b>messages</b>() const
  */
-QList<IrcMessage*> IrcBatchMessage::messages() const
+QList<IrcMessage *> IrcBatchMessage::messages() const
 {
     Q_D(const IrcMessage);
     return d->batch;
@@ -953,7 +961,7 @@ bool IrcBatchMessage::isValid() const
 /*!
     Constructs a new IrcCapabilityMessage with \a connection.
  */
-IrcCapabilityMessage::IrcCapabilityMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcCapabilityMessage::IrcCapabilityMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Capability;
@@ -1007,7 +1015,7 @@ bool IrcCapabilityMessage::isValid() const
 /*!
     Constructs a new IrcErrorMessage with \a connection.
  */
-IrcErrorMessage::IrcErrorMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcErrorMessage::IrcErrorMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Error;
@@ -1042,7 +1050,7 @@ bool IrcErrorMessage::isValid() const
 /*!
     Constructs a new IrcHostChangeMessage with \a connection.
  */
-IrcHostChangeMessage::IrcHostChangeMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcHostChangeMessage::IrcHostChangeMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = HostChange;
@@ -1086,7 +1094,7 @@ bool IrcHostChangeMessage::isValid() const
 /*!
     Constructs a new IrcInviteMessage with \a connection.
  */
-IrcInviteMessage::IrcInviteMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcInviteMessage::IrcInviteMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Invite;
@@ -1153,7 +1161,7 @@ bool IrcInviteMessage::isValid() const
 /*!
     Constructs a new IrcJoinMessage with \a connection.
  */
-IrcJoinMessage::IrcJoinMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcJoinMessage::IrcJoinMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Join;
@@ -1225,7 +1233,7 @@ bool IrcJoinMessage::isValid() const
 /*!
     Constructs a new IrcKickMessage with \a connection.
  */
-IrcKickMessage::IrcKickMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcKickMessage::IrcKickMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Kick;
@@ -1296,7 +1304,7 @@ bool IrcKickMessage::isValid() const
 /*!
     Constructs a new IrcModeMessage with \a connection.
  */
-IrcModeMessage::IrcModeMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcModeMessage::IrcModeMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Mode;
@@ -1380,12 +1388,15 @@ bool IrcModeMessage::isReply() const
 IrcModeMessage::Kind IrcModeMessage::kind() const
 {
     const QString m = mode().remove(QLatin1Char('+')).remove(QLatin1Char('-'));
-    if (!m.isEmpty()) {
+    if (!m.isEmpty())
+    {
         QStringList channelModes;
-        if (const IrcNetwork* net = network())
+        if (const IrcNetwork *net = network())
             channelModes = net->channelModes(IrcNetwork::AllTypes);
-        if (!channelModes.isEmpty()) {
-            for (int i = 0; i < m.length(); ++i) {
+        if (!channelModes.isEmpty())
+        {
+            for (int i = 0; i < m.length(); ++i)
+            {
                 if (!channelModes.contains(m.at(i)))
                     return User;
             }
@@ -1408,7 +1419,7 @@ bool IrcModeMessage::isValid() const
 /*!
     Constructs a new IrcMotdMessage with \a connection.
  */
-IrcMotdMessage::IrcMotdMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcMotdMessage::IrcMotdMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Motd;
@@ -1442,7 +1453,7 @@ bool IrcMotdMessage::isValid() const
 /*!
     Constructs a new IrcNamesMessage with \a connection.
  */
-IrcNamesMessage::IrcNamesMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcNamesMessage::IrcNamesMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Names;
@@ -1488,7 +1499,7 @@ bool IrcNamesMessage::isValid() const
 /*!
     Constructs a new IrcNickMessage with \a connection.
  */
-IrcNickMessage::IrcNickMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcNickMessage::IrcNickMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Nick;
@@ -1535,7 +1546,7 @@ bool IrcNickMessage::isValid() const
 /*!
     Constructs a new IrcNoticeMessage with \a connection.
  */
-IrcNoticeMessage::IrcNoticeMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcNoticeMessage::IrcNoticeMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Notice;
@@ -1550,8 +1561,9 @@ IrcNoticeMessage::IrcNoticeMessage(IrcConnection* connection) : IrcMessage(conne
 QString IrcNoticeMessage::target() const
 {
     Q_D(const IrcMessage);
-    if (d->connection) {
-        const IrcNetwork* network = d->connection->network();
+    if (d->connection)
+    {
+        const IrcNetwork *network = d->connection->network();
         return IrcNetworkPrivate::removePrefix(d->param(0), network->statusPrefixes());
     }
     return d->param(0);
@@ -1567,7 +1579,8 @@ QString IrcNoticeMessage::content() const
 {
     Q_D(const IrcMessage);
     QString msg = d->param(1);
-    if (isReply()) {
+    if (isReply())
+    {
         msg.remove(0, 1);
         msg.chop(1);
     }
@@ -1585,8 +1598,9 @@ QString IrcNoticeMessage::content() const
 QString IrcNoticeMessage::statusPrefix() const
 {
     Q_D(const IrcMessage);
-    if (d->connection) {
-        const IrcNetwork* network = d->connection->network();
+    if (d->connection)
+    {
+        const IrcNetwork *network = d->connection->network();
         return IrcNetworkPrivate::getPrefix(d->param(0), network->statusPrefixes());
     }
     return QString();
@@ -1636,7 +1650,7 @@ bool IrcNoticeMessage::isValid() const
 /*!
     Constructs a new IrcNumericMessage with \a connection.
  */
-IrcNumericMessage::IrcNumericMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcNumericMessage::IrcNumericMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Numeric;
@@ -1692,7 +1706,7 @@ bool IrcNumericMessage::isValid() const
 /*!
     Constructs a new IrcPartMessage with \a connection.
  */
-IrcPartMessage::IrcPartMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcPartMessage::IrcPartMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Part;
@@ -1736,7 +1750,7 @@ bool IrcPartMessage::isValid() const
 /*!
     Constructs a new IrcPingMessage with \a connection.
  */
-IrcPingMessage::IrcPingMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcPingMessage::IrcPingMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Ping;
@@ -1768,7 +1782,7 @@ bool IrcPingMessage::isValid() const
 /*!
     Constructs a new IrcPongMessage with \a connection.
  */
-IrcPongMessage::IrcPongMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcPongMessage::IrcPongMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Pong;
@@ -1801,7 +1815,7 @@ bool IrcPongMessage::isValid() const
 /*!
     Constructs a new IrcPrivateMessage with \a connection.
  */
-IrcPrivateMessage::IrcPrivateMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcPrivateMessage::IrcPrivateMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Private;
@@ -1816,8 +1830,9 @@ IrcPrivateMessage::IrcPrivateMessage(IrcConnection* connection) : IrcMessage(con
 QString IrcPrivateMessage::target() const
 {
     Q_D(const IrcMessage);
-    if (d->connection) {
-        const IrcNetwork* network = d->connection->network();
+    if (d->connection)
+    {
+        const IrcNetwork *network = d->connection->network();
         return IrcNetworkPrivate::removePrefix(d->param(0), network->statusPrefixes());
     }
     return d->param(0);
@@ -1835,9 +1850,12 @@ QString IrcPrivateMessage::content() const
     QString msg = d->param(1);
     const bool act = isAction();
     const bool req = isRequest();
-    if (act) msg.remove(0, 8);
-    if (req) msg.remove(0, 1);
-    if (act || req) msg.chop(1);
+    if (act)
+        msg.remove(0, 8);
+    if (req)
+        msg.remove(0, 1);
+    if (act || req)
+        msg.chop(1);
     return msg;
 }
 
@@ -1852,8 +1870,9 @@ QString IrcPrivateMessage::content() const
 QString IrcPrivateMessage::statusPrefix() const
 {
     Q_D(const IrcMessage);
-    if (d->connection) {
-        const IrcNetwork* network = d->connection->network();
+    if (d->connection)
+    {
+        const IrcNetwork *network = d->connection->network();
         return IrcNetworkPrivate::getPrefix(d->param(0), network->statusPrefixes());
     }
     return QString();
@@ -1917,7 +1936,7 @@ bool IrcPrivateMessage::isValid() const
 /*!
     Constructs a new IrcQuitMessage with \a connection.
  */
-IrcQuitMessage::IrcQuitMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcQuitMessage::IrcQuitMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Quit;
@@ -1949,7 +1968,7 @@ bool IrcQuitMessage::isValid() const
 /*!
     Constructs a new IrcTopicMessage with \a connection.
  */
-IrcTopicMessage::IrcTopicMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcTopicMessage::IrcTopicMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Topic;
@@ -2017,7 +2036,7 @@ bool IrcTopicMessage::isValid() const
 /*!
     Constructs a new IrcWhoisMessage with \a connection.
  */
-IrcWhoisMessage::IrcWhoisMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcWhoisMessage::IrcWhoisMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Whois;
@@ -2163,7 +2182,7 @@ bool IrcWhoisMessage::isValid() const
 /*!
     Constructs a new IrcWhowasMessage with \a connection.
  */
-IrcWhowasMessage::IrcWhowasMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcWhowasMessage::IrcWhowasMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = Whowas;
@@ -2234,7 +2253,7 @@ bool IrcWhowasMessage::isValid() const
 /*!
     Constructs a new IrcWhoReplyMessage with \a connection.
  */
-IrcWhoReplyMessage::IrcWhoReplyMessage(IrcConnection* connection) : IrcMessage(connection)
+IrcWhoReplyMessage::IrcWhoReplyMessage(IrcConnection *connection) : IrcMessage(connection)
 {
     Q_D(IrcMessage);
     d->type = WhoReply;
@@ -2312,7 +2331,7 @@ QDebug operator<<(QDebug debug, IrcMessage::Type type)
 {
     const int index = IrcMessage::staticMetaObject.indexOfEnumerator("Type");
     QMetaEnum enumerator = IrcMessage::staticMetaObject.enumerator(index);
-    const char* key = enumerator.valueToKey(type);
+    const char *key = enumerator.valueToKey(type);
     debug << (key ? key : "Unknown");
     return debug;
 }
@@ -2321,7 +2340,7 @@ QDebug operator<<(QDebug debug, IrcMessage::Flag flag)
 {
     const int index = IrcMessage::staticMetaObject.indexOfEnumerator("Flag");
     QMetaEnum enumerator = IrcMessage::staticMetaObject.enumerator(index);
-    const char* key = enumerator.valueToKey(flag);
+    const char *key = enumerator.valueToKey(flag);
     debug << (key ? key : "None");
     return debug;
 }
@@ -2345,16 +2364,16 @@ QDebug operator<<(QDebug debug, IrcModeMessage::Kind kind)
 {
     const int index = IrcModeMessage::staticMetaObject.indexOfEnumerator("Kind");
     QMetaEnum enumerator = IrcModeMessage::staticMetaObject.enumerator(index);
-    const char* key = enumerator.valueToKey(kind);
+    const char *key = enumerator.valueToKey(kind);
     debug << (key ? key : "Unknown");
     return debug;
 }
 
-QDebug operator<<(QDebug debug, const IrcMessage* message)
+QDebug operator<<(QDebug debug, const IrcMessage *message)
 {
     if (!message)
         return debug << "IrcMessage(0x0) ";
-    debug.nospace() << message->metaObject()->className() << '(' << (void*) message;
+    debug.nospace() << message->metaObject()->className() << '(' << (void *)message;
     if (!message->objectName().isEmpty())
         debug.nospace() << ", name=" << qPrintable(message->objectName());
     debug.nospace() << ", flags=" << message->flags();

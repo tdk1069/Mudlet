@@ -20,12 +20,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include "ui_source_editor_find_area.h"
-#include <QTextEdit>
 #include <QKeyEvent>
-#include "post_guard.h"
+#include <QTextEdit>
 
 /*namespace Ui {
 class dlgSourceEditorFindArea;
@@ -35,13 +34,13 @@ class dlgSourceEditorFindArea : public QWidget, public Ui::source_editor_find_ar
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(dlgSourceEditorFindArea)
-    explicit dlgSourceEditorFindArea(QWidget*);
+    explicit dlgSourceEditorFindArea(QWidget *);
 
-    bool eventFilter(QObject*, QEvent* event) override;
+    bool eventFilter(QObject *, QEvent *event) override;
 
-signals:
+  signals:
     void signal_sourceEditorFindPrevious();
     void signal_sourceEditorFindNext();
     void signal_sourceEditorMovementNecessary();

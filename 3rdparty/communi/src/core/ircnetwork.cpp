@@ -27,11 +27,11 @@
 */
 
 #include "ircnetwork.h"
-#include "ircnetwork_p.h"
-#include "ircconnection_p.h"
-#include "ircprotocol.h"
-#include "ircconnection.h"
 #include "irccommand.h"
+#include "ircconnection.h"
+#include "ircconnection_p.h"
+#include "ircnetwork_p.h"
+#include "ircprotocol.h"
 #include <QMetaEnum>
 #include <QPointer>
 
@@ -182,26 +182,31 @@ IRC_BEGIN_NAMESPACE
  */
 
 #ifndef IRC_DOXYGEN
-IrcNetworkPrivate::IrcNetworkPrivate() : q_ptr(0), initialized(false),
-    modes(QStringList() << "o" << "v"), prefixes(QStringList() << "@" << "+"), channelTypes("#")
+IrcNetworkPrivate::IrcNetworkPrivate()
+    : q_ptr(0), initialized(false), modes(QStringList() << "o"
+                                                        << "v"),
+      prefixes(QStringList() << "@"
+                             << "+"),
+      channelTypes("#")
 {
 }
 
-static QHash<QString, int> numericValues(const QString& parameter)
+static QHash<QString, int> numericValues(const QString &parameter)
 {
     QHash<QString, int> values;
     const QStringList keyValues = parameter.split(",", QString::SkipEmptyParts);
-    foreach (const QString& keyValue, keyValues)
+    foreach (const QString &keyValue, keyValues)
         values.insert(keyValue.section(":", 0, 0), keyValue.section(":", 1, 1).toInt());
     return values;
 }
 
-void IrcNetworkPrivate::setInfo(const QHash<QString, QString>& info)
+void IrcNetworkPrivate::setInfo(const QHash<QString, QString> &info)
 {
     Q_Q(IrcNetwork);
     if (info.contains("NETWORK"))
         setName(info.value("NETWORK"));
-    if (info.contains("PREFIX")) {
+    if (info.contains("PREFIX"))
+    {
         const QString pfx = info.value("PREFIX");
         setModes(pfx.mid(1, pfx.indexOf(')') - 1).split("", QString::SkipEmptyParts));
         setPrefixes(pfx.mid(pfx.indexOf(')') + 1).split("", QString::SkipEmptyParts));
@@ -235,76 +240,84 @@ void IrcNetworkPrivate::setInfo(const QHash<QString, QString>& info)
     if (info.contains("TARGMAX"))
         targetLimits = numericValues(info.value("TARGMAX"));
 
-    if (!initialized) {
+    if (!initialized)
+    {
         initialized = true;
         emit q->initialized();
     }
 }
 
-void IrcNetworkPrivate::setAvailableCapabilities(const QSet<QString>& capabilities)
+void IrcNetworkPrivate::setAvailableCapabilities(const QSet<QString> &capabilities)
 {
     Q_Q(IrcNetwork);
-    if (availableCaps != capabilities) {
+    if (availableCaps != capabilities)
+    {
         availableCaps = capabilities;
         emit q->availableCapabilitiesChanged(availableCaps.toList());
     }
 }
 
-void IrcNetworkPrivate::setActiveCapabilities(const QSet<QString>& capabilities)
+void IrcNetworkPrivate::setActiveCapabilities(const QSet<QString> &capabilities)
 {
     Q_Q(IrcNetwork);
-    if (activeCaps != capabilities) {
+    if (activeCaps != capabilities)
+    {
         activeCaps = capabilities;
         emit q->activeCapabilitiesChanged(activeCaps.toList());
     }
 }
 
-void IrcNetworkPrivate::setName(const QString& value)
+void IrcNetworkPrivate::setName(const QString &value)
 {
     Q_Q(IrcNetwork);
-    if (name != value) {
+    if (name != value)
+    {
         name = value;
         emit q->nameChanged(value);
     }
 }
 
-void IrcNetworkPrivate::setModes(const QStringList& value)
+void IrcNetworkPrivate::setModes(const QStringList &value)
 {
     Q_Q(IrcNetwork);
-    if (modes != value) {
+    if (modes != value)
+    {
         modes = value;
         emit q->modesChanged(value);
     }
 }
 
-void IrcNetworkPrivate::setPrefixes(const QStringList& value)
+void IrcNetworkPrivate::setPrefixes(const QStringList &value)
 {
     Q_Q(IrcNetwork);
-    if (prefixes != value) {
+    if (prefixes != value)
+    {
         prefixes = value;
         emit q->prefixesChanged(value);
     }
 }
 
-void IrcNetworkPrivate::setChannelTypes(const QStringList& value)
+void IrcNetworkPrivate::setChannelTypes(const QStringList &value)
 {
     Q_Q(IrcNetwork);
-    if (channelTypes != value) {
+    if (channelTypes != value)
+    {
         channelTypes = value;
         emit q->channelTypesChanged(value);
     }
 }
 
-void IrcNetworkPrivate::setStatusPrefixes(const QStringList& value)
+void IrcNetworkPrivate::setStatusPrefixes(const QStringList &value)
 {
     Q_Q(IrcNetwork);
-    if (statusPrefixes != value) {
+    if (statusPrefixes != value)
+    {
         statusPrefixes = value;
         emit q->statusPrefixesChanged(value);
     }
 }
 
-QString IrcNetworkPrivate::getPrefix(const QString& str, const QStringList& prefixes)
+QString IrcNetworkPrivate::getPrefix(const QString &str, const QStringList &prefixes)
 {
     int i = 0;
     while (i < str.length() && prefixes.contains(str.at(i)))
@@ -312,7 +325,7 @@ QString IrcNetworkPrivate::getPrefix(const QString& str, const QStringList& pref
     return str.left(i);
 }
 
-QString IrcNetworkPrivate::removePrefix(const QString& str, const QStringList& prefixes)
+QString IrcNetworkPrivate::removePrefix(const QString &str, const QStringList &prefixes)
 {
     int i = 0;
     while (i < str.length() && prefixes.contains(str.at(i)))
@@ -325,7 +338,7 @@ QString IrcNetworkPrivate::removePrefix(const QString& str, const QStringList& p
     \internal
     Constructs a new network object for IRC \a connection.
  */
-IrcNetwork::IrcNetwork(IrcConnection* connection) : QObject(connection), d_ptr(new IrcNetworkPrivate)
+IrcNetwork::IrcNetwork(IrcConnection *connection) : QObject(connection), d_ptr(new IrcNetworkPrivate)
 {
     Q_D(IrcNetwork);
     d->q_ptr = this;
@@ -425,7 +438,7 @@ QStringList IrcNetwork::prefixes() const
 
     \sa modes, prefixToMode()
  */
-QString IrcNetwork::modeToPrefix(const QString& mode) const
+QString IrcNetwork::modeToPrefix(const QString &mode) const
 {
     Q_D(const IrcNetwork);
     return d->prefixes.value(d->modes.indexOf(mode));
@@ -436,7 +449,7 @@ QString IrcNetwork::modeToPrefix(const QString& mode) const
 
     \sa prefixes, modeToPrefix()
  */
-QString IrcNetwork::prefixToMode(const QString& prefix) const
+QString IrcNetwork::prefixToMode(const QString &prefix) const
 {
     Q_D(const IrcNetwork);
     return d->modes.value(d->prefixes.indexOf(prefix));
@@ -495,7 +508,7 @@ QStringList IrcNetwork::statusPrefixes() const
 
     \sa channelTypes
  */
-bool IrcNetwork::isChannel(const QString& name) const
+bool IrcNetwork::isChannel(const QString &name) const
 {
     Q_D(const IrcNetwork);
     QString unprefixed = d->removePrefix(name, d->statusPrefixes);
@@ -531,15 +544,31 @@ int IrcNetwork::numericLimit(Limit limit) const
 {
     Q_D(const IrcNetwork);
     QString key;
-    switch (limit) {
-        case NickLength:        key = QLatin1String("NICKLEN"); break;
-        case ChannelLength:     key = QLatin1String("CHANNELLEN"); break;
-        case TopicLength:       key = QLatin1String("TOPICLEN"); break;
-        case MessageLength:     return 512; // RFC 1459
-        case KickReasonLength:  key = QLatin1String("KICKLEN"); break;
-        case AwayReasonLength:  key = QLatin1String("AWAYLEN"); break;
-        case ModeCount:         key = QLatin1String("MODES"); break;
-        case MonitorCount:      key = QLatin1String("MONITOR"); break;
+    switch (limit)
+    {
+    case NickLength:
+        key = QLatin1String("NICKLEN");
+        break;
+    case ChannelLength:
+        key = QLatin1String("CHANNELLEN");
+        break;
+    case TopicLength:
+        key = QLatin1String("TOPICLEN");
+        break;
+    case MessageLength:
+        return 512; // RFC 1459
+    case KickReasonLength:
+        key = QLatin1String("KICKLEN");
+        break;
+    case AwayReasonLength:
+        key = QLatin1String("AWAYLEN");
+        break;
+    case ModeCount:
+        key = QLatin1String("MODES");
+        break;
+    case MonitorCount:
+        key = QLatin1String("MONITOR");
+        break;
     }
     return d->numericLimits.value(key, -1);
 }
@@ -549,7 +578,7 @@ int IrcNetwork::numericLimit(Limit limit) const
 
     \sa modes()
  */
-int IrcNetwork::modeLimit(const QString& mode) const
+int IrcNetwork::modeLimit(const QString &mode) const
 {
     Q_D(const IrcNetwork);
     return d->modeLimits.value(mode);
@@ -560,7 +589,7 @@ int IrcNetwork::modeLimit(const QString& mode) const
 
     \sa channelTypes()
  */
-int IrcNetwork::channelLimit(const QString& type) const
+int IrcNetwork::channelLimit(const QString &type) const
 {
     Q_D(const IrcNetwork);
     return d->channelLimits.value(type);
@@ -569,7 +598,7 @@ int IrcNetwork::channelLimit(const QString& type) const
 /*!
     Returns the limit of targets for a \a command, or \c -1 if the limitation is not known.
  */
-int IrcNetwork::targetLimit(const QString& command) const
+int IrcNetwork::targetLimit(const QString &command) const
 {
     Q_D(const IrcNetwork);
     return d->targetLimits.value(command);
@@ -614,7 +643,7 @@ QStringList IrcNetwork::activeCapabilities() const
 
     \sa availableCapabilities
  */
-bool IrcNetwork::hasCapability(const QString& capability) const
+bool IrcNetwork::hasCapability(const QString &capability) const
 {
     Q_D(const IrcNetwork);
     return d->availableCaps.contains(capability);
@@ -625,7 +654,7 @@ bool IrcNetwork::hasCapability(const QString& capability) const
 
     \sa activeCapabilities
  */
-bool IrcNetwork::isCapable(const QString& capability) const
+bool IrcNetwork::isCapable(const QString &capability) const
 {
     Q_D(const IrcNetwork);
     return d->activeCaps.contains(capability);
@@ -637,7 +666,7 @@ bool IrcNetwork::isCapable(const QString& capability) const
     \note The \a capability is NOT added to the list of \ref requestedCapabilities
           "requested capabilities" to avoid them "piling up".
  */
-bool IrcNetwork::requestCapability(const QString& capability)
+bool IrcNetwork::requestCapability(const QString &capability)
 {
     Q_D(IrcNetwork);
     if (d->connection)
@@ -651,7 +680,7 @@ bool IrcNetwork::requestCapability(const QString& capability)
     \note The \a capabilities are NOT added to the list of \ref requestedCapabilities
           "requested capabilities" to avoid them "piling up".
  */
-bool IrcNetwork::requestCapabilities(const QStringList& capabilities)
+bool IrcNetwork::requestCapabilities(const QStringList &capabilities)
 {
     Q_D(IrcNetwork);
     if (d->connection && d->connection->isActive())
@@ -680,11 +709,12 @@ QStringList IrcNetwork::requestedCapabilities() const
     return d->requestedCaps.toList();
 }
 
-void IrcNetwork::setRequestedCapabilities(const QStringList& capabilities)
+void IrcNetwork::setRequestedCapabilities(const QStringList &capabilities)
 {
     Q_D(IrcNetwork);
     const QSet<QString> caps = capabilities.toSet();
-    if (d->requestedCaps != caps) {
+    if (d->requestedCaps != caps)
+    {
         d->requestedCaps = caps;
         emit requestedCapabilitiesChanged(caps.toList());
     }
@@ -695,7 +725,7 @@ QDebug operator<<(QDebug debug, IrcNetwork::Limit limit)
 {
     const int index = IrcNetwork::staticMetaObject.indexOfEnumerator("Limit");
     QMetaEnum enumerator = IrcNetwork::staticMetaObject.enumerator(index);
-    const char* key = enumerator.valueToKey(limit);
+    const char *key = enumerator.valueToKey(limit);
     debug << (key ? key : "Unknown");
     return debug;
 }
@@ -704,7 +734,7 @@ QDebug operator<<(QDebug debug, IrcNetwork::ModeType type)
 {
     const int index = IrcNetwork::staticMetaObject.indexOfEnumerator("ModeType");
     QMetaEnum enumerator = IrcNetwork::staticMetaObject.enumerator(index);
-    const char* key = enumerator.valueToKey(type);
+    const char *key = enumerator.valueToKey(type);
     debug << (key ? key : "Unknown");
     return debug;
 }
@@ -712,9 +742,12 @@ QDebug operator<<(QDebug debug, IrcNetwork::ModeType type)
 QDebug operator<<(QDebug debug, IrcNetwork::ModeTypes types)
 {
     QStringList lst;
-    if (types == IrcNetwork::AllTypes) {
+    if (types == IrcNetwork::AllTypes)
+    {
         lst << "AllTypes";
-    } else {
+    }
+    else
+    {
         if (types & IrcNetwork::TypeA)
             lst << "TypeA";
         if (types & IrcNetwork::TypeB)
@@ -728,11 +761,11 @@ QDebug operator<<(QDebug debug, IrcNetwork::ModeTypes types)
     return debug;
 }
 
-QDebug operator<<(QDebug debug, const IrcNetwork* network)
+QDebug operator<<(QDebug debug, const IrcNetwork *network)
 {
     if (!network)
         return debug << "IrcNetwork(0x0) ";
-    debug.nospace() << network->metaObject()->className() << '(' << (void*) network;
+    debug.nospace() << network->metaObject()->className() << '(' << (void *)network;
     if (!network->objectName().isEmpty())
         debug.nospace() << ", name=" << qPrintable(network->objectName());
     if (!network->name().isEmpty())

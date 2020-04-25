@@ -41,56 +41,57 @@ IRC_BEGIN_NAMESPACE
     \brief Module meta-type registration.
  */
 
-namespace IrcCore {
+namespace IrcCore
+{
 
-    /*!
-        Registers IrcCore types to the %Qt meta-system.
+/*!
+    Registers IrcCore types to the %Qt meta-system.
 
-        \sa IrcModel::registerMetaTypes(), IrcUtil::registerMetaTypes(), qRegisterMetaType()
-     */
-    void registerMetaTypes()
-    {
-        qRegisterMetaType<Irc::Color>("Irc::Color");
-        qRegisterMetaType<Irc::DataRole>("Irc::DataRole");
-        qRegisterMetaType<Irc::SortMethod>("Irc::SortMethod");
-        qRegisterMetaType<Irc::Code>("Irc::Code");
+    \sa IrcModel::registerMetaTypes(), IrcUtil::registerMetaTypes(), qRegisterMetaType()
+ */
+void registerMetaTypes()
+{
+    qRegisterMetaType<Irc::Color>("Irc::Color");
+    qRegisterMetaType<Irc::DataRole>("Irc::DataRole");
+    qRegisterMetaType<Irc::SortMethod>("Irc::SortMethod");
+    qRegisterMetaType<Irc::Code>("Irc::Code");
 
-        qRegisterMetaType<IrcConnection*>("IrcConnection*");
-        qRegisterMetaType<IrcConnection::Status>("IrcConnection::Status");
+    qRegisterMetaType<IrcConnection *>("IrcConnection*");
+    qRegisterMetaType<IrcConnection::Status>("IrcConnection::Status");
 
-        qRegisterMetaType<IrcNetwork*>("IrcNetwork*");
+    qRegisterMetaType<IrcNetwork *>("IrcNetwork*");
 
-        qRegisterMetaType<IrcCommand*>("IrcCommand*");
-        qRegisterMetaType<IrcCommand::Type>("IrcCommand::Type");
+    qRegisterMetaType<IrcCommand *>("IrcCommand*");
+    qRegisterMetaType<IrcCommand::Type>("IrcCommand::Type");
 
-        qRegisterMetaType<IrcMessage*>("IrcMessage*");
-        qRegisterMetaType<IrcMessage::Type>("IrcMessage::Type");
+    qRegisterMetaType<IrcMessage *>("IrcMessage*");
+    qRegisterMetaType<IrcMessage::Type>("IrcMessage::Type");
 
-        qRegisterMetaType<IrcAccountMessage*>("IrcAccountMessage*");
-        qRegisterMetaType<IrcAwayMessage*>("IrcAwayMessage*");
-        qRegisterMetaType<IrcBatchMessage*>("IrcBatchMessage*");
-        qRegisterMetaType<IrcCapabilityMessage*>("IrcCapabilityMessage*");
-        qRegisterMetaType<IrcErrorMessage*>("IrcErrorMessage*");
-        qRegisterMetaType<IrcInviteMessage*>("IrcHostChangeMessage*");
-        qRegisterMetaType<IrcInviteMessage*>("IrcInviteMessage*");
-        qRegisterMetaType<IrcJoinMessage*>("IrcJoinMessage*");
-        qRegisterMetaType<IrcKickMessage*>("IrcKickMessage*");
-        qRegisterMetaType<IrcModeMessage*>("IrcModeMessage*");
-        qRegisterMetaType<IrcNamesMessage*>("IrcNamesMessage*");
-        qRegisterMetaType<IrcNickMessage*>("IrcNickMessage*");
-        qRegisterMetaType<IrcNoticeMessage*>("IrcNoticeMessage*");
-        qRegisterMetaType<IrcNumericMessage*>("IrcNumericMessage*");
-        qRegisterMetaType<IrcMotdMessage*>("IrcMotdMessage*");
-        qRegisterMetaType<IrcPartMessage*>("IrcPartMessage*");
-        qRegisterMetaType<IrcPingMessage*>("IrcPingMessage*");
-        qRegisterMetaType<IrcPongMessage*>("IrcPongMessage*");
-        qRegisterMetaType<IrcPrivateMessage*>("IrcPrivateMessage*");
-        qRegisterMetaType<IrcQuitMessage*>("IrcQuitMessage*");
-        qRegisterMetaType<IrcTopicMessage*>("IrcTopicMessage*");
-        qRegisterMetaType<IrcWhoisMessage*>("IrcWhoisMessage*");
-        qRegisterMetaType<IrcWhowasMessage*>("IrcWhowasMessage*");
-        qRegisterMetaType<IrcWhoReplyMessage*>("IrcWhoReplyMessage*");
-    }
+    qRegisterMetaType<IrcAccountMessage *>("IrcAccountMessage*");
+    qRegisterMetaType<IrcAwayMessage *>("IrcAwayMessage*");
+    qRegisterMetaType<IrcBatchMessage *>("IrcBatchMessage*");
+    qRegisterMetaType<IrcCapabilityMessage *>("IrcCapabilityMessage*");
+    qRegisterMetaType<IrcErrorMessage *>("IrcErrorMessage*");
+    qRegisterMetaType<IrcInviteMessage *>("IrcHostChangeMessage*");
+    qRegisterMetaType<IrcInviteMessage *>("IrcInviteMessage*");
+    qRegisterMetaType<IrcJoinMessage *>("IrcJoinMessage*");
+    qRegisterMetaType<IrcKickMessage *>("IrcKickMessage*");
+    qRegisterMetaType<IrcModeMessage *>("IrcModeMessage*");
+    qRegisterMetaType<IrcNamesMessage *>("IrcNamesMessage*");
+    qRegisterMetaType<IrcNickMessage *>("IrcNickMessage*");
+    qRegisterMetaType<IrcNoticeMessage *>("IrcNoticeMessage*");
+    qRegisterMetaType<IrcNumericMessage *>("IrcNumericMessage*");
+    qRegisterMetaType<IrcMotdMessage *>("IrcMotdMessage*");
+    qRegisterMetaType<IrcPartMessage *>("IrcPartMessage*");
+    qRegisterMetaType<IrcPingMessage *>("IrcPingMessage*");
+    qRegisterMetaType<IrcPongMessage *>("IrcPongMessage*");
+    qRegisterMetaType<IrcPrivateMessage *>("IrcPrivateMessage*");
+    qRegisterMetaType<IrcQuitMessage *>("IrcQuitMessage*");
+    qRegisterMetaType<IrcTopicMessage *>("IrcTopicMessage*");
+    qRegisterMetaType<IrcWhoisMessage *>("IrcWhoisMessage*");
+    qRegisterMetaType<IrcWhowasMessage *>("IrcWhowasMessage*");
+    qRegisterMetaType<IrcWhoReplyMessage *>("IrcWhoReplyMessage*");
 }
+} // namespace IrcCore
 
 IRC_END_NAMESPACE

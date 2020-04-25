@@ -19,27 +19,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TTimer.h"
-
 
 #include "Host.h"
 #include "TDebug.h"
 #include "mudlet.h"
 
-const char* TTimer::scmProperty_HostName = "HostName";
-const char* TTimer::scmProperty_TTimerId = "TTimerId";
+const char *TTimer::scmProperty_HostName = "HostName";
+const char *TTimer::scmProperty_TTimerId = "TTimerId";
 
-TTimer::TTimer(TTimer* parent, Host* pHost)
-: Tree<TTimer>(parent)
-, mRegisteredAnonymousLuaFunction(false)
-, exportItem(true)
-, mModuleMasterFolder(false)
-, mpHost(pHost)
-, mNeedsToBeCompiled(true)
-, mpQTimer(new QTimer)
-, mModuleMember(false)
-, mRepeating(false)
+TTimer::TTimer(TTimer *parent, Host *pHost)
+    : Tree<TTimer>(parent), mRegisteredAnonymousLuaFunction(false), exportItem(true), mModuleMasterFolder(false),
+      mpHost(pHost), mNeedsToBeCompiled(true), mpQTimer(new QTimer), mModuleMember(false), mRepeating(false)
 {
     mpQTimer->stop();
     mpQTimer->setProperty(scmProperty_HostName, mpHost->getName());
@@ -47,17 +38,9 @@ TTimer::TTimer(TTimer* parent, Host* pHost)
     mpQTimer->setProperty(scmProperty_TTimerId, 0);
 }
 
-TTimer::TTimer(const QString& name, QTime time, Host* pHost, bool repeating)
-: Tree<TTimer>(nullptr)
-, mRegisteredAnonymousLuaFunction(false)
-, exportItem(true)
-, mModuleMasterFolder(false)
-, mName(name)
-, mTime(time)
-, mpHost(pHost)
-, mNeedsToBeCompiled(true)
-, mpQTimer(new QTimer)
-, mModuleMember(false)
+TTimer::TTimer(const QString &name, QTime time, Host *pHost, bool repeating)
+    : Tree<TTimer>(nullptr), mRegisteredAnonymousLuaFunction(false), exportItem(true), mModuleMasterFolder(false),
+      mName(name), mTime(time), mpHost(pHost), mNeedsToBeCompiled(true), mpQTimer(new QTimer), mModuleMember(false)
 {
     mpQTimer->stop();
     mpQTimer->setProperty(scmProperty_HostName, mpHost->getName());
@@ -69,18 +52,20 @@ TTimer::TTimer(const QString& name, QTime time, Host* pHost, bool repeating)
 TTimer::~TTimer()
 {
     mpQTimer->stop();
-    if (mpHost) {
+    if (mpHost)
+    {
         mpHost->getTimerUnit()->unregisterTimer(this);
     }
 
     mpQTimer->deleteLater();
 }
 
-void TTimer::setName(const QString& name)
+void TTimer::setName(const QString &name)
 {
     // temp timers do not need to check for names referring to multiple
     // timer objects as names=ID -> much faster tempTimer creation
-    if (!isTemporary()) {
+    if (!isTemporary())
+    {
         mpHost->getTimerUnit()->mLookupTable.remove(mName, this);
     }
     mName = name;
@@ -103,9 +88,12 @@ void TTimer::setTime(QTime time)
 //     offset timers: -> their time interval is interpreted as an offset to their parent timer
 bool TTimer::isOffsetTimer()
 {
-    if (mpParent) {
+    if (mpParent)
+    {
         return !mpParent->isFolder();
-    } else {
+    }
+    else
+    {
         return false;
     }
 }
@@ -114,23 +102,28 @@ bool TTimer::setIsActive(bool b)
 {
     bool condition1 = Tree<TTimer>::setIsActive(b);
     bool condition2 = canBeUnlocked();
-    if (condition1 && condition2) {
+    if (condition1 && condition2)
+    {
         start();
-    } else {
+    }
+    else
+    {
         stop();
     }
     return condition1 && condition2;
 }
-
 
 void TTimer::start()
 {
     // temporary repeating timers are still singleshot not to change the design too much
     mpQTimer->setSingleShot(isTemporary());
 
-    if (!isFolder()) {
+    if (!isFolder())
+    {
         mpQTimer->start();
-    } else {
+    }
+    else
+    {
         stop();
     }
 }
@@ -142,15 +135,21 @@ void TTimer::stop()
 
 void TTimer::compile()
 {
-    if (mNeedsToBeCompiled) {
-        if (!compileScript()) {
-            if (mudlet::debugMode) {
-                TDebug(QColor(Qt::white), QColor(Qt::red)) << "ERROR: Lua compile error. compiling script of timer:" << mName << "\n" >> 0;
+    if (mNeedsToBeCompiled)
+    {
+        if (!compileScript())
+        {
+            if (mudlet::debugMode)
+            {
+                TDebug(QColor(Qt::white), QColor(Qt::red))
+                        << "ERROR: Lua compile error. compiling script of timer:" << mName << "\n" >>
+                    0;
             }
             mOK_code = false;
         }
     }
-    for (auto timer : *mpMyChildrenList) {
+    for (auto timer : *mpMyChildrenList)
+    {
         timer->compile();
     }
 }
@@ -158,24 +157,32 @@ void TTimer::compile()
 void TTimer::compileAll()
 {
     mNeedsToBeCompiled = true;
-    if (!compileScript()) {
-        if (mudlet::debugMode) {
-            TDebug(QColor(Qt::white), QColor(Qt::red)) << "ERROR: Lua compile error. compiling script of timer:" << mName << "\n" >> 0;
+    if (!compileScript())
+    {
+        if (mudlet::debugMode)
+        {
+            TDebug(QColor(Qt::white), QColor(Qt::red))
+                    << "ERROR: Lua compile error. compiling script of timer:" << mName << "\n" >>
+                0;
         }
         mOK_code = false;
     }
-    for (auto timer : *mpMyChildrenList) {
+    for (auto timer : *mpMyChildrenList)
+    {
         timer->compileAll();
     }
 }
 
-bool TTimer::setScript(const QString& script)
+bool TTimer::setScript(const QString &script)
 {
     mScript = script;
-    if (script == "") {
+    if (script == "")
+    {
         mNeedsToBeCompiled = false;
         mOK_code = true;
-    } else {
+    }
+    else
+    {
         mNeedsToBeCompiled = true;
         mOK_code = compileScript();
     }
@@ -187,11 +194,14 @@ bool TTimer::compileScript()
     mFuncName = QString("Timer") + QString::number(mID);
     QString code = QString("function ") + mFuncName + QString("()\n") + mScript + QString("\nend\n");
     QString error;
-    if (mpHost->mLuaInterpreter.compile(code, error, "Timer: " + getName())) {
+    if (mpHost->mLuaInterpreter.compile(code, error, "Timer: " + getName()))
+    {
         mNeedsToBeCompiled = false;
         mOK_code = true;
         return true;
-    } else {
+    }
+    else
+    {
         mOK_code = false;
         setError(error);
         return false;
@@ -205,50 +215,65 @@ bool TTimer::checkRestart()
 
 void TTimer::execute()
 {
-    if (!isActive() || isFolder()) {
+    if (!isActive() || isFolder())
+    {
         mpQTimer->stop();
         return;
     }
 
-    if (isTemporary()) {
-        if (mScript.isEmpty()) {
+    if (isTemporary())
+    {
+        if (mScript.isEmpty())
+        {
             mpHost->mLuaInterpreter.call_luafunction(this);
-        } else {
+        }
+        else
+        {
             mpHost->mLuaInterpreter.compileAndExecuteScript(mScript);
         }
 
-        if (!mRepeating) {
+        if (!mRepeating)
+        {
             mpQTimer->stop();
             mpHost->getTimerUnit()->markCleanup(this);
         }
         return;
     }
 
-    if ((!isFolder() && hasChildren()) || (isOffsetTimer())) {
-        for (auto timer : *mpMyChildrenList) {
-            if (timer->isOffsetTimer()) {
+    if ((!isFolder() && hasChildren()) || (isOffsetTimer()))
+    {
+        for (auto timer : *mpMyChildrenList)
+        {
+            if (timer->isOffsetTimer())
+            {
                 timer->enableTimer(timer->getID());
             }
         }
-        if (isOffsetTimer()) {
+        if (isOffsetTimer())
+        {
             disableTimer(mID);
             deactivate();
         }
     }
 
-    if (!mCommand.isEmpty()) {
+    if (!mCommand.isEmpty())
+    {
         mpHost->send(mCommand);
     }
 
-    if (!mScript.isEmpty()) {
-        if (mNeedsToBeCompiled) {
-            if (!compileScript()) {
+    if (!mScript.isEmpty())
+    {
+        if (mNeedsToBeCompiled)
+        {
+            if (!compileScript())
+            {
                 disableTimer();
                 return;
             }
         }
 
-        if (!mpHost->mLuaInterpreter.call(mFuncName, mName, (mTime < mpHost->mTimerDebugOutputSuppressionInterval))) {
+        if (!mpHost->mLuaInterpreter.call(mFuncName, mName, (mTime < mpHost->mTimerDebugOutputSuppressionInterval)))
+        {
 
             mpQTimer->stop();
         }
@@ -257,36 +282,51 @@ void TTimer::execute()
 
 bool TTimer::canBeUnlocked()
 {
-    if (shouldBeActive()) {
-        if (!mpParent) {
+    if (shouldBeActive())
+    {
+        if (!mpParent)
+        {
             return true;
-        } else {
+        }
+        else
+        {
             return mpParent->canBeUnlocked();
         }
-    } else {
+    }
+    else
+    {
         return false;
     }
 }
 
 void TTimer::enableTimer(int id)
 {
-    if (mID == id) {
-        if (canBeUnlocked()) {
-            if (activate()) {
+    if (mID == id)
+    {
+        if (canBeUnlocked())
+        {
+            if (activate())
+            {
                 // CHECKME: Should this not also check for a non-empty "command" as well?
-                if (!mScript.isEmpty()) {
+                if (!mScript.isEmpty())
+                {
                     mpQTimer->start();
                 }
-            } else {
+            }
+            else
+            {
                 deactivate();
                 mpQTimer->stop();
             }
         }
     }
 
-    if (isFolder()) {
-        for (auto timer : *mpMyChildrenList) {
-            if (!timer->isOffsetTimer()) {
+    if (isFolder())
+    {
+        for (auto timer : *mpMyChildrenList)
+        {
+            if (!timer->isOffsetTimer())
+            {
                 timer->enableTimer(timer->getID());
             }
         }
@@ -295,13 +335,16 @@ void TTimer::enableTimer(int id)
 
 void TTimer::disableTimer(int id)
 {
-    if (mID == id) {
+    if (mID == id)
+    {
         deactivate();
         mpQTimer->stop();
     }
 
-    for (auto timer : *mpMyChildrenList) {
-        if (!timer->isOffsetTimer() && timer->shouldBeActive()) {
+    for (auto timer : *mpMyChildrenList)
+    {
+        if (!timer->isOffsetTimer() && timer->shouldBeActive())
+        {
             timer->disableTimer(timer->getID());
         }
     }
@@ -309,20 +352,28 @@ void TTimer::disableTimer(int id)
 
 void TTimer::enableTimer()
 {
-    if (canBeUnlocked()) {
-        if (activate()) {
+    if (canBeUnlocked())
+    {
+        if (activate())
+        {
             // CHECKME: Should this not also check for a non-empty "command" as well?
-            if (!mScript.isEmpty()) {
+            if (!mScript.isEmpty())
+            {
                 mpQTimer->start();
             }
-        } else {
+        }
+        else
+        {
             deactivate();
             mpQTimer->stop();
         }
     }
-    if (!isOffsetTimer()) {
-        for (auto timer : *mpMyChildrenList) {
-            if (!timer->isOffsetTimer()) {
+    if (!isOffsetTimer())
+    {
+        for (auto timer : *mpMyChildrenList)
+        {
+            if (!timer->isOffsetTimer())
+            {
                 timer->enableTimer();
             }
         }
@@ -333,44 +384,52 @@ void TTimer::disableTimer()
 {
     deactivate();
     mpQTimer->stop();
-    for (auto timer : *mpMyChildrenList) {
+    for (auto timer : *mpMyChildrenList)
+    {
         timer->disableTimer();
     }
 }
 
-
-void TTimer::enableTimer(const QString& name)
+void TTimer::enableTimer(const QString &name)
 {
-    if (mName == name) {
-        if (canBeUnlocked()) {
-            if (activate()) {
+    if (mName == name)
+    {
+        if (canBeUnlocked())
+        {
+            if (activate())
+            {
                 mpQTimer->start();
-            } else {
+            }
+            else
+            {
                 deactivate();
                 mpQTimer->stop();
             }
         }
     }
 
-    if (!isOffsetTimer()) {
-        for (auto timer : *mpMyChildrenList) {
+    if (!isOffsetTimer())
+    {
+        for (auto timer : *mpMyChildrenList)
+        {
             timer->enableTimer(timer->getName());
         }
     }
 }
 
-void TTimer::disableTimer(const QString& name)
+void TTimer::disableTimer(const QString &name)
 {
-    if (mName == name) {
+    if (mName == name)
+    {
         deactivate();
         mpQTimer->stop();
     }
 
-    for (auto timer : *mpMyChildrenList) {
+    for (auto timer : *mpMyChildrenList)
+    {
         timer->disableTimer(timer->getName());
     }
 }
-
 
 void TTimer::killTimer()
 {
@@ -388,4 +447,3 @@ int TTimer::remainingTime()
 {
     return mpQTimer->remainingTime();
 }
-

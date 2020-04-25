@@ -22,33 +22,31 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include "ui_notes_editor.h"
 #include <QPointer>
-#include "post_guard.h"
 
 class Host;
-
 
 class dlgNotepad : public QMainWindow, public Ui::notes_editor
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(dlgNotepad)
-    dlgNotepad(Host*);
+    dlgNotepad(Host *);
     ~dlgNotepad();
 
     void save();
     void restore();
 
-private slots:
+  private slots:
     void slot_text_written();
 
-private:
+  private:
     void timerEvent(QTimerEvent *event) override;
-    void restoreFile(const QString&, const bool);
+    void restoreFile(const QString &, const bool);
 
     QPointer<Host> mpHost;
     bool mNeedToSave{};

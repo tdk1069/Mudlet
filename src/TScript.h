@@ -21,44 +21,54 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "Tree.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QPointer>
 #include <QStringList>
-#include "post_guard.h"
 
 class Host;
 class TEvent;
-
 
 class TScript : public Tree<TScript>
 {
     friend class XMLexport;
     friend class XMLimport;
 
-public:
+  public:
     virtual ~TScript();
-    TScript(TScript* parent, Host* pHost);
-    TScript(const QString& name, Host* pHost);
+    TScript(TScript *parent, Host *pHost);
+    TScript(const QString &name, Host *pHost);
 
-    QString getName() { return mName; }
-    void setName(const QString& name) { mName = name; }
+    QString getName()
+    {
+        return mName;
+    }
+    void setName(const QString &name)
+    {
+        mName = name;
+    }
     void compile();
     void compileAll();
     bool compileScript();
     void execute();
-    QString getScript() { return mScript; }
-    bool setScript(const QString& script);
+    QString getScript()
+    {
+        return mScript;
+    }
+    bool setScript(const QString &script);
     bool registerScript();
-    void callEventHandler(const TEvent&);
+    void callEventHandler(const TEvent &);
     void setEventHandlerList(QStringList handlerList);
-    QStringList getEventHandlerList() { return mEventHandlerList; }
+    QStringList getEventHandlerList()
+    {
+        return mEventHandlerList;
+    }
     bool exportItem;
     bool mModuleMasterFolder;
 
-private:
+  private:
     TScript() = default;
     QString mName;
     QString mScript;

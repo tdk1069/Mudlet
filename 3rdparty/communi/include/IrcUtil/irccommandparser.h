@@ -29,10 +29,10 @@
 #ifndef IRCCOMMANDPARSER_H
 #define IRCCOMMANDPARSER_H
 
-#include <IrcGlobal>
 #include <IrcCommand>
-#include <QtCore/qobject.h>
+#include <IrcGlobal>
 #include <QtCore/qmetatype.h>
+#include <QtCore/qobject.h>
 #include <QtCore/qstringlist.h>
 
 IRC_BEGIN_NAMESPACE
@@ -49,13 +49,14 @@ class IRC_UTIL_EXPORT IrcCommandParser : public QObject
     Q_PROPERTY(bool tolerant READ isTolerant WRITE setTolerant NOTIFY tolerancyChanged)
     Q_FLAGS(Details)
 
-public:
-    explicit IrcCommandParser(QObject* parent = 0);
+  public:
+    explicit IrcCommandParser(QObject *parent = 0);
     virtual ~IrcCommandParser();
 
     QStringList commands() const;
 
-    enum Detail {
+    enum Detail
+    {
         Full = 0x0,
         NoTarget = 0x1,
         NoPrefix = 0x2,
@@ -67,10 +68,10 @@ public:
     };
     Q_DECLARE_FLAGS(Details, Detail)
 
-    Q_INVOKABLE QString syntax(const QString& command, Details details = Visual) const;
+    Q_INVOKABLE QString syntax(const QString &command, Details details = Visual) const;
 
-    Q_INVOKABLE void addCommand(IrcCommand::Type type, const QString& syntax);
-    Q_INVOKABLE void removeCommand(IrcCommand::Type type, const QString& syntax = QString());
+    Q_INVOKABLE void addCommand(IrcCommand::Type type, const QString &syntax);
+    Q_INVOKABLE void removeCommand(IrcCommand::Type type, const QString &syntax = QString());
 
     QStringList triggers() const;
 
@@ -80,24 +81,24 @@ public:
     bool isTolerant() const;
     void setTolerant(bool tolerant);
 
-    Q_INVOKABLE IrcCommand* parse(const QString& input) const;
+    Q_INVOKABLE IrcCommand *parse(const QString &input) const;
 
-public Q_SLOTS:
+  public Q_SLOTS:
     void clear();
     void reset();
 
-    void setTriggers(const QStringList& triggers);
-    void setChannels(const QStringList& channels);
-    void setTarget(const QString& target);
+    void setTriggers(const QStringList &triggers);
+    void setChannels(const QStringList &channels);
+    void setTarget(const QString &target);
 
-Q_SIGNALS:
-    void commandsChanged(const QStringList& commands);
-    void triggersChanged(const QStringList& triggers);
-    void channelsChanged(const QStringList& channels);
-    void targetChanged(const QString& target);
+  Q_SIGNALS:
+    void commandsChanged(const QStringList &commands);
+    void triggersChanged(const QStringList &triggers);
+    void channelsChanged(const QStringList &channels);
+    void targetChanged(const QString &target);
     void tolerancyChanged(bool tolerant);
 
-private:
+  private:
     QScopedPointer<IrcCommandParserPrivate> d_ptr;
     Q_DECLARE_PRIVATE(IrcCommandParser)
     Q_DISABLE_COPY(IrcCommandParser)
@@ -107,6 +108,6 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(IrcCommandParser::Details)
 
 IRC_END_NAMESPACE
 
-Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcCommandParser*))
+Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcCommandParser *))
 
 #endif // IRCCOMMANDPARSER_H

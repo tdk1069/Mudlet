@@ -41,21 +41,22 @@ IRC_BEGIN_NAMESPACE
     \brief Module meta-type registration.
  */
 
-namespace IrcUtil {
+namespace IrcUtil
+{
 
-    /*!
-        Registers IrcUtil types to the %Qt meta-system.
+/*!
+    Registers IrcUtil types to the %Qt meta-system.
 
-        \sa IrcCore::registerMetaTypes(), IrcModel::registerMetaTypes(), qRegisterMetaType()
-     */
-    void registerMetaTypes()
-    {
-        qRegisterMetaType<IrcCommandParser*>("IrcCommandParser*");
-        qRegisterMetaType<IrcCompleter*>("IrcCompleter*");
-        qRegisterMetaType<IrcLagTimer*>("IrcLagTimer*");
-        qRegisterMetaType<IrcPalette*>("IrcPalette*");
-        qRegisterMetaType<IrcTextFormat*>("IrcTextFormat*");
-    }
+    \sa IrcCore::registerMetaTypes(), IrcModel::registerMetaTypes(), qRegisterMetaType()
+ */
+void registerMetaTypes()
+{
+    qRegisterMetaType<IrcCommandParser *>("IrcCommandParser*");
+    qRegisterMetaType<IrcCompleter *>("IrcCompleter*");
+    qRegisterMetaType<IrcLagTimer *>("IrcLagTimer*");
+    qRegisterMetaType<IrcPalette *>("IrcPalette*");
+    qRegisterMetaType<IrcTextFormat *>("IrcTextFormat*");
 }
+} // namespace IrcUtil
 
 IRC_END_NAMESPACE

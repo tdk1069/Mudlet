@@ -39,24 +39,28 @@ class IrcCommand;
 
 class IRC_CORE_EXPORT IrcMessageFilter
 {
-public:
-    virtual ~IrcMessageFilter() { }
-    virtual bool messageFilter(IrcMessage* message) = 0;
+  public:
+    virtual ~IrcMessageFilter()
+    {
+    }
+    virtual bool messageFilter(IrcMessage *message) = 0;
 };
 
 class IRC_CORE_EXPORT IrcCommandFilter
 {
-public:
-    virtual ~IrcCommandFilter() { }
-    virtual bool commandFilter(IrcCommand* command) = 0;
+  public:
+    virtual ~IrcCommandFilter()
+    {
+    }
+    virtual bool commandFilter(IrcCommand *command) = 0;
 };
 
 IRC_END_NAMESPACE
 
 // TODO: fixme
 #ifdef IRC_NAMESPACE
-using IRC_NAMESPACE::IrcMessageFilter;
 using IRC_NAMESPACE::IrcCommandFilter;
+using IRC_NAMESPACE::IrcMessageFilter;
 #endif
 
 Q_DECLARE_INTERFACE(IrcMessageFilter, "Communi.IrcMessageFilter")

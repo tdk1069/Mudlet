@@ -27,11 +27,11 @@
 */
 
 #include "ircusermodel.h"
-#include "ircusermodel_p.h"
 #include "ircbuffermodel.h"
-#include "ircconnection.h"
 #include "ircchannel_p.h"
+#include "ircconnection.h"
 #include "ircuser.h"
+#include "ircusermodel_p.h"
 #include <qpointer.h>
 
 IRC_BEGIN_NAMESPACE
@@ -89,41 +89,54 @@ IRC_BEGIN_NAMESPACE
 #ifndef IRC_DOXYGEN
 class IrcUserLessThan
 {
-public:
-    IrcUserLessThan(IrcUserModel* model, Irc::SortMethod method) : model(model), method(method) { }
-    bool operator()(IrcUser* u1, IrcUser* u2) const { return model->lessThan(u1, u2, method); }
-private:
-    IrcUserModel* model;
+  public:
+    IrcUserLessThan(IrcUserModel *model, Irc::SortMethod method) : model(model), method(method)
+    {
+    }
+    bool operator()(IrcUser *u1, IrcUser *u2) const
+    {
+        return model->lessThan(u1, u2, method);
+    }
+
+  private:
+    IrcUserModel *model;
     Irc::SortMethod method;
 };
 
 class IrcUserGreaterThan
 {
-public:
-    IrcUserGreaterThan(IrcUserModel* model, Irc::SortMethod method) : model(model), method(method) { }
-    bool operator()(IrcUser* u1, IrcUser* u2) const { return model->lessThan(u2, u1, method); }
-private:
-    IrcUserModel* model;
+  public:
+    IrcUserGreaterThan(IrcUserModel *model, Irc::SortMethod method) : model(model), method(method)
+    {
+    }
+    bool operator()(IrcUser *u1, IrcUser *u2) const
+    {
+        return model->lessThan(u2, u1, method);
+    }
+
+  private:
+    IrcUserModel *model;
     Irc::SortMethod method;
 };
 
-IrcUserModelPrivate::IrcUserModelPrivate() : q_ptr(0), role(Irc::TitleRole),
-    sortMethod(Irc::SortByHand), sortOrder(Qt::AscendingOrder)
+IrcUserModelPrivate::IrcUserModelPrivate()
+    : q_ptr(0), role(Irc::TitleRole), sortMethod(Irc::SortByHand), sortOrder(Qt::AscendingOrder)
 {
 }
 
-void IrcUserModelPrivate::addUser(IrcUser* user, bool notify)
+void IrcUserModelPrivate::addUser(IrcUser *user, bool notify)
 {
     insertUser(-1, user, notify);
 }
 
-void IrcUserModelPrivate::insertUser(int index, IrcUser* user, bool notify)
+void IrcUserModelPrivate::insertUser(int index, IrcUser *user, bool notify)
 {
     Q_Q(IrcUserModel);
     if (index == -1)
         index = userList.count();
-    if (sortMethod != Irc::SortByHand) {
-        QList<IrcUser*>::iterator it;
+    if (sortMethod != Irc::SortByHand)
+    {
+        QList<IrcUser *>::iterator it;
         if (sortOrder == Qt::AscendingOrder)
             it = qUpperBound(userList.begin(), userList.end(), user, IrcUserLessThan(q, sortMethod));
         else
@@ -136,7 +149,8 @@ void IrcUserModelPrivate::insertUser(int index, IrcUser* user, bool notify)
     userList.insert(index, user);
     updateTitles();
     q->endInsertRows();
-    if (notify) {
+    if (notify)
+    {
         emit q->added(user);
         emit q->namesChanged(IrcChannelPrivate::get(channel)->names);
         emit q->titlesChanged(titles);
@@ -147,18 +161,20 @@ void IrcUserModelPrivate::insertUser(int index, IrcUser* user, bool notify)
     }
 }
 
-void IrcUserModelPrivate::removeUser(IrcUser* user, bool notify)
+void IrcUserModelPrivate::removeUser(IrcUser *user, bool notify)
 {
     Q_Q(IrcUserModel);
     int idx = userList.indexOf(user);
-    if (idx != -1) {
+    if (idx != -1)
+    {
         if (notify)
             emit q->aboutToBeRemoved(user);
         q->beginRemoveRows(QModelIndex(), idx, idx);
         userList.removeAt(idx);
         updateTitles();
         q->endRemoveRows();
-        if (notify) {
+        if (notify)
+        {
             emit q->removed(user);
             emit q->namesChanged(IrcChannelPrivate::get(channel)->names);
             emit q->titlesChanged(titles);
@@ -170,14 +186,15 @@ void IrcUserModelPrivate::removeUser(IrcUser* user, bool notify)
     }
 }
 
-void IrcUserModelPrivate::setUsers(const QList<IrcUser*>& users, bool reset)
+void IrcUserModelPrivate::setUsers(const QList<IrcUser *> &users, bool reset)
 {
     Q_Q(IrcUserModel);
     bool wasEmpty = userList.isEmpty();
     if (reset)
         q->beginResetModel();
     userList = users;
-    if (sortMethod != Irc::SortByHand) {
+    if (sortMethod != Irc::SortByHand)
+    {
         if (sortOrder == Qt::AscendingOrder)
             qSort(userList.begin(), userList.end(), IrcUserLessThan(q, sortMethod));
         else
@@ -197,11 +214,12 @@ void IrcUserModelPrivate::setUsers(const QList<IrcUser*>& users, bool reset)
         emit q->emptyChanged(userList.isEmpty());
 }
 
-void IrcUserModelPrivate::renameUser(IrcUser* user)
+void IrcUserModelPrivate::renameUser(IrcUser *user)
 {
     Q_Q(IrcUserModel);
-    if (updateUser(user) && sortMethod != Irc::SortByHand) {
-        QList<IrcUser*> users = userList;
+    if (updateUser(user) && sortMethod != Irc::SortByHand)
+    {
+        QList<IrcUser *> users = userList;
         const bool notify = false;
         removeUser(user, notify);
         insertUser(-1, user, notify);
@@ -212,10 +230,11 @@ void IrcUserModelPrivate::renameUser(IrcUser* user)
     }
 }
 
-void IrcUserModelPrivate::setUserMode(IrcUser* user)
+void IrcUserModelPrivate::setUserMode(IrcUser *user)
 {
     Q_Q(IrcUserModel);
-    if (updateUser(user) && sortMethod == Irc::SortByTitle) {
+    if (updateUser(user) && sortMethod == Irc::SortByTitle)
+    {
         const bool notify = false;
         removeUser(user, notify);
         insertUser(0, user, notify);
@@ -225,10 +244,11 @@ void IrcUserModelPrivate::setUserMode(IrcUser* user)
     }
 }
 
-void IrcUserModelPrivate::promoteUser(IrcUser* user)
+void IrcUserModelPrivate::promoteUser(IrcUser *user)
 {
     Q_Q(IrcUserModel);
-    if (sortMethod == Irc::SortByActivity) {
+    if (sortMethod == Irc::SortByActivity)
+    {
         const bool notify = false;
         removeUser(user, notify);
         insertUser(0, user, notify);
@@ -238,11 +258,12 @@ void IrcUserModelPrivate::promoteUser(IrcUser* user)
     }
 }
 
-bool IrcUserModelPrivate::updateUser(IrcUser* user)
+bool IrcUserModelPrivate::updateUser(IrcUser *user)
 {
     Q_Q(IrcUserModel);
     const int idx = userList.indexOf(user);
-    if (idx != -1) {
+    if (idx != -1)
+    {
         QModelIndex index = q->index(idx, 0);
         emit q->dataChanged(index, index);
         return true;
@@ -254,7 +275,7 @@ bool IrcUserModelPrivate::updateTitles()
 {
     QStringList prev = titles;
     titles.clear();
-    foreach (IrcUser* user, userList)
+    foreach (IrcUser *user, userList)
         titles += user->title();
     return titles != prev;
 }
@@ -267,14 +288,14 @@ bool IrcUserModelPrivate::updateTitles()
     \note If \a parent is an instance of IrcChannel, it will be
     automatically assigned to \ref IrcUserModel::channel "channel".
  */
-IrcUserModel::IrcUserModel(QObject* parent) : QAbstractListModel(parent), d_ptr(new IrcUserModelPrivate)
+IrcUserModel::IrcUserModel(QObject *parent) : QAbstractListModel(parent), d_ptr(new IrcUserModelPrivate)
 {
     Q_D(IrcUserModel);
     d->q_ptr = this;
-    setChannel(qobject_cast<IrcChannel*>(parent));
+    setChannel(qobject_cast<IrcChannel *>(parent));
 
-    qRegisterMetaType<IrcUser*>();
-    qRegisterMetaType<QList<IrcUser*> >();
+    qRegisterMetaType<IrcUser *>();
+    qRegisterMetaType<QList<IrcUser *>>();
 }
 
 /*!
@@ -297,24 +318,26 @@ IrcUserModel::~IrcUserModel()
     \par Notifier signal:
     \li void <b>channelChanged</b>(\ref IrcChannel* channel)
  */
-IrcChannel* IrcUserModel::channel() const
+IrcChannel *IrcUserModel::channel() const
 {
     Q_D(const IrcUserModel);
     return d->channel;
 }
 
-void IrcUserModel::setChannel(IrcChannel* channel)
+void IrcUserModel::setChannel(IrcChannel *channel)
 {
     Q_D(IrcUserModel);
-    if (d->channel != channel) {
+    if (d->channel != channel)
+    {
         beginResetModel();
         if (d->channel)
             IrcChannelPrivate::get(d->channel)->userModels.removeOne(this);
 
         d->channel = channel;
 
-        QList<IrcUser*> users;
-        if (d->channel) {
+        QList<IrcUser *> users;
+        if (d->channel)
+        {
             IrcChannelPrivate::get(d->channel)->userModels.append(this);
             if (d->sortMethod == Irc::SortByActivity)
                 users = IrcChannelPrivate::get(d->channel)->activeUsers;
@@ -406,7 +429,7 @@ QStringList IrcUserModel::titles() const
     \par Notifier signal:
     \li void <b>usersChanged</b>(const QList<\ref IrcUser*>& users)
  */
-QList<IrcUser*> IrcUserModel::users() const
+QList<IrcUser *> IrcUserModel::users() const
 {
     Q_D(const IrcUserModel);
     return d->userList;
@@ -415,7 +438,7 @@ QList<IrcUser*> IrcUserModel::users() const
 /*!
     Returns the user object at \a index.
  */
-IrcUser* IrcUserModel::get(int index) const
+IrcUser *IrcUserModel::get(int index) const
 {
     Q_D(const IrcUserModel);
     return d->userList.value(index);
@@ -424,7 +447,7 @@ IrcUser* IrcUserModel::get(int index) const
 /*!
     Returns the user object for \a name or \c 0 if not found.
  */
-IrcUser* IrcUserModel::find(const QString& name) const
+IrcUser *IrcUserModel::find(const QString &name) const
 {
     Q_D(const IrcUserModel);
     if (d->channel && !d->userList.isEmpty())
@@ -435,7 +458,7 @@ IrcUser* IrcUserModel::find(const QString& name) const
 /*!
     Returns \c true if the model contains \a name.
  */
-bool IrcUserModel::contains(const QString& name) const
+bool IrcUserModel::contains(const QString &name) const
 {
     Q_D(const IrcUserModel);
     if (d->channel && !d->userList.isEmpty())
@@ -447,7 +470,7 @@ bool IrcUserModel::contains(const QString& name) const
     Returns the index of the specified \a user,
     or \c -1 if the model does not contain the \a user.
  */
-int IrcUserModel::indexOf(IrcUser* user) const
+int IrcUserModel::indexOf(IrcUser *user) const
 {
     Q_D(const IrcUserModel);
     return d->userList.indexOf(user);
@@ -458,12 +481,13 @@ int IrcUserModel::indexOf(IrcUser* user) const
 
     The default value is \c Irc::SortByHand.
 
-    Method              | Description                                                                                       | Example
+    Method              | Description | Example
     --------------------|---------------------------------------------------------------------------------------------------|----------------------------------------------
-    Irc::SortByHand     | Users are not sorted automatically, but only by calling sort().                                   | -
-    Irc::SortByName     | Users are sorted alphabetically, ignoring any mode prefix.                                        | "bot", "@ChanServ", "jpnurmi", "+qtassistant"
-    Irc::SortByTitle    | Users are sorted alphabetically, and special users (operators, voiced users) before normal users. | "@ChanServ", "+qtassistant", "bot", "jpnurmi"
-    Irc::SortByActivity | Users are sorted based on their activity, last active and mentioned (1) users first.              | -
+    Irc::SortByHand     | Users are not sorted automatically, but only by calling sort(). | - Irc::SortByName     |
+   Users are sorted alphabetically, ignoring any mode prefix.                                        | "bot",
+   "@ChanServ", "jpnurmi", "+qtassistant" Irc::SortByTitle    | Users are sorted alphabetically, and special users
+   (operators, voiced users) before normal users. | "@ChanServ", "+qtassistant", "bot", "jpnurmi" Irc::SortByActivity |
+   Users are sorted based on their activity, last active and mentioned (1) users first.              | -
 
     1) For performance reasons, IrcUserModel does \b not scan the whole channel
        messages to find out if a channel user was mentioned. IrcUserModel merely
@@ -484,9 +508,11 @@ Irc::SortMethod IrcUserModel::sortMethod() const
 void IrcUserModel::setSortMethod(Irc::SortMethod method)
 {
     Q_D(IrcUserModel);
-    if (d->sortMethod != method) {
+    if (d->sortMethod != method)
+    {
         d->sortMethod = method;
-        if (method == Irc::SortByActivity && d->channel) {
+        if (method == Irc::SortByActivity && d->channel)
+        {
             d->userList = IrcChannelPrivate::get(d->channel)->activeUsers;
             if (d->updateTitles())
                 emit titlesChanged(d->titles);
@@ -516,7 +542,8 @@ Qt::SortOrder IrcUserModel::sortOrder() const
 void IrcUserModel::setSortOrder(Qt::SortOrder order)
 {
     Q_D(IrcUserModel);
-    if (d->sortOrder != order) {
+    if (d->sortOrder != order)
+    {
         d->sortOrder = order;
         if (d->sortMethod != Irc::SortByHand && !d->userList.isEmpty())
             sort(d->sortMethod, d->sortOrder);
@@ -549,7 +576,7 @@ void IrcUserModel::setDisplayRole(Irc::DataRole role)
 /*!
     Returns the model index for \a user.
  */
-QModelIndex IrcUserModel::index(IrcUser* user) const
+QModelIndex IrcUserModel::index(IrcUser *user) const
 {
     Q_D(const IrcUserModel);
     return index(d->userList.indexOf(user));
@@ -558,12 +585,12 @@ QModelIndex IrcUserModel::index(IrcUser* user) const
 /*!
     Returns the user for model \a index.
  */
-IrcUser* IrcUserModel::user(const QModelIndex& index) const
+IrcUser *IrcUserModel::user(const QModelIndex &index) const
 {
     if (!hasIndex(index.row(), index.column()))
         return 0;
 
-    return static_cast<IrcUser*>(index.internalPointer());
+    return static_cast<IrcUser *>(index.internalPointer());
 }
 
 /*!
@@ -595,7 +622,7 @@ QHash<int, QByteArray> IrcUserModel::roleNames() const
 /*!
     Returns the number of users on the channel.
  */
-int IrcUserModel::rowCount(const QModelIndex& parent) const
+int IrcUserModel::rowCount(const QModelIndex &parent) const
 {
     Q_D(const IrcUserModel);
     if (parent.isValid() || !d->channel)
@@ -609,16 +636,17 @@ int IrcUserModel::rowCount(const QModelIndex& parent) const
 
     \sa Irc::DataRole, roleNames()
  */
-QVariant IrcUserModel::data(const QModelIndex& index, int role) const
+QVariant IrcUserModel::data(const QModelIndex &index, int role) const
 {
     Q_D(const IrcUserModel);
     if (!d->channel || !hasIndex(index.row(), index.column(), index.parent()))
         return QVariant();
 
-    IrcUser* user = static_cast<IrcUser*>(index.internalPointer());
+    IrcUser *user = static_cast<IrcUser *>(index.internalPointer());
     Q_ASSERT(user);
 
-    switch (role) {
+    switch (role)
+    {
     case Qt::DisplayRole:
         return data(index, d->role);
     case Irc::UserRole:
@@ -639,7 +667,7 @@ QVariant IrcUserModel::data(const QModelIndex& index, int role) const
 /*!
     Returns the index of the item in the model specified by the given \a row, \a column and \a parent index.
  */
-QModelIndex IrcUserModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex IrcUserModel::index(int row, int column, const QModelIndex &parent) const
 {
     Q_D(const IrcUserModel);
     if (!d->channel || !hasIndex(row, column, parent))
@@ -654,13 +682,14 @@ QModelIndex IrcUserModel::index(int row, int column, const QModelIndex& parent) 
 void IrcUserModel::clear()
 {
     Q_D(IrcUserModel);
-    if (!d->userList.isEmpty()) {
+    if (!d->userList.isEmpty())
+    {
         beginResetModel();
         d->userList.clear();
         endResetModel();
         emit namesChanged(QStringList());
         emit titlesChanged(QStringList());
-        emit usersChanged(QList<IrcUser*>());
+        emit usersChanged(QList<IrcUser *>());
         emit countChanged(0);
         emit emptyChanged(true);
     }
@@ -689,10 +718,10 @@ void IrcUserModel::sort(Irc::SortMethod method, Qt::SortOrder order)
 
     emit layoutAboutToBeChanged();
 
-    QList<IrcUser*> persistentUsers;
+    QList<IrcUser *> persistentUsers;
     QModelIndexList oldPersistentIndexes = persistentIndexList();
-    foreach (const QModelIndex& index, oldPersistentIndexes)
-        persistentUsers += static_cast<IrcUser*>(index.internalPointer());
+    foreach (const QModelIndex &index, oldPersistentIndexes)
+        persistentUsers += static_cast<IrcUser *>(index.internalPointer());
 
     if (order == Qt::AscendingOrder)
         qSort(d->userList.begin(), d->userList.end(), IrcUserLessThan(this, method));
@@ -703,7 +732,7 @@ void IrcUserModel::sort(Irc::SortMethod method, Qt::SortOrder order)
         emit titlesChanged(d->titles);
 
     QModelIndexList newPersistentIndexes;
-    foreach (IrcUser* user, persistentUsers)
+    foreach (IrcUser *user, persistentUsers)
         newPersistentIndexes += index(d->userList.indexOf(user));
     changePersistentIndexList(oldPersistentIndexes, newPersistentIndexes);
 
@@ -719,15 +748,18 @@ void IrcUserModel::sort(Irc::SortMethod method, Qt::SortOrder order)
 
     \sa sort(), sortMethod
  */
-bool IrcUserModel::lessThan(IrcUser* one, IrcUser* another, Irc::SortMethod method) const
+bool IrcUserModel::lessThan(IrcUser *one, IrcUser *another, Irc::SortMethod method) const
 {
-    if (method == Irc::SortByActivity) {
-        QList<IrcUser*> activeUsers = IrcChannelPrivate::get(one->channel())->activeUsers;
+    if (method == Irc::SortByActivity)
+    {
+        QList<IrcUser *> activeUsers = IrcChannelPrivate::get(one->channel())->activeUsers;
         const int i1 = activeUsers.indexOf(one);
         const int i2 = activeUsers.indexOf(another);
         return i1 < i2;
-    } else if (method == Irc::SortByTitle) {
-        const IrcNetwork* network = one->channel()->network();
+    }
+    else if (method == Irc::SortByTitle)
+    {
+        const IrcNetwork *network = one->channel()->network();
         const QStringList prefixes = network->prefixes();
 
         const QString p1 = one->prefix();

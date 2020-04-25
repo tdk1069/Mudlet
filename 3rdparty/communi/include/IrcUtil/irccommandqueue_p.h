@@ -37,26 +37,26 @@
 
 IRC_BEGIN_NAMESPACE
 
-class IrcCommandQueuePrivate : public QObject,  public IrcCommandFilter
+class IrcCommandQueuePrivate : public QObject, public IrcCommandFilter
 {
     Q_OBJECT
     Q_INTERFACES(IrcCommandFilter)
     Q_DECLARE_PUBLIC(IrcCommandQueue)
 
-public:
+  public:
     IrcCommandQueuePrivate();
 
-    bool commandFilter(IrcCommand* cmd);
+    bool commandFilter(IrcCommand *cmd);
 
     void _irc_updateTimer();
     void _irc_sendBatch(bool force = false);
 
-    IrcCommandQueue* q_ptr;
-    IrcConnection* connection;
+    IrcCommandQueue *q_ptr;
+    IrcConnection *connection;
     QTimer timer;
     int batch;
     int interval;
-    QQueue<QPointer<IrcCommand> > commands;
+    QQueue<QPointer<IrcCommand>> commands;
 };
 
 IRC_END_NAMESPACE

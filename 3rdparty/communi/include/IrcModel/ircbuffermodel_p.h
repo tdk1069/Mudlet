@@ -30,8 +30,8 @@
 #define IRCBUFFERMODEL_P_H
 
 #include "ircbuffer.h"
-#include "ircfilter.h"
 #include "ircbuffermodel.h"
+#include "ircfilter.h"
 #include <qpointer.h>
 
 IRC_BEGIN_NAMESPACE
@@ -42,54 +42,54 @@ class IrcBufferModelPrivate : public QObject, public IrcMessageFilter, public Ir
     Q_DECLARE_PUBLIC(IrcBufferModel)
     Q_INTERFACES(IrcMessageFilter IrcCommandFilter)
 
-public:
+  public:
     IrcBufferModelPrivate();
 
-    bool messageFilter(IrcMessage* message);
-    bool commandFilter(IrcCommand* command);
+    bool messageFilter(IrcMessage *message);
+    bool commandFilter(IrcCommand *command);
 
-    IrcBuffer* createBufferHelper(const QString& title);
-    IrcChannel* createChannelHelper(const QString& title);
+    IrcBuffer *createBufferHelper(const QString &title);
+    IrcChannel *createChannelHelper(const QString &title);
 
-    IrcBuffer* createBuffer(const QString& title);
-    void destroyBuffer(const QString& title, bool force = false);
+    IrcBuffer *createBuffer(const QString &title);
+    void destroyBuffer(const QString &title, bool force = false);
 
-    void addBuffer(IrcBuffer* buffer, bool notify = true);
-    void insertBuffer(int index, IrcBuffer* buffer, bool notify = true);
-    void removeBuffer(IrcBuffer* buffer, bool notify = true);
-    bool renameBuffer(const QString& from, const QString& to);
-    void promoteBuffer(IrcBuffer* buffer);
+    void addBuffer(IrcBuffer *buffer, bool notify = true);
+    void insertBuffer(int index, IrcBuffer *buffer, bool notify = true);
+    void removeBuffer(IrcBuffer *buffer, bool notify = true);
+    bool renameBuffer(const QString &from, const QString &to);
+    void promoteBuffer(IrcBuffer *buffer);
 
-    void restoreBuffer(IrcBuffer* buffer);
-    QVariantMap saveBuffer(IrcBuffer* buffer) const;
+    void restoreBuffer(IrcBuffer *buffer);
+    QVariantMap saveBuffer(IrcBuffer *buffer) const;
 
-    bool processMessage(const QString& title, IrcMessage* message, bool create = false);
+    bool processMessage(const QString &title, IrcMessage *message, bool create = false);
 
     void _irc_connected();
     void _irc_initialized();
     void _irc_disconnected();
-    void _irc_bufferDestroyed(IrcBuffer* buffer);
+    void _irc_bufferDestroyed(IrcBuffer *buffer);
 
     void _irc_restoreBuffers();
     void _irc_monitorStatus();
 
-    static IrcBufferModelPrivate* get(IrcBufferModel* model)
+    static IrcBufferModelPrivate *get(IrcBufferModel *model)
     {
         return model->d_func();
     }
 
-    IrcBufferModel* q_ptr;
+    IrcBufferModel *q_ptr;
     Irc::DataRole role;
     QPointer<IrcConnection> connection;
-    QList<IrcBuffer*> bufferList;
-    QMap<QString, IrcBuffer*> bufferMap;
+    QList<IrcBuffer *> bufferList;
+    QMap<QString, IrcBuffer *> bufferMap;
     QHash<QString, QString> keys;
     QVariantMap bufferStates;
     QStringList channels;
     Irc::SortMethod sortMethod;
     Qt::SortOrder sortOrder;
-    IrcBuffer* bufferProto;
-    IrcChannel* channelProto;
+    IrcBuffer *bufferProto;
+    IrcChannel *channelProto;
     bool persistent;
     int joinDelay;
     bool monitorEnabled;

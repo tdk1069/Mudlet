@@ -22,10 +22,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QWidget>
-#include "post_guard.h"
 
 #include <list>
 
@@ -34,33 +33,41 @@ class TAction;
 
 class QGridLayout;
 
-
 class TEasyButtonBar : public QWidget
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(TEasyButtonBar)
-    TEasyButtonBar(TAction*, QString, QWidget* pW = nullptr);
-    void addButton(TFlipButton* pW);
-    void setVerticalOrientation() { mVerticalOrientation = true; }
-    void setHorizontalOrientation() { mVerticalOrientation = false; }
+    TEasyButtonBar(TAction *, QString, QWidget *pW = nullptr);
+    void addButton(TFlipButton *pW);
+    void setVerticalOrientation()
+    {
+        mVerticalOrientation = true;
+    }
+    void setHorizontalOrientation()
+    {
+        mVerticalOrientation = false;
+    }
     void clear();
     void finalize();
-    void recordMove() { mRecordMove = true; }
+    void recordMove()
+    {
+        mRecordMove = true;
+    }
 
-    TAction* mpTAction;
+    TAction *mpTAction;
 
-public slots:
+  public slots:
     void slot_pressed(bool);
 
-private:
+  private:
     bool mVerticalOrientation;
-    QWidget* mpWidget;
+    QWidget *mpWidget;
     bool mRecordMove;
-    QGridLayout* mpLayout;
+    QGridLayout *mpLayout;
     int mItemCount;
-    std::list<TFlipButton*> mButtonList;
+    std::list<TFlipButton *> mButtonList;
 };
 
 #endif // MUDLET_TEASYBUTTONBAR_H

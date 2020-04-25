@@ -20,9 +20,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "XMLexport.h"
-
 
 #include "Host.h"
 #include "LuaInterface.h"
@@ -36,161 +34,149 @@
 #include "VarUnit.h"
 #include "mudlet.h"
 
-#include "pre_guard.h"
-#include <QtConcurrent>
-#include <QFile>
-#include <sstream>
 #include "post_guard.h"
+#include "pre_guard.h"
+#include <QFile>
+#include <QtConcurrent>
+#include <sstream>
 
-XMLexport::XMLexport( Host * pH )
-: mpHost( pH )
-, mpTrigger( Q_NULLPTR )
-, mpTimer( Q_NULLPTR )
-, mpAlias( Q_NULLPTR )
-, mpAction( Q_NULLPTR )
-, mpScript( Q_NULLPTR )
-, mpKey( Q_NULLPTR )
+XMLexport::XMLexport(Host *pH)
+    : mpHost(pH), mpTrigger(Q_NULLPTR), mpTimer(Q_NULLPTR), mpAlias(Q_NULLPTR), mpAction(Q_NULLPTR),
+      mpScript(Q_NULLPTR), mpKey(Q_NULLPTR)
 {
 }
 
-XMLexport::XMLexport( TTrigger * pT )
-: mpHost( Q_NULLPTR )
-, mpTrigger( pT )
-, mpTimer( Q_NULLPTR )
-, mpAlias( Q_NULLPTR )
-, mpAction( Q_NULLPTR )
-, mpScript( Q_NULLPTR )
-, mpKey( Q_NULLPTR )
+XMLexport::XMLexport(TTrigger *pT)
+    : mpHost(Q_NULLPTR), mpTrigger(pT), mpTimer(Q_NULLPTR), mpAlias(Q_NULLPTR), mpAction(Q_NULLPTR),
+      mpScript(Q_NULLPTR), mpKey(Q_NULLPTR)
 {
 }
 
-XMLexport::XMLexport( TTimer * pT )
-: mpHost( Q_NULLPTR )
-, mpTrigger( Q_NULLPTR )
-, mpTimer( pT )
-, mpAlias( Q_NULLPTR )
-, mpAction( Q_NULLPTR )
-, mpScript( Q_NULLPTR )
-, mpKey( Q_NULLPTR )
+XMLexport::XMLexport(TTimer *pT)
+    : mpHost(Q_NULLPTR), mpTrigger(Q_NULLPTR), mpTimer(pT), mpAlias(Q_NULLPTR), mpAction(Q_NULLPTR),
+      mpScript(Q_NULLPTR), mpKey(Q_NULLPTR)
 {
 }
 
-XMLexport::XMLexport( TAlias * pT )
-: mpHost( Q_NULLPTR )
-, mpTrigger( Q_NULLPTR )
-, mpTimer( Q_NULLPTR )
-, mpAlias( pT )
-, mpAction( Q_NULLPTR )
-, mpScript( Q_NULLPTR )
-, mpKey( Q_NULLPTR )
+XMLexport::XMLexport(TAlias *pT)
+    : mpHost(Q_NULLPTR), mpTrigger(Q_NULLPTR), mpTimer(Q_NULLPTR), mpAlias(pT), mpAction(Q_NULLPTR),
+      mpScript(Q_NULLPTR), mpKey(Q_NULLPTR)
 {
 }
 
-XMLexport::XMLexport( TAction * pT )
-: mpHost( Q_NULLPTR )
-, mpTrigger( Q_NULLPTR )
-, mpTimer( Q_NULLPTR )
-, mpAlias( Q_NULLPTR )
-, mpAction( pT )
-, mpScript( Q_NULLPTR )
-, mpKey( Q_NULLPTR )
+XMLexport::XMLexport(TAction *pT)
+    : mpHost(Q_NULLPTR), mpTrigger(Q_NULLPTR), mpTimer(Q_NULLPTR), mpAlias(Q_NULLPTR), mpAction(pT),
+      mpScript(Q_NULLPTR), mpKey(Q_NULLPTR)
 {
 }
 
-XMLexport::XMLexport( TScript * pT )
-: mpHost( Q_NULLPTR )
-, mpTrigger( Q_NULLPTR )
-, mpTimer( Q_NULLPTR )
-, mpAlias( Q_NULLPTR )
-, mpAction( Q_NULLPTR )
-, mpScript( pT )
-, mpKey( Q_NULLPTR )
+XMLexport::XMLexport(TScript *pT)
+    : mpHost(Q_NULLPTR), mpTrigger(Q_NULLPTR), mpTimer(Q_NULLPTR), mpAlias(Q_NULLPTR), mpAction(Q_NULLPTR),
+      mpScript(pT), mpKey(Q_NULLPTR)
 {
 }
 
-XMLexport::XMLexport( TKey * pT )
-: mpHost( Q_NULLPTR )
-, mpTrigger( Q_NULLPTR )
-, mpTimer( Q_NULLPTR )
-, mpAlias( Q_NULLPTR )
-, mpAction( Q_NULLPTR )
-, mpScript( Q_NULLPTR )
-, mpKey( pT )
+XMLexport::XMLexport(TKey *pT)
+    : mpHost(Q_NULLPTR), mpTrigger(Q_NULLPTR), mpTimer(Q_NULLPTR), mpAlias(Q_NULLPTR), mpAction(Q_NULLPTR),
+      mpScript(Q_NULLPTR), mpKey(pT)
 {
 }
 
 XMLexport::~XMLexport() = default;
 
-void XMLexport::writeModuleXML(const QString& moduleName, const QString& fileName)
+void XMLexport::writeModuleXML(const QString &moduleName, const QString &fileName)
 {
     auto pHost = mpHost;
     auto mudletPackage = writeXmlHeader();
 
     auto triggerPackage = mudletPackage.append_child("TriggerPackage");
-    //we go a level down for all these functions so as to not infinitely nest the module
-    for (auto& it : pHost->mTriggerUnit.mTriggerRootNodeList) {
-        if (!it || it->mPackageName != moduleName) {
+    // we go a level down for all these functions so as to not infinitely nest the module
+    for (auto &it : pHost->mTriggerUnit.mTriggerRootNodeList)
+    {
+        if (!it || it->mPackageName != moduleName)
+        {
             continue;
         }
-        if (!it->isTemporary() && it->mModuleMember) {
+        if (!it->isTemporary() && it->mModuleMember)
+        {
             writeTrigger(it, triggerPackage);
         }
     }
 
     auto timerPackage = mudletPackage.append_child("TimerPackage");
-    for (auto& it : pHost->mTimerUnit.mTimerRootNodeList) {
-        if (!it || it->mPackageName != moduleName) {
+    for (auto &it : pHost->mTimerUnit.mTimerRootNodeList)
+    {
+        if (!it || it->mPackageName != moduleName)
+        {
             continue;
         }
-        if (!it->isTemporary() && it->mModuleMember) {
+        if (!it->isTemporary() && it->mModuleMember)
+        {
             writeTimer(it, timerPackage);
         }
     }
 
     auto aliasPackage = mudletPackage.append_child("AliasPackage");
-    for (auto& it : pHost->mAliasUnit.mAliasRootNodeList) {
-        if (!it || it->mPackageName != moduleName) {
+    for (auto &it : pHost->mAliasUnit.mAliasRootNodeList)
+    {
+        if (!it || it->mPackageName != moduleName)
+        {
             continue;
         }
-        if (!it->isTemporary() && it->mModuleMember) {
+        if (!it->isTemporary() && it->mModuleMember)
+        {
             writeAlias(it, aliasPackage);
         }
     }
 
     auto actionPackage = mudletPackage.append_child("ActionPackage");
-    for (auto& it : pHost->mActionUnit.mActionRootNodeList) {
-        if (!it || it->mPackageName != moduleName) {
+    for (auto &it : pHost->mActionUnit.mActionRootNodeList)
+    {
+        if (!it || it->mPackageName != moduleName)
+        {
             continue;
         }
-        if (it->mModuleMember) {
+        if (it->mModuleMember)
+        {
             writeAction(it, actionPackage);
         }
     }
 
     auto scriptPackage = mudletPackage.append_child("ScriptPackage");
-    for (auto& it : pHost->mScriptUnit.mScriptRootNodeList) {
-        if (!it || it->mPackageName != moduleName) {
+    for (auto &it : pHost->mScriptUnit.mScriptRootNodeList)
+    {
+        if (!it || it->mPackageName != moduleName)
+        {
             continue;
         }
-        if (it->mModuleMember) {
+        if (it->mModuleMember)
+        {
             writeScript(it, scriptPackage);
         }
     }
 
     auto keyPackage = mudletPackage.append_child("KeyPackage");
-    for (auto& it : pHost->mKeyUnit.mKeyRootNodeList) {
-        if (!it || it->mPackageName != moduleName) {
+    for (auto &it : pHost->mKeyUnit.mKeyRootNodeList)
+    {
+        if (!it || it->mPackageName != moduleName)
+        {
             continue;
         }
-        if (!it->isTemporary() && it->mModuleMember) {
+        if (!it->isTemporary() && it->mModuleMember)
+        {
             writeKey(it, keyPackage);
         }
     }
 
     auto helpPackage = mudletPackage.append_child("HelpPackage");
-    if (pHost->moduleHelp.contains(moduleName) && pHost->moduleHelp.value(moduleName).contains(QStringLiteral("helpURL"))) {
-        helpPackage.append_child("helpURL").text().set(pHost->moduleHelp.value(moduleName).value(QStringLiteral("helpURL")).toUtf8().constData());
-    } else {
+    if (pHost->moduleHelp.contains(moduleName) &&
+        pHost->moduleHelp.value(moduleName).contains(QStringLiteral("helpURL")))
+    {
+        helpPackage.append_child("helpURL").text().set(
+            pHost->moduleHelp.value(moduleName).value(QStringLiteral("helpURL")).toUtf8().constData());
+    }
+    else
+    {
         helpPackage.append_child("helpURL").text().set("");
     }
 
@@ -201,20 +187,21 @@ void XMLexport::writeModuleXML(const QString& moduleName, const QString& fileNam
     saveFutures.append(future);
 }
 
-void XMLexport::exportHost(const QString& filename_pugi_xml)
+void XMLexport::exportHost(const QString &filename_pugi_xml)
 {
     auto mudletPackage = writeXmlHeader();
     writeHost(mpHost, mudletPackage);
     auto future = QtConcurrent::run(this, &XMLexport::saveXml, filename_pugi_xml);
 
     auto watcher = new QFutureWatcher<bool>;
-    QObject::connect(watcher, &QFutureWatcher<bool>::finished, mpHost, [=]() { mpHost->xmlSaved(QStringLiteral("profile")); });
+    QObject::connect(watcher, &QFutureWatcher<bool>::finished, mpHost,
+                     [=]() { mpHost->xmlSaved(QStringLiteral("profile")); });
     watcher->setFuture(future);
     saveFutures.append(future);
 }
 
 // credit: https://stackoverflow.com/a/29752943/72944
-void inline XMLexport::replaceAll(std::string& source, const std::string& from, const std::string& to)
+void inline XMLexport::replaceAll(std::string &source, const std::string &from, const std::string &to)
 {
     std::string newString;
     newString.reserve(source.length()); // avoids a few memory allocations
@@ -222,7 +209,8 @@ void inline XMLexport::replaceAll(std::string& source, const std::string& from, 
     std::string::size_type lastPos = 0;
     std::string::size_type findPos;
 
-    while (std::string::npos != (findPos = source.find(from, lastPos))) {
+    while (std::string::npos != (findPos = source.find(from, lastPos)))
+    {
         newString.append(source, lastPos, findPos - lastPos);
         newString += to;
         lastPos = findPos + from.length();
@@ -237,87 +225,100 @@ void inline XMLexport::replaceAll(std::string& source, const std::string& from, 
 // sanitize non-printable characters for backwards & forward compatibility
 // work qxml which is stuck at 1.0 and doesn't support properly
 // encoding them. See https://github.com/Mudlet/Mudlet/issues/500
-void XMLexport::sanitizeForQxml(std::string& output)
+void XMLexport::sanitizeForQxml(std::string &output)
 {
     QMap<std::string, std::string> replacements{
-            {"&#1;", "\uFFFC\u2401"},   // SOH
-            {"&#01;", "\uFFFC\u2401"},   // SOH
-            {"&#2;", "\uFFFC\u2402"},   // STX
-            {"&#02;", "\uFFFC\u2402"},   // STX
-            {"&#3;", "\uFFFC\u2403"},   // ETX
-            {"&#03;", "\uFFFC\u2403"},   // ETX
-            {"&#4;", "\uFFFC\u2404"},   // EOT
-            {"&#04;", "\uFFFC\u2404"},   // EOT
-            {"&#5;", "\uFFFC\u2405"},   // ENQ
-            {"&#05;", "\uFFFC\u2405"},   // ENQ
-            {"&#6;", "\uFFFC\u2406"},   // ACK
-            {"&#06;", "\uFFFC\u2406"},   // ACK
-            {"&#7;", "\uFFFC\u2407"},   // BEL
-            {"&#07;", "\uFFFC\u2407"},   // BEL
-            {"&#8;", "\uFFFC\u2408"},   // BS
-            {"&#08;", "\uFFFC\u2408"},   // BS
-            {"&#11;", "\uFFFC\u240B"},  // VT
-            {"&#12;", "\uFFFC\u240C"},  // FF
-            {"&#14;", "\uFFFC\u240E"},  // SS
-            {"&#15;", "\uFFFC\u240F"},  // SI
-            {"&#10;", "\uFFFC\u2410"},  // DLE
-            {"&#16;", "\uFFFC\u2411"},  // DC1
-            {"&#18;", "\uFFFC\u2412"},  // DC2
-            {"&#19;", "\uFFFC\u2413"},  // DC3
-            {"&#20;", "\uFFFC\u2414"},  // DC4
-            {"&#21;", "\uFFFC\u2415"},  // NAK
-            {"&#22;", "\uFFFC\u2416"},  // SYN
-            {"&#17;", "\uFFFC\u2417"},  // ETB
-            {"&#23;", "\uFFFC\u2418"},  // CAN
-            {"&#25;", "\uFFFC\u2419"},  // EM
-            {"&#26;", "\uFFFC\u241A"},  // SUB
-            {"&#27;", "\uFFFC\u241B"},  // ESC
-            {"&#28;", "\uFFFC\u241C"},  // FS
-            {"&#29;", "\uFFFC\u241D"},  // GS
-            {"&#30;", "\uFFFC\u241E"},  // RS
-            {"&#31;", "\uFFFC\u241F"},  // US
-            {"&#127;", "\uFFFC\u2421"}, // DEL
+        {"&#1;", "\uFFFC\u2401"},   // SOH
+        {"&#01;", "\uFFFC\u2401"},  // SOH
+        {"&#2;", "\uFFFC\u2402"},   // STX
+        {"&#02;", "\uFFFC\u2402"},  // STX
+        {"&#3;", "\uFFFC\u2403"},   // ETX
+        {"&#03;", "\uFFFC\u2403"},  // ETX
+        {"&#4;", "\uFFFC\u2404"},   // EOT
+        {"&#04;", "\uFFFC\u2404"},  // EOT
+        {"&#5;", "\uFFFC\u2405"},   // ENQ
+        {"&#05;", "\uFFFC\u2405"},  // ENQ
+        {"&#6;", "\uFFFC\u2406"},   // ACK
+        {"&#06;", "\uFFFC\u2406"},  // ACK
+        {"&#7;", "\uFFFC\u2407"},   // BEL
+        {"&#07;", "\uFFFC\u2407"},  // BEL
+        {"&#8;", "\uFFFC\u2408"},   // BS
+        {"&#08;", "\uFFFC\u2408"},  // BS
+        {"&#11;", "\uFFFC\u240B"},  // VT
+        {"&#12;", "\uFFFC\u240C"},  // FF
+        {"&#14;", "\uFFFC\u240E"},  // SS
+        {"&#15;", "\uFFFC\u240F"},  // SI
+        {"&#10;", "\uFFFC\u2410"},  // DLE
+        {"&#16;", "\uFFFC\u2411"},  // DC1
+        {"&#18;", "\uFFFC\u2412"},  // DC2
+        {"&#19;", "\uFFFC\u2413"},  // DC3
+        {"&#20;", "\uFFFC\u2414"},  // DC4
+        {"&#21;", "\uFFFC\u2415"},  // NAK
+        {"&#22;", "\uFFFC\u2416"},  // SYN
+        {"&#17;", "\uFFFC\u2417"},  // ETB
+        {"&#23;", "\uFFFC\u2418"},  // CAN
+        {"&#25;", "\uFFFC\u2419"},  // EM
+        {"&#26;", "\uFFFC\u241A"},  // SUB
+        {"&#27;", "\uFFFC\u241B"},  // ESC
+        {"&#28;", "\uFFFC\u241C"},  // FS
+        {"&#29;", "\uFFFC\u241D"},  // GS
+        {"&#30;", "\uFFFC\u241E"},  // RS
+        {"&#31;", "\uFFFC\u241F"},  // US
+        {"&#127;", "\uFFFC\u2421"}, // DEL
     };
 
     // Look for each replacement in data and if not present remove it from the
     // list of things to replace
     QMutableMapIterator<std::string, std::string> itReplacement(replacements);
-    while (itReplacement.hasNext()) {
+    while (itReplacement.hasNext())
+    {
         itReplacement.next();
-        if (output.find(itReplacement.key()) == std::string::npos) {
+        if (output.find(itReplacement.key()) == std::string::npos)
+        {
             itReplacement.remove();
         }
     }
 
-    if (!replacements.isEmpty()) {
+    if (!replacements.isEmpty())
+    {
         // There is at least one thing left in the QMap of replacements and we
         // can use the same iterator if we reset it to the start of the
         // remaining replacements:
         itReplacement.toFront();
-        while (itReplacement.hasNext()) {
+        while (itReplacement.hasNext())
+        {
             itReplacement.next();
             replaceAll(output, itReplacement.key(), itReplacement.value());
         }
     }
 }
 
-bool XMLexport::saveXml(const QString& fileName)
+bool XMLexport::saveXml(const QString &fileName)
 {
     QFile file(fileName);
 
-    if (!file.open(QFile::WriteOnly)) {
-        qDebug().noquote().nospace() << "XMLexport::saveXml(\"" << fileName << "\") ERROR - failed to open file, reason: " << file.errorString() << ".";
+    if (!file.open(QFile::WriteOnly))
+    {
+        qDebug().noquote().nospace() << "XMLexport::saveXml(\"" << fileName
+                                     << "\") ERROR - failed to open file, reason: " << file.errorString() << ".";
         return false;
     }
 
     bool result = saveXmlFile(file);
-    if (!result) {
-        if (file.error() != QFile::NoError) {
+    if (!result)
+    {
+        if (file.error() != QFile::NoError)
+        {
             // Error reason was related to QFile:
-            qDebug().noquote().nospace() << "XMLexport::saveXml(\"" << fileName << "\") ERROR - failed to save package, reason: " << file.errorString() << ".";
-        } else {
+            qDebug().noquote().nospace() << "XMLexport::saveXml(\"" << fileName
+                                         << "\") ERROR - failed to save package, reason: " << file.errorString() << ".";
+        }
+        else
+        {
             // Error was due to failure in document preparation
-            qDebug().noquote().nospace() << "XMLexport::saveXml(\"" << fileName << "\") ERROR - failed to save package, reason: XML document preparation failure.";
+            qDebug().noquote().nospace()
+                << "XMLexport::saveXml(\"" << fileName
+                << "\") ERROR - failed to save package, reason: XML document preparation failure.";
         }
     }
 
@@ -330,7 +331,7 @@ bool XMLexport::saveXml(const QString& fileName)
 // just passing a filename and then creating another QFile instance on the
 // same file in the filesystem is less than optimum.
 // TODO: Refactor dlgTriggerEditor::slot_export() {at least} to call this method instead of saveXml(const QString&)
-bool XMLexport::saveXmlFile(QFile& file)
+bool XMLexport::saveXmlFile(QFile &file)
 {
     std::stringstream saveStringStream(std::ios::out);
     // Remember, the mExportDoc is the data in the form of a pugi::xml_document
@@ -364,7 +365,7 @@ QString XMLexport::saveXml()
     return QString::fromStdString(output);
 }
 
-void XMLexport::writeHost(Host* pHost, pugi::xml_node mudletPackage)
+void XMLexport::writeHost(Host *pHost, pugi::xml_node mudletPackage)
 {
     auto hostPackage = mudletPackage.append_child("HostPackage");
     auto host = hostPackage.append_child("Host");
@@ -380,7 +381,8 @@ void XMLexport::writeHost(Host* pHost, pugi::xml_node mudletPackage)
     host.append_attribute("mNoAntiAlias") = pHost->mNoAntiAlias ? "yes" : "no";
     host.append_attribute("mEchoLuaErrors") = pHost->mEchoLuaErrors ? "yes" : "no";
     host.append_attribute("runAllKeyMatches") = pHost->getKeyUnit()->mRunAllKeyMatches ? "yes" : "no";
-    host.append_attribute("AmbigousWidthGlyphsToBeWide") = pHost->mAutoAmbigousWidthGlyphsSetting ? "auto" : (pHost->mWideAmbigousWidthGlyphs ? "yes" : "no");
+    host.append_attribute("AmbigousWidthGlyphsToBeWide") =
+        pHost->mAutoAmbigousWidthGlyphsSetting ? "auto" : (pHost->mWideAmbigousWidthGlyphs ? "yes" : "no");
     // FIXME: Change to a string or integer property when possible to support more
     // than false (perhaps 0 or "PlainText") or true (perhaps 1 or "HTML") in the
     // future - phpBB code might be useful if it can be done.
@@ -423,7 +425,8 @@ void XMLexport::writeHost(Host* pHost, pugi::xml_node mudletPackage)
     host.append_attribute("mThemePreviewItemID") = QString::number(pHost->mThemePreviewItemID).toUtf8().constData();
     host.append_attribute("mThemePreviewType") = pHost->mThemePreviewType.toUtf8().constData();
     host.append_attribute("mSearchEngineName") = pHost->mSearchEngineName.toUtf8().constData();
-    host.append_attribute("mTimerSupressionInterval") = pHost->mTimerDebugOutputSuppressionInterval.toString(QLatin1String("HH:mm:ss.zzz")).toUtf8().constData();
+    host.append_attribute("mTimerSupressionInterval") =
+        pHost->mTimerDebugOutputSuppressionInterval.toString(QLatin1String("HH:mm:ss.zzz")).toUtf8().constData();
     host.append_attribute("mUseProxy") = pHost->mUseProxy ? "yes" : "no";
     host.append_attribute("mProxyAddress") = pHost->mProxyAddress.toUtf8().constData();
     host.append_attribute("mProxyPort") = QString::number(pHost->mProxyPort).toUtf8().constData();
@@ -436,7 +439,8 @@ void XMLexport::writeHost(Host* pHost, pugi::xml_node mudletPackage)
     host.append_attribute("mSslIgnoreAll") = pHost->mSslIgnoreAll ? "yes" : "no";
     host.append_attribute("mDiscordAccessFlags") = QString::number(pHost->mDiscordAccessFlags).toUtf8().constData();
     host.append_attribute("mRequiredDiscordUserName") = pHost->mRequiredDiscordUserName.toUtf8().constData();
-    host.append_attribute("mRequiredDiscordUserDiscriminator") = pHost->mRequiredDiscordUserDiscriminator.toUtf8().constData();
+    host.append_attribute("mRequiredDiscordUserDiscriminator") =
+        pHost->mRequiredDiscordUserDiscriminator.toUtf8().constData();
     host.append_attribute("mSGRCodeHasColSpaceId") = pHost->getHaveColorSpaceId() ? "yes" : "no";
     host.append_attribute("mServerMayRedefineColors") = pHost->getMayRedefineColors() ? "yes" : "no";
     quint8 styleCode = 0;
@@ -444,7 +448,8 @@ void XMLexport::writeHost(Host* pHost, pugi::xml_node mudletPackage)
     quint8 innerDiameterPercentage = 0;
     QColor outerColor;
     QColor innerColor;
-    pHost->getPlayerRoomStyleDetails(styleCode, outerDiameterPercentage, innerDiameterPercentage, outerColor, innerColor);
+    pHost->getPlayerRoomStyleDetails(styleCode, outerDiameterPercentage, innerDiameterPercentage, outerColor,
+                                     innerColor);
     host.append_attribute("playerRoomPrimaryColor") = outerColor.name(QColor::HexArgb).toLatin1().constData();
     host.append_attribute("playerRoomSecondaryColor") = innerColor.name(QColor::HexArgb).toLatin1().constData();
     host.append_attribute("playerRoomStyle") = QString::number(styleCode).toLatin1().constData();
@@ -453,7 +458,8 @@ void XMLexport::writeHost(Host* pHost, pugi::xml_node mudletPackage)
 
     QString ignore;
     QSetIterator<QChar> it(pHost->mDoubleClickIgnore);
-    while (it.hasNext()) {
+    while (it.hasNext())
+    {
         ignore = ignore.append(it.next());
     }
     host.append_attribute("mDoubleClickIgnore") = ignore.toUtf8().constData();
@@ -464,24 +470,30 @@ void XMLexport::writeHost(Host* pHost, pugi::xml_node mudletPackage)
 
         auto mInstalledPackages = host.append_child("mInstalledPackages");
 
-        for (int i = 0; i < pHost->mInstalledPackages.size(); ++i) {
+        for (int i = 0; i < pHost->mInstalledPackages.size(); ++i)
+        {
             mInstalledPackages.append_child("string").text().set(pHost->mInstalledPackages.at(i).toUtf8().constData());
         }
 
-        if (!pHost->mInstalledModules.empty()) {
+        if (!pHost->mInstalledModules.empty())
+        {
             auto mInstalledModules = host.append_child("mInstalledModules");
             QMapIterator<QString, QStringList> it(pHost->mInstalledModules);
             pHost->modulesToWrite.clear();
-            while (it.hasNext()) {
+            while (it.hasNext())
+            {
                 it.next();
                 mInstalledModules.append_child("key").text().set(it.key().toUtf8().constData());
                 QStringList entry = it.value();
                 mInstalledModules.append_child("filepath").text().set(entry.at(0).toUtf8().constData());
                 mInstalledModules.append_child("globalSave").text().set(entry.at(1).toUtf8().constData());
-                if (entry.at(1).toInt()) {
+                if (entry.at(1).toInt())
+                {
                     pHost->modulesToWrite.insert(it.key(), entry);
                 }
-                mInstalledModules.append_child("priority").text().set(QString::number(pHost->mModulePriorities.value(it.key())).toUtf8().constData());
+                mInstalledModules.append_child("priority")
+                    .text()
+                    .set(QString::number(pHost->mModulePriorities.value(it.key())).toUtf8().constData());
             }
         }
 
@@ -490,9 +502,13 @@ void XMLexport::writeHost(Host* pHost, pugi::xml_node mudletPackage)
         host.append_child("serverPackageVersion").text().set(pHost->mServerGUI_Package_version.toUtf8().constData());
         host.append_child("port").text().set(QString::number(pHost->mPort).toUtf8().constData());
         host.append_child("borderTopHeight").text().set(QString::number(pHost->mBorderTopHeight).toUtf8().constData());
-        host.append_child("borderBottomHeight").text().set(QString::number(pHost->mBorderBottomHeight).toUtf8().constData());
+        host.append_child("borderBottomHeight")
+            .text()
+            .set(QString::number(pHost->mBorderBottomHeight).toUtf8().constData());
         host.append_child("borderLeftWidth").text().set(QString::number(pHost->mBorderLeftWidth).toUtf8().constData());
-        host.append_child("borderRightWidth").text().set(QString::number(pHost->mBorderRightWidth).toUtf8().constData());
+        host.append_child("borderRightWidth")
+            .text()
+            .set(QString::number(pHost->mBorderRightWidth).toUtf8().constData());
         host.append_child("wrapAt").text().set(QString::number(pHost->mWrapAt).toUtf8().constData());
         host.append_child("wrapIndentCount").text().set(QString::number(pHost->mWrapIndentCount).toUtf8().constData());
         host.append_child("mFgColor").text().set(pHost->mFgColor.name().toUtf8().constData());
@@ -521,7 +537,9 @@ void XMLexport::writeHost(Host* pHost, pugi::xml_node mudletPackage)
         host.append_child("mCommandLineFont").text().set(pHost->mCommandLineFont.toString().toUtf8().constData());
         // There was a mis-spelt duplicate commandSeperator above but it is now gone
         host.append_child("mCommandSeparator").text().set(pHost->mCommandSeparator.toUtf8().constData());
-        host.append_child("commandLineMinimumHeight").text().set(QString::number(pHost->commandLineMinimumHeight).toUtf8().constData());
+        host.append_child("commandLineMinimumHeight")
+            .text()
+            .set(QString::number(pHost->commandLineMinimumHeight).toUtf8().constData());
 
         host.append_child("mFgColor2").text().set(pHost->mFgColor_2.name().toUtf8().constData());
         host.append_child("mBgColor2").text().set(pHost->mBgColor_2.name().toUtf8().constData());
@@ -553,19 +571,28 @@ void XMLexport::writeHost(Host* pHost, pugi::xml_node mudletPackage)
     {
         auto stopwatches = host.append_child("stopwatches");
         QListIterator<int> itStopWatchId(pHost->getStopWatchIds());
-        while (itStopWatchId.hasNext()) {
+        while (itStopWatchId.hasNext())
+        {
             auto stopWatchId = itStopWatchId.next();
             auto pStopWatch = pHost->getStopWatch(stopWatchId);
-            if (pStopWatch->persistent()) {
+            if (pStopWatch->persistent())
+            {
                 auto stopwatch = stopwatches.append_child("stopwatch");
                 // Three QStrings used here are purely numeric so can be expressed in Latin1 encoding:
                 stopwatch.append_attribute("id") = QString::number(stopWatchId).toLatin1().constData();
-                if (pStopWatch->running()) {
+                if (pStopWatch->running())
+                {
                     stopwatch.append_attribute("running") = "yes";
-                    stopwatch.append_attribute("effectiveStartDateTimeEpochMSecs") = QString::number(QDateTime::currentMSecsSinceEpoch() - pStopWatch->getElapsedMilliSeconds()).toLatin1().constData();
-                } else {
+                    stopwatch.append_attribute("effectiveStartDateTimeEpochMSecs") =
+                        QString::number(QDateTime::currentMSecsSinceEpoch() - pStopWatch->getElapsedMilliSeconds())
+                            .toLatin1()
+                            .constData();
+                }
+                else
+                {
                     stopwatch.append_attribute("running") = "no";
-                    stopwatch.append_attribute("elapsedDateTimeMSecs") = QString::number(pStopWatch->getElapsedMilliSeconds()).toLatin1().constData();
+                    stopwatch.append_attribute("elapsedDateTimeMSecs") =
+                        QString::number(pStopWatch->getElapsedMilliSeconds()).toLatin1().constData();
                 }
                 stopwatch.append_attribute("name") = pStopWatch->name().toUtf8().constData();
             }
@@ -580,123 +607,149 @@ void XMLexport::writeHost(Host* pHost, pugi::xml_node mudletPackage)
     writeVariablePackage(pHost, mudletPackage);
 }
 
-void XMLexport::writeVariablePackage(Host* pHost, pugi::xml_node& mudletPackage)
+void XMLexport::writeVariablePackage(Host *pHost, pugi::xml_node &mudletPackage)
 {
     auto variablePackage = mudletPackage.append_child("VariablePackage");
-    LuaInterface* lI = pHost->getLuaInterface();
-    VarUnit* vu = lI->getVarUnit();
-    //do hidden variables first
+    LuaInterface *lI = pHost->getLuaInterface();
+    VarUnit *vu = lI->getVarUnit();
+    // do hidden variables first
     { // Blocked so that indentation reflects that of the XML file
         auto hiddenVariables = variablePackage.append_child("HiddenVariables");
         QSetIterator<QString> itHiddenVariableName(vu->hiddenByUser);
-        while (itHiddenVariableName.hasNext()) {
+        while (itHiddenVariableName.hasNext())
+        {
             auto variableName = itHiddenVariableName.next();
             hiddenVariables.append_child("name").text().set(variableName.toUtf8().constData());
         }
     }
 
-    TVar* base = vu->getBase();
-    if (!base) {
+    TVar *base = vu->getBase();
+    if (!base)
+    {
         lI->getVars(false);
         base = vu->getBase();
     }
 
-    if (base) {
-        QListIterator<TVar*> itVariable(base->getChildren(false));
-        while (itVariable.hasNext()) {
+    if (base)
+    {
+        QListIterator<TVar *> itVariable(base->getChildren(false));
+        while (itVariable.hasNext())
+        {
             writeVariable(itVariable.next(), lI, vu, variablePackage);
         }
     }
 }
 
-void XMLexport::writeKeyPackage(const Host* pHost, pugi::xml_node& mudletPackage, bool skipModuleMembers)
+void XMLexport::writeKeyPackage(const Host *pHost, pugi::xml_node &mudletPackage, bool skipModuleMembers)
 {
     auto keyPackage = mudletPackage.append_child("KeyPackage");
-    for (auto it : pHost->mKeyUnit.mKeyRootNodeList) {
-        if (!it || it->isTemporary() || (skipModuleMembers && it->mModuleMember)) {
+    for (auto it : pHost->mKeyUnit.mKeyRootNodeList)
+    {
+        if (!it || it->isTemporary() || (skipModuleMembers && it->mModuleMember))
+        {
             continue;
         }
         writeKey(it, keyPackage);
     }
 }
 
-void XMLexport::writeScriptPackage(const Host* pHost, pugi::xml_node& mudletPackage, bool skipModuleMembers)
+void XMLexport::writeScriptPackage(const Host *pHost, pugi::xml_node &mudletPackage, bool skipModuleMembers)
 {
     auto scriptPackage = mudletPackage.append_child("ScriptPackage");
-    for (auto it : pHost->mScriptUnit.mScriptRootNodeList) {
-        if (!it || (skipModuleMembers && it->mModuleMember)) {
+    for (auto it : pHost->mScriptUnit.mScriptRootNodeList)
+    {
+        if (!it || (skipModuleMembers && it->mModuleMember))
+        {
             continue;
         }
         writeScript(it, scriptPackage);
     }
 }
 
-void XMLexport::writeActionPackage(const Host* pHost, pugi::xml_node& mudletPackage, bool skipModuleMembers)
+void XMLexport::writeActionPackage(const Host *pHost, pugi::xml_node &mudletPackage, bool skipModuleMembers)
 {
     auto actionPackage = mudletPackage.append_child("ActionPackage");
-    for (auto it : pHost->mActionUnit.mActionRootNodeList) {
-        if (!it || (skipModuleMembers && it->mModuleMember)) {
+    for (auto it : pHost->mActionUnit.mActionRootNodeList)
+    {
+        if (!it || (skipModuleMembers && it->mModuleMember))
+        {
             continue;
         }
         writeAction(it, actionPackage);
     }
 }
 
-void XMLexport::writeAliasPackage(const Host* pHost, pugi::xml_node& mudletPackage, bool skipModuleMembers)
+void XMLexport::writeAliasPackage(const Host *pHost, pugi::xml_node &mudletPackage, bool skipModuleMembers)
 {
     auto aliasPackage = mudletPackage.append_child("AliasPackage");
-    for (auto it : pHost->mAliasUnit.mAliasRootNodeList) {
-        if (!it || (skipModuleMembers && it->mModuleMember)) {
+    for (auto it : pHost->mAliasUnit.mAliasRootNodeList)
+    {
+        if (!it || (skipModuleMembers && it->mModuleMember))
+        {
             continue;
         }
-        if (!it->isTemporary()) {
+        if (!it->isTemporary())
+        {
             writeAlias(it, aliasPackage);
         }
     }
 }
 
-void XMLexport::writeTimerPackage(const Host* pHost, pugi::xml_node& mudletPackage, bool skipModuleMembers)
+void XMLexport::writeTimerPackage(const Host *pHost, pugi::xml_node &mudletPackage, bool skipModuleMembers)
 {
     auto timerPackage = mudletPackage.append_child("TimerPackage");
-    for (auto it : pHost->mTimerUnit.mTimerRootNodeList) {
-        if (!it || (skipModuleMembers && it->mModuleMember)) {
+    for (auto it : pHost->mTimerUnit.mTimerRootNodeList)
+    {
+        if (!it || (skipModuleMembers && it->mModuleMember))
+        {
             continue;
         }
-        if (!it->isTemporary()) {
+        if (!it->isTemporary())
+        {
             writeTimer(it, timerPackage);
         }
     }
 }
 
-void XMLexport::writeTriggerPackage(const Host* pHost, pugi::xml_node& mudletPackage, bool ignoreModuleMembers)
+void XMLexport::writeTriggerPackage(const Host *pHost, pugi::xml_node &mudletPackage, bool ignoreModuleMembers)
 {
     auto triggerPackage = mudletPackage.append_child("TriggerPackage");
-    for (auto it : pHost->mTriggerUnit.mTriggerRootNodeList) {
-        if (!it || (ignoreModuleMembers && it->mModuleMember)) {
+    for (auto it : pHost->mTriggerUnit.mTriggerRootNodeList)
+    {
+        if (!it || (ignoreModuleMembers && it->mModuleMember))
+        {
             continue;
         }
-        if (!it->isTemporary()) {
+        if (!it->isTemporary())
+        {
             writeTrigger(it, triggerPackage);
         }
     }
 }
 
-void XMLexport::writeVariable(TVar* pVar, LuaInterface* pLuaInterface, VarUnit* pVariableUnit, pugi::xml_node xmlParent)
+void XMLexport::writeVariable(TVar *pVar, LuaInterface *pLuaInterface, VarUnit *pVariableUnit, pugi::xml_node xmlParent)
 {
-    if (pVariableUnit->isSaved(pVar)) {
-        if (pVar->getValueType() == LUA_TTABLE) {
+    if (pVariableUnit->isSaved(pVar))
+    {
+        if (pVar->getValueType() == LUA_TTABLE)
+        {
             auto variableGroup = xmlParent.append_child("VariableGroup");
 
             variableGroup.append_child("name").text().set(pVar->getName().toUtf8().constData());
             variableGroup.append_child("keyType").text().set(QString::number(pVar->getKeyType()).toUtf8().constData());
             variableGroup.append_child("value").text().set(pLuaInterface->getValue(pVar).toUtf8().constData());
-            variableGroup.append_child("valueType").text().set(QString::number(pVar->getValueType()).toUtf8().constData());
+            variableGroup.append_child("valueType")
+                .text()
+                .set(QString::number(pVar->getValueType()).toUtf8().constData());
 
-            QListIterator<TVar*> itNestedVariable(pVar->getChildren(false));
-            while (itNestedVariable.hasNext()) {
+            QListIterator<TVar *> itNestedVariable(pVar->getChildren(false));
+            while (itNestedVariable.hasNext())
+            {
                 writeVariable(itNestedVariable.next(), pLuaInterface, pVariableUnit, variableGroup);
             }
-        } else {
+        }
+        else
+        {
             auto variable = xmlParent.append_child("Variable");
 
             variable.append_child("name").text().set(pVar->getName().toUtf8().constData());
@@ -707,14 +760,16 @@ void XMLexport::writeVariable(TVar* pVar, LuaInterface* pLuaInterface, VarUnit* 
     }
 }
 
-bool XMLexport::exportProfile(const QString& exportFileName)
+bool XMLexport::exportProfile(const QString &exportFileName)
 {
     auto mudletPackage = writeXmlHeader();
 
-    if (writeGenericPackage(mpHost, mudletPackage)) {
+    if (writeGenericPackage(mpHost, mudletPackage))
+    {
         auto future = QtConcurrent::run(this, &XMLexport::saveXml, exportFileName);
         auto watcher = new QFutureWatcher<bool>;
-        QObject::connect(watcher, &QFutureWatcher<bool>::finished, mpHost, [=]() { mpHost->xmlSaved(QStringLiteral("profile")); });
+        QObject::connect(watcher, &QFutureWatcher<bool>::finished, mpHost,
+                         [=]() { mpHost->xmlSaved(QStringLiteral("profile")); });
         watcher->setFuture(future);
         saveFutures.append(future);
 
@@ -724,18 +779,19 @@ bool XMLexport::exportProfile(const QString& exportFileName)
     return false;
 }
 
-bool XMLexport::exportPackage(const QString& exportFileName)
+bool XMLexport::exportPackage(const QString &exportFileName)
 {
     auto mudletPackage = writeXmlHeader();
 
-    if (writeGenericPackage(mpHost, mudletPackage)) {
+    if (writeGenericPackage(mpHost, mudletPackage))
+    {
         return saveXml(exportFileName);
     }
 
     return false;
 }
 
-bool XMLexport::writeGenericPackage(Host* pHost, pugi::xml_node& mudletPackage)
+bool XMLexport::writeGenericPackage(Host *pHost, pugi::xml_node &mudletPackage)
 {
     writeTriggerPackage(pHost, mudletPackage, true);
     writeTimerPackage(pHost, mudletPackage, true);
@@ -763,7 +819,7 @@ pugi::xml_node XMLexport::writeXmlHeader()
     return mudletPackage;
 }
 
-bool XMLexport::exportTrigger(const QString& fileName)
+bool XMLexport::exportTrigger(const QString &fileName)
 {
     auto mudletPackage = writeXmlHeader();
 
@@ -774,7 +830,7 @@ bool XMLexport::exportTrigger(const QString& fileName)
     return saveXml(fileName);
 }
 
-void XMLexport::exportToClipboard(TTrigger* pT)
+void XMLexport::exportToClipboard(TTrigger *pT)
 {
     // The use of pT is a cludge - it was already used in the previously invoked
     // in this XMLexport instance's constructor (and stored in mpTrigger) and it
@@ -790,9 +846,10 @@ void XMLexport::exportToClipboard(TTrigger* pT)
     clipboard->setText(xml, QClipboard::Clipboard);
 }
 
-void XMLexport::writeTrigger(TTrigger* pT, pugi::xml_node xmlParent)
+void XMLexport::writeTrigger(TTrigger *pT, pugi::xml_node xmlParent)
 {
-    if (!pT->mModuleMasterFolder && pT->exportItem) {
+    if (!pT->mModuleMasterFolder && pT->exportItem)
+    {
         auto trigger = xmlParent.append_child(pT->isFolder() ? "TriggerGroup" : "Trigger");
 
         // set the xml parent to the trigger we just made so nested triggers will get written to it
@@ -816,37 +873,48 @@ void XMLexport::writeTrigger(TTrigger* pT, pugi::xml_node xmlParent)
             writeScriptElement(pT->mScript, trigger);
 
             trigger.append_child("triggerType").text().set(QString::number(pT->mTriggerType).toUtf8().constData());
-            trigger.append_child("conditonLineDelta").text().set(QString::number(pT->mConditionLineDelta).toUtf8().constData());
+            trigger.append_child("conditonLineDelta")
+                .text()
+                .set(QString::number(pT->mConditionLineDelta).toUtf8().constData());
             trigger.append_child("mStayOpen").text().set(QString::number(pT->mStayOpen).toUtf8().constData());
             trigger.append_child("mCommand").text().set(pT->mCommand.toUtf8().constData());
             trigger.append_child("packageName").text().set(pT->mPackageName.toUtf8().constData());
             trigger.append_child("mFgColor").text().set(pT->mFgColor.name().toUtf8().constData());
             trigger.append_child("mBgColor").text().set(pT->mBgColor.name().toUtf8().constData());
             trigger.append_child("mSoundFile").text().set(pT->mSoundFile.toUtf8().constData());
-            trigger.append_child("colorTriggerFgColor").text().set(pT->mColorTriggerFgColor.name().toUtf8().constData());
-            trigger.append_child("colorTriggerBgColor").text().set(pT->mColorTriggerBgColor.name().toUtf8().constData());
+            trigger.append_child("colorTriggerFgColor")
+                .text()
+                .set(pT->mColorTriggerFgColor.name().toUtf8().constData());
+            trigger.append_child("colorTriggerBgColor")
+                .text()
+                .set(pT->mColorTriggerBgColor.name().toUtf8().constData());
 
             auto regexCodeList = trigger.append_child("regexCodeList");
             // Revert the first 16 ANSI colour codes back to the wrong values
             // that are still used in the save files
-            QStringList unfixedAnsiColourPatternList = remapAnsiToColorNumber(pT->mRegexCodeList, pT->mRegexCodePropertyList);
-            for (int i = 0; i < unfixedAnsiColourPatternList.size(); ++i) {
-                regexCodeList.append_child("string").text().set(unfixedAnsiColourPatternList.at(i).toUtf8().constData());
+            QStringList unfixedAnsiColourPatternList =
+                remapAnsiToColorNumber(pT->mRegexCodeList, pT->mRegexCodePropertyList);
+            for (int i = 0; i < unfixedAnsiColourPatternList.size(); ++i)
+            {
+                regexCodeList.append_child("string").text().set(
+                    unfixedAnsiColourPatternList.at(i).toUtf8().constData());
             }
 
             auto regexCodePropertyList = trigger.append_child("regexCodePropertyList");
-            for (int i : qAsConst(pT->mRegexCodePropertyList)) {
+            for (int i : qAsConst(pT->mRegexCodePropertyList))
+            {
                 regexCodePropertyList.append_child("integer").text().set(QString::number(i).toUtf8().constData());
             }
         }
     }
 
-    for (auto& it : *pT->mpMyChildrenList) {
+    for (auto &it : *pT->mpMyChildrenList)
+    {
         writeTrigger(it, xmlParent);
     }
 }
 
-bool XMLexport::exportAlias(const QString& fileName)
+bool XMLexport::exportAlias(const QString &fileName)
 {
     auto mudletPackage = writeXmlHeader();
 
@@ -857,7 +925,7 @@ bool XMLexport::exportAlias(const QString& fileName)
     return saveXml(fileName);
 }
 
-void XMLexport::exportToClipboard(TAlias* pT)
+void XMLexport::exportToClipboard(TAlias *pT)
 {
     // The use of pT is a cludge - it was already used in the previously invoked
     // in this XMLexport instance's constructor (and stored in mpAlias) and it
@@ -873,9 +941,10 @@ void XMLexport::exportToClipboard(TAlias* pT)
     clipboard->setText(xml, QClipboard::Clipboard);
 }
 
-void XMLexport::writeAlias(TAlias* pT, pugi::xml_node xmlParent)
+void XMLexport::writeAlias(TAlias *pT, pugi::xml_node xmlParent)
 {
-    if (!pT->mModuleMasterFolder && pT->exportItem) {
+    if (!pT->mModuleMasterFolder && pT->exportItem)
+    {
         auto aliasContents = xmlParent.append_child(pT->isFolder() ? "AliasGroup" : "Alias");
 
         // set the xml parent to the trigger we just made so nested triggers will get written to it
@@ -894,12 +963,13 @@ void XMLexport::writeAlias(TAlias* pT, pugi::xml_node xmlParent)
         }
     }
 
-    for (auto& it : *pT->mpMyChildrenList) {
+    for (auto &it : *pT->mpMyChildrenList)
+    {
         writeAlias(it, xmlParent);
     }
 }
 
-bool XMLexport::exportAction(const QString& fileName)
+bool XMLexport::exportAction(const QString &fileName)
 {
     auto mudletPackage = writeXmlHeader();
 
@@ -910,7 +980,7 @@ bool XMLexport::exportAction(const QString& fileName)
     return saveXml(fileName);
 }
 
-void XMLexport::exportToClipboard(TAction* pT)
+void XMLexport::exportToClipboard(TAction *pT)
 {
     // The use of pT is a cludge - it was already used in the previously invoked
     // in this XMLexport instance's constructor (and stored in mpAction) and it
@@ -926,9 +996,10 @@ void XMLexport::exportToClipboard(TAction* pT)
     clipboard->setText(xml, QClipboard::Clipboard);
 }
 
-void XMLexport::writeAction(TAction* pT, pugi::xml_node xmlParent)
+void XMLexport::writeAction(TAction *pT, pugi::xml_node xmlParent)
 {
-    if (!pT->mModuleMasterFolder && pT->exportItem) {
+    if (!pT->mModuleMasterFolder && pT->exportItem)
+    {
         auto actionContents = xmlParent.append_child(pT->isFolder() ? "ActionGroup" : "Action");
 
         // set the xml parent to the trigger we just made so nested triggers will get written to it
@@ -949,27 +1020,36 @@ void XMLexport::writeAction(TAction* pT, pugi::xml_node xmlParent)
             actionContents.append_child("commandButtonUp").text().set(pT->mCommandButtonUp.toUtf8().constData());
             actionContents.append_child("commandButtonDown").text().set(pT->mCommandButtonDown.toUtf8().constData());
             actionContents.append_child("icon").text().set(pT->mIcon.toUtf8().constData());
-            actionContents.append_child("orientation").text().set(QString::number(pT->mOrientation).toUtf8().constData());
+            actionContents.append_child("orientation")
+                .text()
+                .set(QString::number(pT->mOrientation).toUtf8().constData());
             actionContents.append_child("location").text().set(QString::number(pT->mLocation).toUtf8().constData());
             actionContents.append_child("posX").text().set(QString::number(pT->mPosX).toUtf8().constData());
             actionContents.append_child("posY").text().set(QString::number(pT->mPosY).toUtf8().constData());
             // We now use a boolean but file must use original "1" (false)
             // or "2" (true) for backward compatibility
-            actionContents.append_child("mButtonState").text().set(QString::number(pT->mButtonState ? 2 : 1).toUtf8().constData());
+            actionContents.append_child("mButtonState")
+                .text()
+                .set(QString::number(pT->mButtonState ? 2 : 1).toUtf8().constData());
             actionContents.append_child("sizeX").text().set(QString::number(pT->mSizeX).toUtf8().constData());
             actionContents.append_child("sizeY").text().set(QString::number(pT->mSizeY).toUtf8().constData());
-            actionContents.append_child("buttonColumn").text().set(QString::number(pT->mButtonColumns).toUtf8().constData());
-            actionContents.append_child("buttonRotation").text().set(QString::number(pT->mButtonRotation).toUtf8().constData());
+            actionContents.append_child("buttonColumn")
+                .text()
+                .set(QString::number(pT->mButtonColumns).toUtf8().constData());
+            actionContents.append_child("buttonRotation")
+                .text()
+                .set(QString::number(pT->mButtonRotation).toUtf8().constData());
             actionContents.append_child("buttonColor").text().set(pT->mButtonColor.name().toUtf8().constData());
         }
     }
 
-    for (auto& it : *pT->mpMyChildrenList) {
+    for (auto &it : *pT->mpMyChildrenList)
+    {
         writeAction(it, xmlParent);
     }
 }
 
-bool XMLexport::exportTimer(const QString& fileName)
+bool XMLexport::exportTimer(const QString &fileName)
 {
     auto mudletPackage = writeXmlHeader();
 
@@ -980,7 +1060,7 @@ bool XMLexport::exportTimer(const QString& fileName)
     return saveXml(fileName);
 }
 
-void XMLexport::exportToClipboard(TTimer* pT)
+void XMLexport::exportToClipboard(TTimer *pT)
 {
     // The use of pT is a cludge - it was already used in the previously invoked
     // in this XMLexport instance's constructor (and stored in mpTimer) and it
@@ -996,9 +1076,10 @@ void XMLexport::exportToClipboard(TTimer* pT)
     clipboard->setText(xml, QClipboard::Clipboard);
 }
 
-void XMLexport::writeTimer(TTimer* pT, pugi::xml_node xmlParent)
+void XMLexport::writeTimer(TTimer *pT, pugi::xml_node xmlParent)
 {
-    if (!pT->mModuleMasterFolder && pT->exportItem) {
+    if (!pT->mModuleMasterFolder && pT->exportItem)
+    {
         auto timerContents = xmlParent.append_child(pT->isFolder() ? "TimerGroup" : "Timer");
 
         // set the xml parent to the trigger we just made so nested triggers will get written to it
@@ -1020,12 +1101,13 @@ void XMLexport::writeTimer(TTimer* pT, pugi::xml_node xmlParent)
         }
     }
 
-    for (auto& it : *pT->mpMyChildrenList) {
+    for (auto &it : *pT->mpMyChildrenList)
+    {
         writeTimer(it, xmlParent);
     }
 }
 
-bool XMLexport::exportScript(const QString& fileName)
+bool XMLexport::exportScript(const QString &fileName)
 {
     auto mudletPackage = writeXmlHeader();
 
@@ -1036,7 +1118,7 @@ bool XMLexport::exportScript(const QString& fileName)
     return saveXml(fileName);
 }
 
-void XMLexport::exportToClipboard(TScript* pT)
+void XMLexport::exportToClipboard(TScript *pT)
 {
     // The use of pT is a cludge - it was already used in the previously invoked
     // in this XMLexport instance's constructor (and stored in mpScript) and it
@@ -1052,9 +1134,10 @@ void XMLexport::exportToClipboard(TScript* pT)
     clipboard->setText(xml, QClipboard::Clipboard);
 }
 
-void XMLexport::writeScript(TScript* pT, pugi::xml_node xmlParent)
+void XMLexport::writeScript(TScript *pT, pugi::xml_node xmlParent)
 {
-    if (!pT->mModuleMasterFolder && pT->exportItem) {
+    if (!pT->mModuleMasterFolder && pT->exportItem)
+    {
         auto scriptContents = xmlParent.append_child(pT->isFolder() ? "ScriptGroup" : "Script");
 
         // set the xml parent to the trigger we just made so nested triggers will get written to it
@@ -1069,18 +1152,20 @@ void XMLexport::writeScript(TScript* pT, pugi::xml_node xmlParent)
             writeScriptElement(pT->mScript, scriptContents);
 
             auto eventHandlerList = scriptContents.append_child("eventHandlerList");
-            for (int i = 0; i < pT->mEventHandlerList.size(); ++i) {
+            for (int i = 0; i < pT->mEventHandlerList.size(); ++i)
+            {
                 eventHandlerList.append_child("string").text().set(pT->mEventHandlerList.at(i).toUtf8().constData());
             }
         }
     }
 
-    for (auto& it : *pT->mpMyChildrenList) {
+    for (auto &it : *pT->mpMyChildrenList)
+    {
         writeScript(it, xmlParent);
     }
 }
 
-bool XMLexport::exportKey(const QString& fileName)
+bool XMLexport::exportKey(const QString &fileName)
 {
     auto mudletPackage = writeXmlHeader();
 
@@ -1091,7 +1176,7 @@ bool XMLexport::exportKey(const QString& fileName)
     return saveXml(fileName);
 }
 
-void XMLexport::exportToClipboard(TKey* pT)
+void XMLexport::exportToClipboard(TKey *pT)
 {
     // The use of pT is a cludge - it was already used in the previously invoked
     // in this XMLexport instance's constructor (and stored in mpKey) and it
@@ -1107,9 +1192,10 @@ void XMLexport::exportToClipboard(TKey* pT)
     clipboard->setText(xml, QClipboard::Clipboard);
 }
 
-void XMLexport::writeKey(TKey* pT, pugi::xml_node xmlParent)
+void XMLexport::writeKey(TKey *pT, pugi::xml_node xmlParent)
 {
-    if (!pT->mModuleMasterFolder && pT->exportItem) {
+    if (!pT->mModuleMasterFolder && pT->exportItem)
+    {
         auto keyContents = xmlParent.append_child(pT->isFolder() ? "KeyGroup" : "Key");
 
         // set the xml parent to the trigger we just made so nested triggers will get written to it
@@ -1129,45 +1215,57 @@ void XMLexport::writeKey(TKey* pT, pugi::xml_node xmlParent)
         }
     }
 
-    for (auto& it : *pT->mpMyChildrenList) {
+    for (auto &it : *pT->mpMyChildrenList)
+    {
         writeKey(it, xmlParent);
     }
 }
 
-void XMLexport::writeScriptElement(const QString& script, pugi::xml_node xmlElement)
+void XMLexport::writeScriptElement(const QString &script, pugi::xml_node xmlElement)
 {
     xmlElement.append_child("script").text().set(script.toUtf8().constData());
 }
 
 // Unlike the reverse operation in XMLimport we cannot modify the supplied patternlist
-QStringList XMLexport::remapAnsiToColorNumber(const QStringList & patternList, const QList<int> & typeList)
+QStringList XMLexport::remapAnsiToColorNumber(const QStringList &patternList, const QList<int> &typeList)
 {
 
     QStringList results;
-    QRegularExpression regex = QRegularExpression(QStringLiteral("(^ANSI_COLORS_F{(\\d+|IGNORE|DEFAULT)}_B{(\\d+|IGNORE|DEFAULT)}$"));
+    QRegularExpression regex =
+        QRegularExpression(QStringLiteral("(^ANSI_COLORS_F{(\\d+|IGNORE|DEFAULT)}_B{(\\d+|IGNORE|DEFAULT)}$"));
     QStringListIterator itPattern(patternList);
     QListIterator<int> itType(typeList);
-    while (itPattern.hasNext() && itType.hasNext()) {
-        if (itType.next() == REGEX_COLOR_PATTERN) {
-            if (!itPattern.next().isEmpty()) {
+    while (itPattern.hasNext() && itType.hasNext())
+    {
+        if (itType.next() == REGEX_COLOR_PATTERN)
+        {
+            if (!itPattern.next().isEmpty())
+            {
                 QRegularExpressionMatch match = regex.match(itPattern.peekPrevious());
                 // Although we define two '('...')' capture groups the count/size is
                 // 3 (0 is the whole string)!
-                if (match.hasMatch() && match.capturedTexts().size() == 3) {
+                if (match.hasMatch() && match.capturedTexts().size() == 3)
+                {
                     bool isFgOk = false;
                     int fg = 0;
-                    if (match.captured(1) == QLatin1String("DEFAULT")) {
+                    if (match.captured(1) == QLatin1String("DEFAULT"))
+                    {
                         // Use the old value for default which is 0 (though we use
                         // -1 internally)
                         isFgOk = true;
-                    } else if (match.captured(1) == QLatin1String("IGNORE")) {
+                    }
+                    else if (match.captured(1) == QLatin1String("IGNORE"))
+                    {
                         // Ignore is NOT handled by old system but use -2 (the value
                         // we use internally now)
                         isFgOk = true;
                         fg = -2;
-                    } else {
+                    }
+                    else
+                    {
                         fg = match.captured(1).toInt(&isFgOk);
-                        if (isFgOk) {
+                        if (isFgOk)
+                        {
                             // clang-format off
                             switch (fg) {
                             case 0:     fg = 2;     break; // black
@@ -1190,7 +1288,9 @@ QStringList XMLexport::remapAnsiToColorNumber(const QStringList & patternList, c
                                    ; // No-op for other color codes
                             }
                             // clang-format on
-                        } else {
+                        }
+                        else
+                        {
                             // Oops failure - return to default color
                             fg = 0;
                         }
@@ -1198,18 +1298,24 @@ QStringList XMLexport::remapAnsiToColorNumber(const QStringList & patternList, c
 
                     bool isBgOk = false;
                     int bg = 0;
-                    if (match.captured(2) == QLatin1String("DEFAULT")) {
+                    if (match.captured(2) == QLatin1String("DEFAULT"))
+                    {
                         // Use the old value for default which is 0 (though we use
                         // -1 internally)
                         isBgOk = true;
-                    } else if (match.captured(2) == QLatin1String("IGNORE")) {
+                    }
+                    else if (match.captured(2) == QLatin1String("IGNORE"))
+                    {
                         // Ignore is NOT handled by old system but use -2 (the value
                         // we use internally)
                         isBgOk = true;
                         bg = -2;
-                    } else {
+                    }
+                    else
+                    {
                         bg = match.captured(2).toInt(&isBgOk);
-                        if (isBgOk) {
+                        if (isBgOk)
+                        {
                             // clang-format off
                             switch (bg) {
                             case 0:     bg = 2;     break; // black
@@ -1232,31 +1338,45 @@ QStringList XMLexport::remapAnsiToColorNumber(const QStringList & patternList, c
                                    ; // No-op for other color codes
                             }
                             // clang-format on
-                        } else {
+                        }
+                        else
+                        {
                             // Oops failure - return to default color
                             bg = 0;
                         }
                     }
 
-                    if (!isFgOk) {
-                        qDebug() << "XMLexport::remapAnsiToColorNumber(...) ERROR - failed to extract FG color code from pattern text:" << itPattern.peekPrevious() << " setting colour to default foreground";
+                    if (!isFgOk)
+                    {
+                        qDebug() << "XMLexport::remapAnsiToColorNumber(...) ERROR - failed to extract FG color code "
+                                    "from pattern text:"
+                                 << itPattern.peekPrevious() << " setting colour to default foreground";
                     }
-                    if (!isBgOk) {
-                        qDebug() << "XMLexport::remapAnsiToColorNumber(...) ERROR - failed to extract BG color code from pattern text:" << itPattern.peekPrevious() << " setting colour to default background";
+                    if (!isBgOk)
+                    {
+                        qDebug() << "XMLexport::remapAnsiToColorNumber(...) ERROR - failed to extract BG color code "
+                                    "from pattern text:"
+                                 << itPattern.peekPrevious() << " setting colour to default background";
                     }
 
                     results << QStringLiteral("FG%1BG%2").arg(QString::number(fg), QString::number(bg));
-                } else {
+                }
+                else
+                {
                     // No match - so insert previous string - which will cause
                     // a failure when it gets loaded as a REGEX_COLOR_PATTERN
                     // again...
                     results << itPattern.peekPrevious();
                 }
-            } else {
+            }
+            else
+            {
                 // Empty pattern
                 results << QString();
             }
-        } else {
+        }
+        else
+        {
             // Copy across the pattern as it isn't a colour pattern
             results << itPattern.next();
         }

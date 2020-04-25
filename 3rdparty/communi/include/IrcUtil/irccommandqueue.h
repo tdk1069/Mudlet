@@ -30,8 +30,8 @@
 #define IRCCOMMANDQUEUE_H
 
 #include <IrcGlobal>
-#include <QtCore/qobject.h>
 #include <QtCore/qmetatype.h>
+#include <QtCore/qobject.h>
 #include <QtCore/qscopedpointer.h>
 
 IRC_BEGIN_NAMESPACE
@@ -45,10 +45,10 @@ class IRC_UTIL_EXPORT IrcCommandQueue : public QObject
     Q_PROPERTY(int batch READ batch WRITE setBatch)
     Q_PROPERTY(int interval READ interval WRITE setInterval)
     Q_PROPERTY(int size READ size NOTIFY sizeChanged)
-    Q_PROPERTY(IrcConnection* connection READ connection WRITE setConnection)
+    Q_PROPERTY(IrcConnection *connection READ connection WRITE setConnection)
 
-public:
-    explicit IrcCommandQueue(QObject* parent = 0);
+  public:
+    explicit IrcCommandQueue(QObject *parent = 0);
     virtual ~IrcCommandQueue();
 
     int batch() const;
@@ -59,17 +59,17 @@ public:
 
     int size() const;
 
-    IrcConnection* connection() const;
-    void setConnection(IrcConnection* connection);
+    IrcConnection *connection() const;
+    void setConnection(IrcConnection *connection);
 
-public Q_SLOTS:
+  public Q_SLOTS:
     void clear();
     void flush();
 
-Q_SIGNALS:
+  Q_SIGNALS:
     void sizeChanged(int size);
 
-private:
+  private:
     QScopedPointer<IrcCommandQueuePrivate> d_ptr;
     Q_DECLARE_PRIVATE(IrcCommandQueue)
     Q_DISABLE_COPY(IrcCommandQueue)
@@ -80,6 +80,6 @@ private:
 
 IRC_END_NAMESPACE
 
-Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcCommandQueue*))
+Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcCommandQueue *))
 
 #endif // IRCCOMMANDQUEUE_H

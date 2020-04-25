@@ -22,14 +22,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include "ui_mapper.h"
 #include <QDir>
 #include <QMainWindow>
 #include <QPointer>
-#include "post_guard.h"
-
 
 class Host;
 class TMap;
@@ -37,23 +35,25 @@ class TMap;
 class GLWidget;
 #endif
 
-
 class dlgMapper : public QWidget, public Ui::mapper
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(dlgMapper)
-    dlgMapper(QWidget*, Host*, TMap*);
+    dlgMapper(QWidget *, Host *, TMap *);
 #if defined(INCLUDE_3DMAPPER)
-    GLWidget* glWidget;
+    GLWidget *glWidget;
 #endif
     void updateAreaComboBox();
     void setDefaultAreaShown(bool);
-    bool getDefaultAreaShown() { return mShowDefaultArea; }
+    bool getDefaultAreaShown()
+    {
+        return mShowDefaultArea;
+    }
     void resetAreaComboBoxToPlayerRoomArea();
 
-public slots:
+  public slots:
     void slot_bubbles();
     void slot_info();
     void slot_toggleShowRoomIDs(int s);
@@ -61,12 +61,12 @@ public slots:
     void show2dView();
     void slot_togglePanel();
     void goRoom();
-    void choseRoom(QListWidgetItem*);
+    void choseRoom(QListWidgetItem *);
     void slot_roomSize(int d);
     void slot_lineSize(int d);
 
-private:
-    TMap* mpMap;
+  private:
+    TMap *mpMap;
     QPointer<Host> mpHost;
     bool mShowDefaultArea;
 };

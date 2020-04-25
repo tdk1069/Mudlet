@@ -37,19 +37,20 @@ IRC_BEGIN_NAMESPACE
 
 class IrcMessageDecoder
 {
-public:
+  public:
     IrcMessageDecoder();
     ~IrcMessageDecoder();
 
-    QString decode(const QByteArray& data, const QByteArray& encoding) const;
+    QString decode(const QByteArray &data, const QByteArray &encoding) const;
 
-private:
+  private:
     void initialize();
     void uninitialize();
-    QByteArray codecForData(const QByteArray& data) const;
+    QByteArray codecForData(const QByteArray &data) const;
 
-    struct Data {
-        void* detector;
+    struct Data
+    {
+        void *detector;
     } d;
 };
 

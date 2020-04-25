@@ -29,8 +29,8 @@
 #ifndef IRCUSERMODEL_P_H
 #define IRCUSERMODEL_P_H
 
-#include "ircuser.h"
 #include "ircchannel_p.h"
+#include "ircuser.h"
 #include "ircusermodel.h"
 #include <qpointer.h>
 
@@ -40,28 +40,28 @@ class IrcUserModelPrivate
 {
     Q_DECLARE_PUBLIC(IrcUserModel)
 
-public:
+  public:
     IrcUserModelPrivate();
 
-    void addUser(IrcUser* user, bool notify = true);
-    void insertUser(int index, IrcUser* user, bool notify = true);
-    void removeUser(IrcUser* user, bool notify = true);
-    void setUsers(const QList<IrcUser*>& users, bool reset = true);
-    void renameUser(IrcUser* user);
-    void setUserMode(IrcUser* user);
-    void promoteUser(IrcUser* user);
-    bool updateUser(IrcUser* user);
+    void addUser(IrcUser *user, bool notify = true);
+    void insertUser(int index, IrcUser *user, bool notify = true);
+    void removeUser(IrcUser *user, bool notify = true);
+    void setUsers(const QList<IrcUser *> &users, bool reset = true);
+    void renameUser(IrcUser *user);
+    void setUserMode(IrcUser *user);
+    void promoteUser(IrcUser *user);
+    bool updateUser(IrcUser *user);
     bool updateTitles();
 
-    static IrcUserModelPrivate* get(IrcUserModel* model)
+    static IrcUserModelPrivate *get(IrcUserModel *model)
     {
         return model->d_func();
     }
 
-    IrcUserModel* q_ptr;
+    IrcUserModel *q_ptr;
     Irc::DataRole role;
     QStringList titles;
-    QList<IrcUser*> userList;
+    QList<IrcUser *> userList;
     QPointer<IrcChannel> channel;
     Irc::SortMethod sortMethod;
     Qt::SortOrder sortOrder;

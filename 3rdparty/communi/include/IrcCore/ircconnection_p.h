@@ -31,14 +31,14 @@
 
 #include "ircconnection.h"
 
-#include <QSet>
-#include <QList>
-#include <QHash>
-#include <QStack>
-#include <QTimer>
-#include <QString>
-#include <QByteArray>
 #include <QAbstractSocket>
+#include <QByteArray>
+#include <QHash>
+#include <QList>
+#include <QSet>
+#include <QStack>
+#include <QString>
+#include <QTimer>
 
 IRC_BEGIN_NAMESPACE
 
@@ -49,10 +49,10 @@ class IrcConnectionPrivate
 {
     Q_DECLARE_PUBLIC(IrcConnection)
 
-public:
+  public:
     IrcConnectionPrivate();
 
-    void init(IrcConnection* connection);
+    void init(IrcConnection *connection);
 
     void _irc_connected();
     void _irc_disconnected();
@@ -62,27 +62,27 @@ public:
     void _irc_reconnect();
     void _irc_readData();
 
-    void _irc_filterDestroyed(QObject* filter);
+    void _irc_filterDestroyed(QObject *filter);
 
     void open();
     void reconnect();
-    void setNick(const QString& nick);
+    void setNick(const QString &nick);
     void setStatus(IrcConnection::Status status);
-    void setInfo(const QHash<QString, QString>& info);
+    void setInfo(const QHash<QString, QString> &info);
 
-    bool receiveMessage(IrcMessage* msg);
-    IrcCommand* createCtcpReply(IrcPrivateMessage* request);
+    bool receiveMessage(IrcMessage *msg);
+    IrcCommand *createCtcpReply(IrcPrivateMessage *request);
 
-    static IrcConnectionPrivate* get(const IrcConnection* connection)
+    static IrcConnectionPrivate *get(const IrcConnection *connection)
     {
         return connection->d_ptr.data();
     }
 
-    IrcConnection* q_ptr;
+    IrcConnection *q_ptr;
     QByteArray encoding;
-    IrcNetwork* network;
-    IrcProtocol* protocol;
-    QAbstractSocket* socket;
+    IrcNetwork *network;
+    IrcProtocol *protocol;
+    QAbstractSocket *socket;
     QString host;
     int port;
     int currentServer;
@@ -100,9 +100,9 @@ public:
     bool enabled;
     IrcConnection::Status status;
     QList<QByteArray> pendingData;
-    QList<QObject*> commandFilters;
-    QList<QObject*> messageFilters;
-    QStack<QObject*> activeCommandFilters;
+    QList<QObject *> commandFilters;
+    QList<QObject *> messageFilters;
+    QStack<QObject *> activeCommandFilters;
     QSet<int> replies;
     bool pendingOpen;
     bool closed;

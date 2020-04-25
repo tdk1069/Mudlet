@@ -55,19 +55,21 @@ IRC_BEGIN_NAMESPACE
     QString html = format.toHtml(message);
     \endcode
 
-    \sa Irc::Color, <a href="http://www.mirc.com/colors.html">mIRC colors</a>, <a href="http://www.w3.org/TR/SVG/types.html#ColorKeywords">SVG color keyword names</a>
+    \sa Irc::Color, <a href="http://www.mirc.com/colors.html">mIRC colors</a>, <a
+   href="http://www.w3.org/TR/SVG/types.html#ColorKeywords">SVG color keyword names</a>
  */
 
 class IrcPalettePrivate
 {
-public:
+  public:
     QMap<int, QString> colors;
 };
 
-static QMap<int, QString>& irc_default_colors()
+static QMap<int, QString> &irc_default_colors()
 {
     static QMap<int, QString> x;
-    if (x.isEmpty()) {
+    if (x.isEmpty())
+    {
         x.insert(Irc::White, QLatin1String("white"));
         x.insert(Irc::Black, QLatin1String("black"));
         x.insert(Irc::Blue, QLatin1String("blue"));
@@ -92,7 +94,7 @@ static QMap<int, QString>& irc_default_colors()
     \internal
     Constructs a new palette with \a parent.
  */
-IrcPalette::IrcPalette(QObject* parent) : QObject(parent), d_ptr(new IrcPalettePrivate)
+IrcPalette::IrcPalette(QObject *parent) : QObject(parent), d_ptr(new IrcPalettePrivate)
 {
     Q_D(IrcPalette);
     d->colors = irc_default_colors();
@@ -123,7 +125,7 @@ QString IrcPalette::white() const
     return d->colors.value(Irc::White);
 }
 
-void IrcPalette::setWhite(const QString& color)
+void IrcPalette::setWhite(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::White, color);
@@ -146,7 +148,7 @@ QString IrcPalette::black() const
     return d->colors.value(Irc::Black);
 }
 
-void IrcPalette::setBlack(const QString& color)
+void IrcPalette::setBlack(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::Black, color);
@@ -169,7 +171,7 @@ QString IrcPalette::blue() const
     return d->colors.value(Irc::Blue);
 }
 
-void IrcPalette::setBlue(const QString& color)
+void IrcPalette::setBlue(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::Blue, color);
@@ -192,7 +194,7 @@ QString IrcPalette::green() const
     return d->colors.value(Irc::Green);
 }
 
-void IrcPalette::setGreen(const QString& color)
+void IrcPalette::setGreen(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::Green, color);
@@ -215,7 +217,7 @@ QString IrcPalette::red() const
     return d->colors.value(Irc::Red);
 }
 
-void IrcPalette::setRed(const QString& color)
+void IrcPalette::setRed(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::Red, color);
@@ -238,7 +240,7 @@ QString IrcPalette::brown() const
     return d->colors.value(Irc::Brown);
 }
 
-void IrcPalette::setBrown(const QString& color)
+void IrcPalette::setBrown(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::Brown, color);
@@ -261,7 +263,7 @@ QString IrcPalette::purple() const
     return d->colors.value(Irc::Purple);
 }
 
-void IrcPalette::setPurple(const QString& color)
+void IrcPalette::setPurple(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::Purple, color);
@@ -284,7 +286,7 @@ QString IrcPalette::orange() const
     return d->colors.value(Irc::Orange);
 }
 
-void IrcPalette::setOrange(const QString& color)
+void IrcPalette::setOrange(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::Orange, color);
@@ -307,7 +309,7 @@ QString IrcPalette::yellow() const
     return d->colors.value(Irc::Yellow);
 }
 
-void IrcPalette::setYellow(const QString& color)
+void IrcPalette::setYellow(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::Yellow, color);
@@ -330,7 +332,7 @@ QString IrcPalette::lightGreen() const
     return d->colors.value(Irc::LightGreen);
 }
 
-void IrcPalette::setLightGreen(const QString& color)
+void IrcPalette::setLightGreen(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::LightGreen, color);
@@ -353,7 +355,7 @@ QString IrcPalette::cyan() const
     return d->colors.value(Irc::Cyan);
 }
 
-void IrcPalette::setCyan(const QString& color)
+void IrcPalette::setCyan(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::Cyan, color);
@@ -376,7 +378,7 @@ QString IrcPalette::lightCyan() const
     return d->colors.value(Irc::LightCyan);
 }
 
-void IrcPalette::setLightCyan(const QString& color)
+void IrcPalette::setLightCyan(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::LightCyan, color);
@@ -399,7 +401,7 @@ QString IrcPalette::lightBlue() const
     return d->colors.value(Irc::LightBlue);
 }
 
-void IrcPalette::setLightBlue(const QString& color)
+void IrcPalette::setLightBlue(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::LightBlue, color);
@@ -422,7 +424,7 @@ QString IrcPalette::pink() const
     return d->colors.value(Irc::Pink);
 }
 
-void IrcPalette::setPink(const QString& color)
+void IrcPalette::setPink(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::Pink, color);
@@ -445,7 +447,7 @@ QString IrcPalette::gray() const
     return d->colors.value(Irc::Gray);
 }
 
-void IrcPalette::setGray(const QString& color)
+void IrcPalette::setGray(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::Gray, color);
@@ -468,7 +470,7 @@ QString IrcPalette::lightGray() const
     return d->colors.value(Irc::LightGray);
 }
 
-void IrcPalette::setLightGray(const QString& color)
+void IrcPalette::setLightGray(const QString &color)
 {
     Q_D(IrcPalette);
     d->colors.insert(Irc::LightGray, color);
@@ -486,7 +488,7 @@ QMap<int, QString> IrcPalette::colorNames() const
 /*!
     Sets the map of color \a names.
  */
-void IrcPalette::setColorNames(const QMap<int, QString>& names)
+void IrcPalette::setColorNames(const QMap<int, QString> &names)
 {
     Q_D(IrcPalette);
     d->colors = names;
@@ -496,7 +498,7 @@ void IrcPalette::setColorNames(const QMap<int, QString>& names)
     Converts a \a color code to a color name. If the \a color code
     is unknown, the function returns the \a fallback color name.
 */
-QString IrcPalette::colorName(int color, const QString& fallback) const
+QString IrcPalette::colorName(int color, const QString &fallback) const
 {
     Q_D(const IrcPalette);
     return d->colors.value(color, fallback);
@@ -511,12 +513,13 @@ QString IrcPalette::colorName(int color, const QString& fallback) const
     \li \#RRGGBB
     \li \#RRRGGGBBB
     \li \#RRRRGGGGBBBB
-    \li A name from the list of colors defined in the list of <a href="http://www.w3.org/TR/SVG/types.html#ColorKeywords">SVG color keyword names</a>
-        provided by the World Wide Web Consortium; for example, "steelblue" or "gainsboro". These color names work on all platforms. Note that these
-        color names are not the same as defined by the Qt::GlobalColor enums, e.g. "green" and Qt::green does not refer to the same color.
-    \li transparent - representing the absence of a color.
+    \li A name from the list of colors defined in the list of <a
+   href="http://www.w3.org/TR/SVG/types.html#ColorKeywords">SVG color keyword names</a> provided by the World Wide Web
+   Consortium; for example, "steelblue" or "gainsboro". These color names work on all platforms. Note that these color
+   names are not the same as defined by the Qt::GlobalColor enums, e.g. "green" and Qt::green does not refer to the same
+   color. \li transparent - representing the absence of a color.
 */
-void IrcPalette::setColorName(int color, const QString& name)
+void IrcPalette::setColorName(int color, const QString &name)
 {
     Q_D(IrcPalette);
     d->colors.insert(color, name);

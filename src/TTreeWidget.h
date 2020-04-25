@@ -21,33 +21,31 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QPointer>
 #include <QTreeWidget>
-#include "post_guard.h"
 
 class Host;
-
 
 class TTreeWidget : public QTreeWidget
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(TTreeWidget)
-    TTreeWidget(QWidget* pW);
+    TTreeWidget(QWidget *pW);
     Qt::DropActions supportedDropActions() const override;
-    void dragEnterEvent(QDragEnterEvent* event) override;
-    void dragMoveEvent(QDragMoveEvent* event) override;
-    void dropEvent(QDropEvent* event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
     void startDrag(Qt::DropActions supportedActions) override;
-    bool dropMimeData(QTreeWidgetItem* parent, int index, const QMimeData* data, Qt::DropAction action) override;
-    void rowsAboutToBeRemoved(const QModelIndex& parent, int start, int end) override;
-    void rowsInserted(const QModelIndex& parent, int start, int end) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
-    void setHost(Host* pH);
+    bool dropMimeData(QTreeWidgetItem *parent, int index, const QMimeData *data, Qt::DropAction action) override;
+    void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end) override;
+    void rowsInserted(const QModelIndex &parent, int start, int end) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void setHost(Host *pH);
     void setIsScriptTree();
     void setIsTimerTree();
     void setIsTriggerTree();
@@ -55,10 +53,10 @@ public:
     void setIsActionTree();
     void setIsVarTree();
     void setIsKeyTree();
-    void beginInsertRows(const QModelIndex& parent, int first, int last);
-    void getAllChildren(QTreeWidgetItem*, QList<QTreeWidgetItem*>&);
+    void beginInsertRows(const QModelIndex &parent, int first, int last);
+    void getAllChildren(QTreeWidgetItem *, QList<QTreeWidgetItem *> &);
 
-private:
+  private:
     bool mIsDropAction;
     QPointer<Host> mpHost;
     int mOldParentID;

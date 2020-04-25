@@ -30,8 +30,8 @@
 #define IRCUSER_H
 
 #include <IrcGlobal>
-#include <QtCore/qobject.h>
 #include <QtCore/qmetatype.h>
+#include <QtCore/qobject.h>
 #include <QtCore/qscopedpointer.h>
 
 IRC_BEGIN_NAMESPACE
@@ -48,10 +48,10 @@ class IRC_MODEL_EXPORT IrcUser : public QObject
     Q_PROPERTY(QString mode READ mode NOTIFY modeChanged)
     Q_PROPERTY(bool servOp READ isServOp NOTIFY servOpChanged)
     Q_PROPERTY(bool away READ isAway NOTIFY awayChanged)
-    Q_PROPERTY(IrcChannel* channel READ channel CONSTANT)
+    Q_PROPERTY(IrcChannel *channel READ channel CONSTANT)
 
-public:
-    explicit IrcUser(QObject* parent = 0);
+  public:
+    explicit IrcUser(QObject *parent = 0);
     virtual ~IrcUser();
 
     QString title() const;
@@ -61,29 +61,29 @@ public:
     bool isServOp() const;
     bool isAway() const;
 
-    IrcChannel* channel() const;
+    IrcChannel *channel() const;
 
-Q_SIGNALS:
-    void titleChanged(const QString& title);
-    void nameChanged(const QString& name);
-    void prefixChanged(const QString& prefix);
-    void modeChanged(const QString& mode);
+  Q_SIGNALS:
+    void titleChanged(const QString &title);
+    void nameChanged(const QString &name);
+    void prefixChanged(const QString &prefix);
+    void modeChanged(const QString &mode);
     void servOpChanged(bool servOp);
     void awayChanged(bool away);
 
-private:
+  private:
     QScopedPointer<IrcUserPrivate> d_ptr;
     Q_DECLARE_PRIVATE(IrcUser)
     Q_DISABLE_COPY(IrcUser)
 };
 
 #ifndef QT_NO_DEBUG_STREAM
-IRC_MODEL_EXPORT QDebug operator<<(QDebug debug, const IrcUser* user);
+IRC_MODEL_EXPORT QDebug operator<<(QDebug debug, const IrcUser *user);
 #endif // QT_NO_DEBUG_STREAM
 
 IRC_END_NAMESPACE
 
-Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcUser*))
-Q_DECLARE_METATYPE(QList<IRC_PREPEND_NAMESPACE(IrcUser*)>)
+Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcUser *))
+Q_DECLARE_METATYPE(QList<IRC_PREPEND_NAMESPACE(IrcUser *)>)
 
 #endif // IRCUSER_H

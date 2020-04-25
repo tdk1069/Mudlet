@@ -31,9 +31,9 @@
 
 #include <Irc>
 #include <IrcGlobal>
+#include <QtCore/qabstractitemmodel.h>
 #include <QtCore/qmetatype.h>
 #include <QtCore/qstringlist.h>
-#include <QtCore/qabstractitemmodel.h>
 
 IRC_BEGIN_NAMESPACE
 
@@ -49,28 +49,28 @@ class IRC_MODEL_EXPORT IrcUserModel : public QAbstractListModel
     Q_PROPERTY(bool empty READ isEmpty NOTIFY emptyChanged)
     Q_PROPERTY(QStringList names READ names NOTIFY namesChanged)
     Q_PROPERTY(QStringList titles READ titles NOTIFY titlesChanged)
-    Q_PROPERTY(QList<IrcUser*> users READ users NOTIFY usersChanged)
+    Q_PROPERTY(QList<IrcUser *> users READ users NOTIFY usersChanged)
     Q_PROPERTY(Irc::DataRole displayRole READ displayRole WRITE setDisplayRole)
-    Q_PROPERTY(IrcChannel* channel READ channel WRITE setChannel NOTIFY channelChanged)
+    Q_PROPERTY(IrcChannel *channel READ channel WRITE setChannel NOTIFY channelChanged)
     Q_PROPERTY(Irc::SortMethod sortMethod READ sortMethod WRITE setSortMethod)
     Q_PROPERTY(Qt::SortOrder sortOrder READ sortOrder WRITE setSortOrder)
 
-public:
-    explicit IrcUserModel(QObject* parent = 0);
+  public:
+    explicit IrcUserModel(QObject *parent = 0);
     virtual ~IrcUserModel();
 
-    IrcChannel* channel() const;
-    void setChannel(IrcChannel* channel);
+    IrcChannel *channel() const;
+    void setChannel(IrcChannel *channel);
 
     int count() const;
     bool isEmpty() const;
     QStringList names() const;
     QStringList titles() const;
-    QList<IrcUser*> users() const;
-    Q_INVOKABLE IrcUser* get(int index) const;
-    Q_INVOKABLE IrcUser* find(const QString& name) const;
-    Q_INVOKABLE bool contains(const QString& name) const;
-    Q_INVOKABLE int indexOf(IrcUser* user) const;
+    QList<IrcUser *> users() const;
+    Q_INVOKABLE IrcUser *get(int index) const;
+    Q_INVOKABLE IrcUser *find(const QString &name) const;
+    Q_INVOKABLE bool contains(const QString &name) const;
+    Q_INVOKABLE int indexOf(IrcUser *user) const;
 
     Irc::DataRole displayRole() const;
     void setDisplayRole(Irc::DataRole role);
@@ -81,35 +81,35 @@ public:
     Qt::SortOrder sortOrder() const;
     void setSortOrder(Qt::SortOrder order);
 
-    QModelIndex index(IrcUser* user) const;
-    IrcUser* user(const QModelIndex& index) const;
+    QModelIndex index(IrcUser *user) const;
+    IrcUser *user(const QModelIndex &index) const;
 
     QHash<int, QByteArray> roleNames() const;
-    int rowCount(const QModelIndex& parent = QModelIndex()) const;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
-    QModelIndex index(int row, int column = 0, const QModelIndex& parent = QModelIndex()) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const;
 
-public Q_SLOTS:
+  public Q_SLOTS:
     void clear();
     void sort(int column = 0, Qt::SortOrder order = Qt::AscendingOrder);
     void sort(Irc::SortMethod method, Qt::SortOrder order = Qt::AscendingOrder);
 
-Q_SIGNALS:
-    void added(IrcUser* user);
-    void removed(IrcUser* user);
-    void aboutToBeAdded(IrcUser* user);
-    void aboutToBeRemoved(IrcUser* user);
+  Q_SIGNALS:
+    void added(IrcUser *user);
+    void removed(IrcUser *user);
+    void aboutToBeAdded(IrcUser *user);
+    void aboutToBeRemoved(IrcUser *user);
     void countChanged(int count);
     void emptyChanged(bool empty);
-    void namesChanged(const QStringList& names);
-    void titlesChanged(const QStringList& titles);
-    void usersChanged(const QList<IrcUser*>& users);
-    void channelChanged(IrcChannel* channel);
+    void namesChanged(const QStringList &names);
+    void titlesChanged(const QStringList &titles);
+    void usersChanged(const QList<IrcUser *> &users);
+    void channelChanged(IrcChannel *channel);
 
-protected:
-    virtual bool lessThan(IrcUser* one, IrcUser* another, Irc::SortMethod method) const;
+  protected:
+    virtual bool lessThan(IrcUser *one, IrcUser *another, Irc::SortMethod method) const;
 
-private:
+  private:
     friend class IrcUserLessThan;
     friend class IrcChannelPrivate;
     friend class IrcUserGreaterThan;
@@ -120,6 +120,6 @@ private:
 
 IRC_END_NAMESPACE
 
-Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcUserModel*))
+Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcUserModel *))
 
 #endif // IRCUSERMODEL_H

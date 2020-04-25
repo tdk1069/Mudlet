@@ -30,9 +30,9 @@
 #include "irccommand_p.h"
 #include "ircconnection.h"
 #include "ircmessage.h"
-#include <QTextCodec>
-#include <QMetaEnum>
 #include <QDebug>
+#include <QMetaEnum>
+#include <QTextCodec>
 
 IRC_BEGIN_NAMESPACE
 
@@ -270,9 +270,9 @@ QString IrcCommandPrivate::params(int index) const
     return QStringList(parameters.mid(index)).join(QLatin1String(" "));
 }
 
-IrcCommand* IrcCommandPrivate::createCommand(IrcCommand::Type type, const QStringList& parameters)
+IrcCommand *IrcCommandPrivate::createCommand(IrcCommand::Type type, const QStringList &parameters)
 {
-    IrcCommand* command = new IrcCommand;
+    IrcCommand *command = new IrcCommand;
     command->setType(type);
     command->setParameters(parameters);
     return command;
@@ -282,7 +282,7 @@ IrcCommand* IrcCommandPrivate::createCommand(IrcCommand::Type type, const QStrin
 /*!
     Constructs a new IrcCommand with \a parent.
  */
-IrcCommand::IrcCommand(QObject* parent) : QObject(parent), d_ptr(new IrcCommandPrivate)
+IrcCommand::IrcCommand(QObject *parent) : QObject(parent), d_ptr(new IrcCommandPrivate)
 {
 }
 
@@ -304,7 +304,7 @@ IrcCommand::~IrcCommand()
     \par Access function:
     \li \ref IrcConnection* <b>connection</b>() const
  */
-IrcConnection* IrcCommand::connection() const
+IrcConnection *IrcCommand::connection() const
 {
     Q_D(const IrcCommand);
     return d->connection;
@@ -320,7 +320,7 @@ IrcConnection* IrcCommand::connection() const
     \par Access function:
     \li \ref IrcNetwork* <b>network</b>() const
  */
-IrcNetwork* IrcCommand::network() const
+IrcNetwork *IrcCommand::network() const
 {
     Q_D(const IrcCommand);
     return d->connection ? d->connection->network() : 0;
@@ -358,7 +358,7 @@ QStringList IrcCommand::parameters() const
     return d->parameters;
 }
 
-void IrcCommand::setParameters(const QStringList& parameters)
+void IrcCommand::setParameters(const QStringList &parameters)
 {
     Q_D(IrcCommand);
     d->parameters = parameters;
@@ -383,11 +383,12 @@ QByteArray IrcCommand::encoding() const
     return d->encoding;
 }
 
-void IrcCommand::setEncoding(const QByteArray& encoding)
+void IrcCommand::setEncoding(const QByteArray &encoding)
 {
     Q_D(IrcCommand);
-    extern bool irc_is_supported_encoding(const QByteArray& encoding); // ircmessagedecoder.cpp
-    if (!irc_is_supported_encoding(encoding)) {
+    extern bool irc_is_supported_encoding(const QByteArray &encoding); // ircmessagedecoder.cpp
+    if (!irc_is_supported_encoding(encoding))
+    {
         qWarning() << "IrcCommand::setEncoding(): unsupported encoding" << encoding;
         return;
     }
@@ -407,43 +408,80 @@ QString IrcCommand::toString() const
     const QString p1 = d->parameters.value(1);
     const QString p2 = d->parameters.value(2);
 
-    switch (d->type) {
-        case Admin:         return QString("ADMIN %1").arg(p0); // server
-        case Away:          return QString("AWAY :%1").arg(d->params(0)); // reason
-        case Capability:    return QString("CAP %1 :%2").arg(p0, d->params(1)); // subcmd, caps
-        case CtcpAction:    return QString("PRIVMSG %1 :\1ACTION %2\1").arg(p0, d->params(1)); // target, msg
-        case CtcpRequest:   return QString("PRIVMSG %1 :\1%2\1").arg(p0, d->params(1)); // target, msg
-        case CtcpReply:     return QString("NOTICE %1 :\1%2\1").arg(p0, d->params(1)); // target, msg
-        case Info:          return QString("INFO %1").arg(p0); // server
-        case Invite:        return QString("INVITE %1 %2").arg(p0, p1); // user, chan
-        case Join:          return p1.isNull() ? QString("JOIN %1").arg(p0) : QString("JOIN %1 %2").arg(p0, p1); // chan, key
-        case Kick:          return p2.isNull() ? QString("KICK %1 %2").arg(p0, p1) : QString("KICK %1 %2 :%3").arg(p0, p1, d->params(2)); // chan, user, reason
-        case Knock:         return QString("KNOCK %1 %2").arg(p0, p1); // chan, msg
-        case List:          return p1.isNull() ? QString("LIST %1").arg(p0) : QString("LIST %1 %2").arg(p0, p1); // chan, server
-        case Message:       return QString("PRIVMSG %1 :%2").arg(p0, d->params(1)); // target, msg
-        case Mode:          return QString("MODE ") + d->parameters.join(" "); // target, mode, arg
-        case Monitor:       return QString("MONITOR %1 %2").arg(p0, p1); // cmd, target
-        case Motd:          return QString("MOTD %1").arg(p0); // server
-        case Names:         return QString("NAMES %1").arg(p0); // chan
-        case Nick:          return QString("NICK %1").arg(p0); // nick
-        case Notice:        return QString("NOTICE %1 :%2").arg(p0, d->params(1)); // target, msg
-        case Part:          return p1.isNull() ? QString("PART %1").arg(p0) : QString("PART %1 :%2").arg(p0, d->params(1)); // chan, reason
-        case Ping:          return QString("PING %1").arg(p0); // argument
-        case Pong:          return QString("PONG %1").arg(p0); // argument
-        case Quit:          return QString("QUIT :%1").arg(d->params(0)); // reason
-        case Quote:         return d->parameters.join(" ");
-        case Stats:         return QString("STATS %1 %2").arg(p0, p1); // query, server
-        case Time:          return QString("TIME %1").arg(p0); // server
-        case Topic:         return p1.isNull() ? QString("TOPIC %1").arg(p0) : QString("TOPIC %1 :%2").arg(p0, d->params(1)); // chan, topic
-        case Trace:         return QString("TRACE %1").arg(p0); // target
-        case Users:         return QString("USERS %1").arg(p0); // server
-        case Version:       return p0.isNull() ? QString("VERSION") : QString("PRIVMSG %1 :\1VERSION\1").arg(p0); // user
-        case Who:           return QString("WHO %1").arg(p0); // user
-        case Whois:         return QString("WHOIS %1 %1").arg(p0); // user
-        case Whowas:        return QString("WHOWAS %1 %1").arg(p0); // user
+    switch (d->type)
+    {
+    case Admin:
+        return QString("ADMIN %1").arg(p0); // server
+    case Away:
+        return QString("AWAY :%1").arg(d->params(0)); // reason
+    case Capability:
+        return QString("CAP %1 :%2").arg(p0, d->params(1)); // subcmd, caps
+    case CtcpAction:
+        return QString("PRIVMSG %1 :\1ACTION %2\1").arg(p0, d->params(1)); // target, msg
+    case CtcpRequest:
+        return QString("PRIVMSG %1 :\1%2\1").arg(p0, d->params(1)); // target, msg
+    case CtcpReply:
+        return QString("NOTICE %1 :\1%2\1").arg(p0, d->params(1)); // target, msg
+    case Info:
+        return QString("INFO %1").arg(p0); // server
+    case Invite:
+        return QString("INVITE %1 %2").arg(p0, p1); // user, chan
+    case Join:
+        return p1.isNull() ? QString("JOIN %1").arg(p0) : QString("JOIN %1 %2").arg(p0, p1); // chan, key
+    case Kick:
+        return p2.isNull() ? QString("KICK %1 %2").arg(p0, p1)
+                           : QString("KICK %1 %2 :%3").arg(p0, p1, d->params(2)); // chan, user, reason
+    case Knock:
+        return QString("KNOCK %1 %2").arg(p0, p1); // chan, msg
+    case List:
+        return p1.isNull() ? QString("LIST %1").arg(p0) : QString("LIST %1 %2").arg(p0, p1); // chan, server
+    case Message:
+        return QString("PRIVMSG %1 :%2").arg(p0, d->params(1)); // target, msg
+    case Mode:
+        return QString("MODE ") + d->parameters.join(" "); // target, mode, arg
+    case Monitor:
+        return QString("MONITOR %1 %2").arg(p0, p1); // cmd, target
+    case Motd:
+        return QString("MOTD %1").arg(p0); // server
+    case Names:
+        return QString("NAMES %1").arg(p0); // chan
+    case Nick:
+        return QString("NICK %1").arg(p0); // nick
+    case Notice:
+        return QString("NOTICE %1 :%2").arg(p0, d->params(1)); // target, msg
+    case Part:
+        return p1.isNull() ? QString("PART %1").arg(p0) : QString("PART %1 :%2").arg(p0, d->params(1)); // chan, reason
+    case Ping:
+        return QString("PING %1").arg(p0); // argument
+    case Pong:
+        return QString("PONG %1").arg(p0); // argument
+    case Quit:
+        return QString("QUIT :%1").arg(d->params(0)); // reason
+    case Quote:
+        return d->parameters.join(" ");
+    case Stats:
+        return QString("STATS %1 %2").arg(p0, p1); // query, server
+    case Time:
+        return QString("TIME %1").arg(p0); // server
+    case Topic:
+        return p1.isNull() ? QString("TOPIC %1").arg(p0) : QString("TOPIC %1 :%2").arg(p0, d->params(1)); // chan, topic
+    case Trace:
+        return QString("TRACE %1").arg(p0); // target
+    case Users:
+        return QString("USERS %1").arg(p0); // server
+    case Version:
+        return p0.isNull() ? QString("VERSION") : QString("PRIVMSG %1 :\1VERSION\1").arg(p0); // user
+    case Who:
+        return QString("WHO %1").arg(p0); // user
+    case Whois:
+        return QString("WHOIS %1 %1").arg(p0); // user
+    case Whowas:
+        return QString("WHOWAS %1 %1").arg(p0); // user
 
-        case Custom:        qWarning("Reimplement IrcCommand::toString() for IrcCommand::Custom");
-        default:            return QString();
+    case Custom:
+        qWarning("Reimplement IrcCommand::toString() for IrcCommand::Custom");
+    default:
+        return QString();
     }
 }
 
@@ -462,7 +500,7 @@ QString IrcCommand::toString() const
     }
     \endcode
  */
-IrcMessage* IrcCommand::toMessage(const QString& prefix, IrcConnection* connection) const
+IrcMessage *IrcCommand::toMessage(const QString &prefix, IrcConnection *connection) const
 {
     return IrcMessage::fromData(":" + prefix.toUtf8() + " " + toString().toUtf8(), connection);
 }
@@ -473,7 +511,7 @@ IrcMessage* IrcCommand::toMessage(const QString& prefix, IrcConnection* connecti
     This command shows admin info for the specified \a server,
     or the current server if not specified.
  */
-IrcCommand* IrcCommand::createAdmin(const QString& server)
+IrcCommand *IrcCommand::createAdmin(const QString &server)
 {
     return IrcCommandPrivate::createCommand(Admin, QStringList() << server);
 }
@@ -484,7 +522,7 @@ IrcCommand* IrcCommand::createAdmin(const QString& server)
     Provides the server with \a reason to automatically send in reply to a private
     message directed at the user. If \a reason is omitted, the away status is removed.
  */
-IrcCommand* IrcCommand::createAway(const QString& reason)
+IrcCommand *IrcCommand::createAway(const QString &reason)
 {
     return IrcCommandPrivate::createCommand(Away, QStringList() << reason);
 }
@@ -496,27 +534,29 @@ IrcCommand* IrcCommand::createAway(const QString& reason)
 
     \sa \ref ircv3
  */
-IrcCommand* IrcCommand::createCapability(const QString& subCommand, const QString& capability)
+IrcCommand *IrcCommand::createCapability(const QString &subCommand, const QString &capability)
 {
     return createCapability(subCommand, QStringList() << capability);
 }
 
 /*!
-    Creates a new capability command with type IrcCommand::Capability and parameters \a subCommand and optional \a capabilities.
+    Creates a new capability command with type IrcCommand::Capability and parameters \a subCommand and optional \a
+   capabilities.
 
     Available subcommands are: LS, LIST, REQ, ACK, NAK, CLEAR and END.
 
     \sa \ref ircv3
  */
-IrcCommand* IrcCommand::createCapability(const QString& subCommand, const QStringList& capabilities)
+IrcCommand *IrcCommand::createCapability(const QString &subCommand, const QStringList &capabilities)
 {
-    return IrcCommandPrivate::createCommand(Capability, QStringList() << subCommand << capabilities.join(QLatin1String(" ")));
+    return IrcCommandPrivate::createCommand(Capability, QStringList()
+                                                            << subCommand << capabilities.join(QLatin1String(" ")));
 }
 
 /*!
     Creates a new CTCP action command with type IrcCommand::CtcpAction and parameters \a target and \a action.
  */
-IrcCommand* IrcCommand::createCtcpAction(const QString& target, const QString& action)
+IrcCommand *IrcCommand::createCtcpAction(const QString &target, const QString &action)
 {
     return IrcCommandPrivate::createCommand(CtcpAction, QStringList() << target << action);
 }
@@ -524,7 +564,7 @@ IrcCommand* IrcCommand::createCtcpAction(const QString& target, const QString& a
 /*!
     Creates a new CTCP reply command with type IrcCommand::CtcpReply and parameters \a target and \a reply.
  */
-IrcCommand* IrcCommand::createCtcpReply(const QString& target, const QString& reply)
+IrcCommand *IrcCommand::createCtcpReply(const QString &target, const QString &reply)
 {
     return IrcCommandPrivate::createCommand(CtcpReply, QStringList() << target << reply);
 }
@@ -532,7 +572,7 @@ IrcCommand* IrcCommand::createCtcpReply(const QString& target, const QString& re
 /*!
     Creates a new CTCP request command with type IrcCommand::CtcpRequest and parameters \a target and \a request.
  */
-IrcCommand* IrcCommand::createCtcpRequest(const QString& target, const QString& request)
+IrcCommand *IrcCommand::createCtcpRequest(const QString &target, const QString &request)
 {
     return IrcCommandPrivate::createCommand(CtcpRequest, QStringList() << target << request);
 }
@@ -543,7 +583,7 @@ IrcCommand* IrcCommand::createCtcpRequest(const QString& target, const QString& 
     This command shows info for the specified \a server,
     or the current server if not specified.
  */
-IrcCommand* IrcCommand::createInfo(const QString& server)
+IrcCommand *IrcCommand::createInfo(const QString &server)
 {
     return IrcCommandPrivate::createCommand(Info, QStringList() << server);
 }
@@ -555,7 +595,7 @@ IrcCommand* IrcCommand::createInfo(const QString& server)
     if it does, only members of the channel are allowed to invite other clients. if the
     channel mode +i (invite-only) is set, only channel operators may invite other clients.
  */
-IrcCommand* IrcCommand::createInvite(const QString& user, const QString& channel)
+IrcCommand *IrcCommand::createInvite(const QString &user, const QString &channel)
 {
     return IrcCommandPrivate::createCommand(Invite, QStringList() << user << channel);
 }
@@ -566,7 +606,7 @@ IrcCommand* IrcCommand::createInvite(const QString& user, const QString& channel
     This command joins the \a channel using \a key if specified.
     If the channel does not exist, it will be created.
  */
-IrcCommand* IrcCommand::createJoin(const QString& channel, const QString& key)
+IrcCommand *IrcCommand::createJoin(const QString &channel, const QString &key)
 {
     return IrcCommandPrivate::createCommand(Join, QStringList() << channel << key);
 }
@@ -574,7 +614,7 @@ IrcCommand* IrcCommand::createJoin(const QString& channel, const QString& key)
 /*!
     This overload is provided for convenience.
  */
-IrcCommand* IrcCommand::createJoin(const QStringList& channels, const QStringList& keys)
+IrcCommand *IrcCommand::createJoin(const QStringList &channels, const QStringList &keys)
 {
     if (keys.join("").isEmpty())
         return IrcCommandPrivate::createCommand(Join, QStringList() << channels.join(","));
@@ -587,7 +627,7 @@ IrcCommand* IrcCommand::createJoin(const QStringList& channels, const QStringLis
     This command forcibly removes \a user from \a channel,
     and may only be issued by channel operators.
  */
-IrcCommand* IrcCommand::createKick(const QString& channel, const QString& user, const QString& reason)
+IrcCommand *IrcCommand::createKick(const QString &channel, const QString &user, const QString &reason)
 {
     return IrcCommandPrivate::createCommand(Kick, QStringList() << channel << user << reason);
 }
@@ -600,7 +640,7 @@ IrcCommand* IrcCommand::createKick(const QString& channel, const QString& user, 
     \note The command is not formally defined by an RFC, but is supported by most major IRC daemons.
     Support is indicated in a RPL_ISUPPORT reply (numeric 005) with the KNOCK keyword.
  */
-IrcCommand* IrcCommand::createKnock(const QString& channel, const QString& message)
+IrcCommand *IrcCommand::createKnock(const QString &channel, const QString &message)
 {
     return IrcCommandPrivate::createCommand(Knock, QStringList() << channel << message);
 }
@@ -611,7 +651,7 @@ IrcCommand* IrcCommand::createKnock(const QString& channel, const QString& messa
     This command lists all channels on the server. If \a channels are given, it will list the channel topics.
     If \a server is given, the command will be forwarded to \a server for evaluation.
  */
-IrcCommand* IrcCommand::createList(const QStringList& channels, const QString& server)
+IrcCommand *IrcCommand::createList(const QStringList &channels, const QString &server)
 {
     return IrcCommandPrivate::createCommand(List, QStringList() << channels.join(",") << server);
 }
@@ -621,7 +661,7 @@ IrcCommand* IrcCommand::createList(const QStringList& channels, const QString& s
 
     This command sends \a message to \a target, which is usually a user or channel.
  */
-IrcCommand* IrcCommand::createMessage(const QString& target, const QString& message)
+IrcCommand *IrcCommand::createMessage(const QString &target, const QString &message)
 {
     return IrcCommandPrivate::createCommand(Message, QStringList() << target << message);
 }
@@ -631,7 +671,7 @@ IrcCommand* IrcCommand::createMessage(const QString& target, const QString& mess
 
     This command is used to set both user and channel modes.
  */
-IrcCommand* IrcCommand::createMode(const QString& target, const QString& mode, const QString& arg)
+IrcCommand *IrcCommand::createMode(const QString &target, const QString &mode, const QString &arg)
 {
     return IrcCommandPrivate::createCommand(Mode, QStringList() << target << mode << arg);
 }
@@ -654,7 +694,7 @@ IrcCommand* IrcCommand::createMode(const QString& target, const QString& mode, c
 
     \sa \ref ircv3
  */
-IrcCommand* IrcCommand::createMonitor(const QString& command, const QString& target)
+IrcCommand *IrcCommand::createMonitor(const QString &command, const QString &target)
 {
     return IrcCommandPrivate::createCommand(Monitor, QStringList() << command << target);
 }
@@ -677,7 +717,7 @@ IrcCommand* IrcCommand::createMonitor(const QString& command, const QString& tar
 
     \sa \ref ircv3
  */
-IrcCommand* IrcCommand::createMonitor(const QString& command, const QStringList& targets)
+IrcCommand *IrcCommand::createMonitor(const QString &command, const QStringList &targets)
 {
     return IrcCommandPrivate::createCommand(Monitor, QStringList() << command << targets.join(","));
 }
@@ -688,7 +728,7 @@ IrcCommand* IrcCommand::createMonitor(const QString& command, const QStringList&
     This command shows the message of the day on the specified \a server,
     or the current server if not specified.
  */
-IrcCommand* IrcCommand::createMotd(const QString& server)
+IrcCommand *IrcCommand::createMotd(const QString &server)
 {
     return IrcCommandPrivate::createCommand(Motd, QStringList() << server);
 }
@@ -702,7 +742,7 @@ IrcCommand* IrcCommand::createMotd(const QString& server)
     all users who are not on a channel being shown as part of channel "*".
     If \a server is specified, the command is sent to \a server for evaluation.
 */
-IrcCommand* IrcCommand::createNames(const QString& channel, const QString& server)
+IrcCommand *IrcCommand::createNames(const QString &channel, const QString &server)
 {
     return IrcCommandPrivate::createCommand(Names, QStringList() << channel << server);
 }
@@ -710,7 +750,7 @@ IrcCommand* IrcCommand::createNames(const QString& channel, const QString& serve
 /*!
     This overload is provided for convenience.
  */
-IrcCommand* IrcCommand::createNames(const QStringList& channels, const QString& server)
+IrcCommand *IrcCommand::createNames(const QStringList &channels, const QString &server)
 {
     return IrcCommandPrivate::createCommand(Names, QStringList() << channels.join(",") << server);
 }
@@ -720,7 +760,7 @@ IrcCommand* IrcCommand::createNames(const QStringList& channels, const QString& 
 
     This command allows a client to change their IRC nickname.
  */
-IrcCommand* IrcCommand::createNick(const QString& nick)
+IrcCommand *IrcCommand::createNick(const QString &nick)
 {
     return IrcCommandPrivate::createCommand(Nick, QStringList() << nick);
 }
@@ -730,9 +770,10 @@ IrcCommand* IrcCommand::createNick(const QString& nick)
 
     This command sends \a notice to \a target, which is usually a user or channel.
 
-    \note The command works similarly to PRIVMSG, except automatic replies must never be sent in reply to NOTICE messages.
+    \note The command works similarly to PRIVMSG, except automatic replies must never be sent in reply to NOTICE
+   messages.
  */
-IrcCommand* IrcCommand::createNotice(const QString& target, const QString& message)
+IrcCommand *IrcCommand::createNotice(const QString &target, const QString &message)
 {
     return IrcCommandPrivate::createCommand(Notice, QStringList() << target << message);
 }
@@ -742,7 +783,7 @@ IrcCommand* IrcCommand::createNotice(const QString& target, const QString& messa
 
     This command causes the client to leave the specified channel.
  */
-IrcCommand* IrcCommand::createPart(const QString& channel, const QString& reason)
+IrcCommand *IrcCommand::createPart(const QString &channel, const QString &reason)
 {
     return IrcCommandPrivate::createCommand(Part, QStringList() << channel << reason);
 }
@@ -750,7 +791,7 @@ IrcCommand* IrcCommand::createPart(const QString& channel, const QString& reason
 /*!
     This overload is provided for convenience.
  */
-IrcCommand* IrcCommand::createPart(const QStringList& channels, const QString& reason)
+IrcCommand *IrcCommand::createPart(const QStringList &channels, const QString &reason)
 {
     return IrcCommandPrivate::createCommand(Part, QStringList() << channels.join(",") << reason);
 }
@@ -758,7 +799,7 @@ IrcCommand* IrcCommand::createPart(const QStringList& channels, const QString& r
 /*!
     Creates a new PING command with type IrcCommand::Ping and \a argument.
  */
-IrcCommand* IrcCommand::createPing(const QString& argument)
+IrcCommand *IrcCommand::createPing(const QString &argument)
 {
     return IrcCommandPrivate::createCommand(Ping, QStringList() << argument);
 }
@@ -766,7 +807,7 @@ IrcCommand* IrcCommand::createPing(const QString& argument)
 /*!
     Creates a new PONG command with type IrcCommand::Pong and \a argument.
  */
-IrcCommand* IrcCommand::createPong(const QString& argument)
+IrcCommand *IrcCommand::createPong(const QString &argument)
 {
     return IrcCommandPrivate::createCommand(Pong, QStringList() << argument);
 }
@@ -774,7 +815,7 @@ IrcCommand* IrcCommand::createPong(const QString& argument)
 /*!
     Creates a new QUIT command with type IrcCommand::Quit and optional parameter \a reason.
  */
-IrcCommand* IrcCommand::createQuit(const QString& reason)
+IrcCommand *IrcCommand::createQuit(const QString &reason)
 {
     return IrcCommandPrivate::createCommand(Quit, QStringList() << reason);
 }
@@ -782,7 +823,7 @@ IrcCommand* IrcCommand::createQuit(const QString& reason)
 /*!
     Creates a new QUOTE command with type IrcCommand::Quote and \a raw.
  */
-IrcCommand* IrcCommand::createQuote(const QString& raw)
+IrcCommand *IrcCommand::createQuote(const QString &raw)
 {
     return IrcCommandPrivate::createCommand(Quote, QStringList() << raw);
 }
@@ -790,7 +831,7 @@ IrcCommand* IrcCommand::createQuote(const QString& raw)
 /*!
     Creates a new QUOTE command with type IrcCommand::Quote and \a parameters.
  */
-IrcCommand* IrcCommand::createQuote(const QStringList& parameters)
+IrcCommand *IrcCommand::createQuote(const QStringList &parameters)
 {
     return IrcCommandPrivate::createCommand(Quote, parameters);
 }
@@ -801,7 +842,7 @@ IrcCommand* IrcCommand::createQuote(const QStringList& parameters)
     This command queries statistics about the specified \a server,
     or the current server if not specified.
  */
-IrcCommand* IrcCommand::createStats(const QString& query, const QString& server)
+IrcCommand *IrcCommand::createStats(const QString &query, const QString &server)
 {
     return IrcCommandPrivate::createCommand(Stats, QStringList() << query << server);
 }
@@ -812,7 +853,7 @@ IrcCommand* IrcCommand::createStats(const QString& query, const QString& server)
     This command queries local time of the specified \a server,
     or the current server if not specified.
  */
-IrcCommand* IrcCommand::createTime(const QString& server)
+IrcCommand *IrcCommand::createTime(const QString &server)
 {
     return IrcCommandPrivate::createCommand(Time, QStringList() << server);
 }
@@ -824,7 +865,7 @@ IrcCommand* IrcCommand::createTime(const QString& server)
     If \a topic is given, it sets the channel topic to \a topic.
     If channel mode +t is set, only a channel operator may set the topic.
  */
-IrcCommand* IrcCommand::createTopic(const QString& channel, const QString& topic)
+IrcCommand *IrcCommand::createTopic(const QString &channel, const QString &topic)
 {
     return IrcCommandPrivate::createCommand(Topic, QStringList() << channel << topic);
 }
@@ -836,7 +877,7 @@ IrcCommand* IrcCommand::createTopic(const QString& channel, const QString& topic
     to the current server or to a specific \a target (server or client)
     in a similar method to traceroute.
  */
-IrcCommand* IrcCommand::createTrace(const QString& target)
+IrcCommand *IrcCommand::createTrace(const QString &target)
 {
     return IrcCommandPrivate::createCommand(Trace, QStringList() << target);
 }
@@ -847,7 +888,7 @@ IrcCommand* IrcCommand::createTrace(const QString& target)
     This command queries the users of the specified \a server,
     or the current server if not specified.
  */
-IrcCommand* IrcCommand::createUsers(const QString& server)
+IrcCommand *IrcCommand::createUsers(const QString &server)
 {
     return IrcCommandPrivate::createCommand(Users, QStringList() << server);
 }
@@ -858,7 +899,7 @@ IrcCommand* IrcCommand::createUsers(const QString& server)
     This command queries the version of the specified \a user's client (CTCP REQUEST VERSION),
     or the current server (VERSION) if not specified.
  */
-IrcCommand* IrcCommand::createVersion(const QString& user)
+IrcCommand *IrcCommand::createVersion(const QString &user)
 {
     return IrcCommandPrivate::createCommand(Version, QStringList() << user);
 }
@@ -869,7 +910,7 @@ IrcCommand* IrcCommand::createVersion(const QString& user)
     This command returns a list of users who match \a mask,
     optionally matching only IRC \a operators.
  */
-IrcCommand* IrcCommand::createWho(const QString& mask, bool operators)
+IrcCommand *IrcCommand::createWho(const QString &mask, bool operators)
 {
     return IrcCommandPrivate::createCommand(Who, QStringList() << mask << (operators ? "o" : ""));
 }
@@ -879,7 +920,7 @@ IrcCommand* IrcCommand::createWho(const QString& mask, bool operators)
 
     This command returns information about \a user.
  */
-IrcCommand* IrcCommand::createWhois(const QString& user)
+IrcCommand *IrcCommand::createWhois(const QString &user)
 {
     return IrcCommandPrivate::createCommand(Whois, QStringList() << user);
 }
@@ -891,7 +932,7 @@ IrcCommand* IrcCommand::createWhois(const QString& user)
     (due to client disconnection, or nickname changes). If given, the server
     will return information from the last \a count times the nickname has been used.
  */
-IrcCommand* IrcCommand::createWhowas(const QString& user, int count)
+IrcCommand *IrcCommand::createWhowas(const QString &user, int count)
 {
     return IrcCommandPrivate::createCommand(Whowas, QStringList() << user << QString::number(count));
 }
@@ -901,16 +942,16 @@ QDebug operator<<(QDebug debug, IrcCommand::Type type)
 {
     const int index = IrcCommand::staticMetaObject.indexOfEnumerator("Type");
     QMetaEnum enumerator = IrcCommand::staticMetaObject.enumerator(index);
-    const char* key = enumerator.valueToKey(type);
+    const char *key = enumerator.valueToKey(type);
     debug << (key ? key : "Unknown");
     return debug;
 }
 
-QDebug operator<<(QDebug debug, const IrcCommand* command)
+QDebug operator<<(QDebug debug, const IrcCommand *command)
 {
     if (!command)
         return debug << "IrcCommand(0x0) ";
-    debug.nospace() << command->metaObject()->className() << '(' << (void*) command;
+    debug.nospace() << command->metaObject()->className() << '(' << (void *)command;
     if (!command->objectName().isEmpty())
         debug.nospace() << ", name=" << qPrintable(command->objectName());
     debug.nospace() << ", type=" << command->type();

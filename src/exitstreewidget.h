@@ -21,20 +21,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QTreeWidget>
-#include "post_guard.h"
-
 
 class ExitsTreeWidget : public QTreeWidget
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(ExitsTreeWidget)
-    ExitsTreeWidget(QWidget* pW);
-    void keyPressEvent(QKeyEvent* event) override;
+    ExitsTreeWidget(QWidget *pW);
+    void keyPressEvent(QKeyEvent *event) override;
 };
 
 #endif // MUDLET_EXITSTREEWIDGET_H

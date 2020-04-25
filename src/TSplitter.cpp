@@ -18,18 +18,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TSplitter.h"
-
 
 #include "TSplitterHandle.h"
 
-
-TSplitter::TSplitter(Qt::Orientation o, QWidget* p) : QSplitter(o, p), mpSplitterHandle()
+TSplitter::TSplitter(Qt::Orientation o, QWidget *p) : QSplitter(o, p), mpSplitterHandle()
 {
 }
 
-QSplitterHandle* TSplitter::createHandle()
+QSplitterHandle *TSplitter::createHandle()
 {
     return new TSplitterHandle(orientation(), this);
 }

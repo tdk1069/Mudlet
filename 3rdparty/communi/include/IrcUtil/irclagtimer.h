@@ -30,8 +30,8 @@
 #define IRCLAGTIMER_H
 
 #include <IrcGlobal>
-#include <QtCore/qobject.h>
 #include <QtCore/qmetatype.h>
+#include <QtCore/qobject.h>
 #include <QtCore/qscopedpointer.h>
 
 IRC_BEGIN_NAMESPACE
@@ -44,24 +44,24 @@ class IRC_UTIL_EXPORT IrcLagTimer : public QObject
     Q_OBJECT
     Q_PROPERTY(qint64 lag READ lag NOTIFY lagChanged)
     Q_PROPERTY(int interval READ interval WRITE setInterval)
-    Q_PROPERTY(IrcConnection* connection READ connection WRITE setConnection)
+    Q_PROPERTY(IrcConnection *connection READ connection WRITE setConnection)
 
-public:
-    explicit IrcLagTimer(QObject* parent = 0);
+  public:
+    explicit IrcLagTimer(QObject *parent = 0);
     virtual ~IrcLagTimer();
 
-    IrcConnection* connection() const;
-    void setConnection(IrcConnection* connection);
+    IrcConnection *connection() const;
+    void setConnection(IrcConnection *connection);
 
     qint64 lag() const;
 
     int interval() const;
     void setInterval(int seconds);
 
-Q_SIGNALS:
+  Q_SIGNALS:
     void lagChanged(qint64 lag);
 
-private:
+  private:
     QScopedPointer<IrcLagTimerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(IrcLagTimer)
     Q_DISABLE_COPY(IrcLagTimer)
@@ -73,6 +73,6 @@ private:
 
 IRC_END_NAMESPACE
 
-Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcLagTimer*))
+Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcLagTimer *))
 
 #endif // IRCLAGTIMER_H

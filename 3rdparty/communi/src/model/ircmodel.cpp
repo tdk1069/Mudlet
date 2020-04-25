@@ -41,21 +41,22 @@ IRC_BEGIN_NAMESPACE
     \brief Module meta-type registration.
  */
 
-namespace IrcModel {
+namespace IrcModel
+{
 
-    /*!
-        Registers IrcModel types to the %Qt meta-system.
+/*!
+    Registers IrcModel types to the %Qt meta-system.
 
-        \sa IrcCore::registerMetaTypes(), IrcUtil::registerMetaTypes(), qRegisterMetaType()
-     */
-    void registerMetaTypes()
-    {
-        qRegisterMetaType<IrcBuffer*>("IrcBuffer*");
-        qRegisterMetaType<IrcBufferModel*>("IrcBufferModel*");
-        qRegisterMetaType<IrcChannel*>("IrcChannel*");
-        qRegisterMetaType<IrcUser*>("IrcUser*");
-        qRegisterMetaType<IrcUserModel*>("IrcUserModel*");
-    }
+    \sa IrcCore::registerMetaTypes(), IrcUtil::registerMetaTypes(), qRegisterMetaType()
+ */
+void registerMetaTypes()
+{
+    qRegisterMetaType<IrcBuffer *>("IrcBuffer*");
+    qRegisterMetaType<IrcBufferModel *>("IrcBufferModel*");
+    qRegisterMetaType<IrcChannel *>("IrcChannel*");
+    qRegisterMetaType<IrcUser *>("IrcUser*");
+    qRegisterMetaType<IrcUserModel *>("IrcUserModel*");
 }
+} // namespace IrcModel
 
 IRC_END_NAMESPACE

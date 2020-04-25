@@ -29,8 +29,8 @@
 #ifndef IRCCHANNEL_H
 #define IRCCHANNEL_H
 
-#include <IrcGlobal>
 #include <IrcBuffer>
+#include <IrcGlobal>
 #include <QtCore/qmetatype.h>
 
 IRC_BEGIN_NAMESPACE
@@ -44,8 +44,8 @@ class IRC_MODEL_EXPORT IrcChannel : public IrcBuffer
     Q_PROPERTY(QString mode READ mode NOTIFY modeChanged)
     Q_PROPERTY(QString topic READ topic NOTIFY topicChanged)
 
-public:
-    Q_INVOKABLE explicit IrcChannel(QObject* parent = 0);
+  public:
+    Q_INVOKABLE explicit IrcChannel(QObject *parent = 0);
     virtual ~IrcChannel();
 
     QString key() const;
@@ -54,29 +54,30 @@ public:
 
     virtual bool isActive() const;
 
-public Q_SLOTS:
+  public Q_SLOTS:
     void who();
-    void join(const QString& key = QString());
-    void part(const QString& reason = QString());
-    void close(const QString& reason = QString());
+    void join(const QString &key = QString());
+    void part(const QString &reason = QString());
+    void close(const QString &reason = QString());
 
-Q_SIGNALS:
-    void keyChanged(const QString& key);
-    void modeChanged(const QString& mode);
-    void topicChanged(const QString& topic);
-    void destroyed(IrcChannel* channel);
-private:
+  Q_SIGNALS:
+    void keyChanged(const QString &key);
+    void modeChanged(const QString &mode);
+    void topicChanged(const QString &topic);
+    void destroyed(IrcChannel *channel);
+
+  private:
     Q_DECLARE_PRIVATE(IrcChannel)
     Q_DISABLE_COPY(IrcChannel)
 };
 
 #ifndef QT_NO_DEBUG_STREAM
-IRC_MODEL_EXPORT QDebug operator<<(QDebug debug, const IrcChannel* channel);
+IRC_MODEL_EXPORT QDebug operator<<(QDebug debug, const IrcChannel *channel);
 #endif // QT_NO_DEBUG_STREAM
 
 IRC_END_NAMESPACE
 
-Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcChannel*))
-Q_DECLARE_METATYPE(QList<IRC_PREPEND_NAMESPACE(IrcChannel*)>)
+Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcChannel *))
+Q_DECLARE_METATYPE(QList<IRC_PREPEND_NAMESPACE(IrcChannel *)>)
 
 #endif // IRCCHANNEL

@@ -26,21 +26,22 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ircmessagecomposer_p.h"
-#include "ircmessage.h"
 #include "irc.h"
+#include "ircmessage.h"
+#include "ircmessagecomposer_p.h"
 
 IRC_BEGIN_NAMESPACE
 
 #ifndef IRC_DOXYGEN
-IrcMessageComposer::IrcMessageComposer(IrcConnection* connection)
+IrcMessageComposer::IrcMessageComposer(IrcConnection *connection)
 {
     d.connection = connection;
 }
 
 bool IrcMessageComposer::isComposed(int code)
 {
-    switch (code) {
+    switch (code)
+    {
     case Irc::RPL_MOTDSTART:
     case Irc::RPL_MOTD:
     case Irc::RPL_ENDOFMOTD:
@@ -72,9 +73,10 @@ bool IrcMessageComposer::isComposed(int code)
     }
 }
 
-void IrcMessageComposer::composeMessage(IrcNumericMessage* message)
+void IrcMessageComposer::composeMessage(IrcNumericMessage *message)
 {
-    switch (message->code()) {
+    switch (message->code())
+    {
     case Irc::RPL_MOTDSTART:
         d.messages.push(new IrcMotdMessage(d.connection));
         d.messages.top()->setPrefix(message->prefix());
@@ -107,7 +109,8 @@ void IrcMessageComposer::composeMessage(IrcNumericMessage* message)
         d.messages.push(new IrcTopicMessage(d.connection));
         d.messages.top()->setPrefix(message->prefix());
         d.messages.top()->setCommand(QString::number(message->code()));
-        d.messages.top()->setParameters(QStringList() << message->parameters().value(1) << message->parameters().value(2));
+        d.messages.top()->setParameters(QStringList()
+                                        << message->parameters().value(1) << message->parameters().value(2));
         finishCompose(message);
         break;
 
@@ -116,18 +119,19 @@ void IrcMessageComposer::composeMessage(IrcNumericMessage* message)
         d.messages.push(new IrcInviteMessage(d.connection));
         d.messages.top()->setPrefix(message->prefix());
         d.messages.top()->setCommand(QString::number(message->code()));
-        d.messages.top()->setParameters(QStringList() << message->parameters().value(1) << message->parameters().value(2));
+        d.messages.top()->setParameters(QStringList()
+                                        << message->parameters().value(1) << message->parameters().value(2));
         finishCompose(message);
         break;
 
     case Irc::RPL_WHOREPLY: {
         d.messages.push(new IrcWhoReplyMessage(d.connection));
-        d.messages.top()->setPrefix(message->parameters().value(5) // nick
-                                    + QLatin1Char('!') + message->parameters().value(2) // ident
+        d.messages.top()->setPrefix(message->parameters().value(5)                        // nick
+                                    + QLatin1Char('!') + message->parameters().value(2)   // ident
                                     + QLatin1Char('@') + message->parameters().value(3)); // host
         d.messages.top()->setCommand(QString::number(message->code()));
-        d.messages.top()->setParameters(QStringList() << message->parameters().value(1) // mask
-                                                      << message->parameters().value(4) // server
+        d.messages.top()->setParameters(QStringList() << message->parameters().value(1)   // mask
+                                                      << message->parameters().value(4)   // server
                                                       << message->parameters().value(6)); // status
         QString last = message->parameters().value(7);
         int index = last.indexOf(QLatin1Char(' ')); // ignore hopcount
@@ -146,7 +150,8 @@ void IrcMessageComposer::composeMessage(IrcNumericMessage* message)
         break;
 
     case Irc::RPL_AWAY:
-        if (!d.messages.isEmpty() && d.messages.top()->type() == IrcMessage::Whois) {
+        if (!d.messages.isEmpty() && d.messages.top()->type() == IrcMessage::Whois)
+        {
             replaceParam(9, message->parameters().value(2)); // away reason
             break;
         }
@@ -155,10 +160,13 @@ void IrcMessageComposer::composeMessage(IrcNumericMessage* message)
     case Irc::RPL_NOWAWAY:
         d.messages.push(new IrcAwayMessage(d.connection));
         d.messages.top()->setCommand(QString::number(message->code()));
-        if (message->code() == Irc::RPL_AWAY) {
+        if (message->code() == Irc::RPL_AWAY)
+        {
             d.messages.top()->setPrefix(message->parameters().value(1));
             d.messages.top()->setParameters(message->parameters().mid(2));
-        } else {
+        }
+        else
+        {
             d.messages.top()->setPrefix(message->parameters().value(0));
             d.messages.top()->setParameters(message->parameters().mid(1));
         }
@@ -167,35 +175,31 @@ void IrcMessageComposer::composeMessage(IrcNumericMessage* message)
 
     case Irc::RPL_WHOISUSER:
         d.messages.push(new IrcWhoisMessage(d.connection));
-        d.messages.top()->setPrefix(message->parameters().value(1)
-                                    + "!" + message->parameters().value(2)
-                                    + "@" + message->parameters().value(3));
-        d.messages.top()->setParameters(QStringList() << message->parameters().value(5)
-                                                      << QString()   // server
-                                                      << QString()   // info
-                                                      << QString()   // account
-                                                      << QString()   // address
-                                                      << QString()   // since
-                                                      << QString()   // idle
-                                                      << QString()   // secure
-                                                      << QString()   // channels
-                                                      << QString()); // away reason
+        d.messages.top()->setPrefix(message->parameters().value(1) + "!" + message->parameters().value(2) + "@" +
+                                    message->parameters().value(3));
+        d.messages.top()->setParameters(QStringList() << message->parameters().value(5) << QString() // server
+                                                      << QString()                                   // info
+                                                      << QString()                                   // account
+                                                      << QString()                                   // address
+                                                      << QString()                                   // since
+                                                      << QString()                                   // idle
+                                                      << QString()                                   // secure
+                                                      << QString()                                   // channels
+                                                      << QString());                                 // away reason
         break;
 
     case Irc::RPL_WHOWASUSER:
         d.messages.push(new IrcWhowasMessage(d.connection));
-        d.messages.top()->setPrefix(message->parameters().value(1)
-                                    + "!" + message->parameters().value(2)
-                                    + "@" + message->parameters().value(3));
-        d.messages.top()->setParameters(QStringList() << message->parameters().value(5)
-                                                      << QString()   // server
-                                                      << QString()   // info
-                                                      << QString()   // account
-                                                      << QString()   // address
-                                                      << QString()   // since
-                                                      << QString()   // idle
-                                                      << QString()   // secure
-                                                      << QString()); // channels
+        d.messages.top()->setPrefix(message->parameters().value(1) + "!" + message->parameters().value(2) + "@" +
+                                    message->parameters().value(3));
+        d.messages.top()->setParameters(QStringList() << message->parameters().value(5) << QString() // server
+                                                      << QString()                                   // info
+                                                      << QString()                                   // account
+                                                      << QString()                                   // address
+                                                      << QString()                                   // since
+                                                      << QString()                                   // idle
+                                                      << QString()                                   // secure
+                                                      << QString());                                 // channels
         break;
 
     case Irc::RPL_WHOISSERVER:
@@ -231,10 +235,11 @@ void IrcMessageComposer::composeMessage(IrcNumericMessage* message)
     }
 }
 
-void IrcMessageComposer::finishCompose(IrcMessage* message)
+void IrcMessageComposer::finishCompose(IrcMessage *message)
 {
-    if (!d.messages.isEmpty()) {
-        IrcMessage* composed = d.messages.pop();
+    if (!d.messages.isEmpty())
+    {
+        IrcMessage *composed = d.messages.pop();
         composed->setTimeStamp(message->timeStamp());
         if (message->testFlag(IrcMessage::Implicit))
             composed->setFlag(IrcMessage::Implicit);
@@ -242,9 +247,10 @@ void IrcMessageComposer::finishCompose(IrcMessage* message)
     }
 }
 
-void IrcMessageComposer::replaceParam(int index, const QString& param)
+void IrcMessageComposer::replaceParam(int index, const QString &param)
 {
-    if (!d.messages.isEmpty()) {
+    if (!d.messages.isEmpty())
+    {
         QStringList params = d.messages.top()->parameters();
         if (index < params.count())
             params.replace(index, param);

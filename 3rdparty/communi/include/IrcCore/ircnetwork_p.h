@@ -31,10 +31,10 @@
 
 #include "ircnetwork.h"
 
-#include <QSet>
 #include <QHash>
-#include <QString>
 #include <QPointer>
+#include <QSet>
+#include <QString>
 
 IRC_BEGIN_NAMESPACE
 
@@ -42,33 +42,33 @@ class IrcNetworkPrivate
 {
     Q_DECLARE_PUBLIC(IrcNetwork)
 
-public:
+  public:
     IrcNetworkPrivate();
 
-    void setInfo(const QHash<QString, QString>& info);
-    void setAvailableCapabilities(const QSet<QString>& capabilities);
-    void setActiveCapabilities(const QSet<QString>& capabilities);
+    void setInfo(const QHash<QString, QString> &info);
+    void setAvailableCapabilities(const QSet<QString> &capabilities);
+    void setActiveCapabilities(const QSet<QString> &capabilities);
 
-    void setName(const QString& name);
-    void setModes(const QStringList& modes);
-    void setPrefixes(const QStringList& prefixes);
-    void setChannelTypes(const QStringList& types);
-    void setStatusPrefixes(const QStringList& prefixes);
+    void setName(const QString &name);
+    void setModes(const QStringList &modes);
+    void setPrefixes(const QStringList &prefixes);
+    void setChannelTypes(const QStringList &types);
+    void setStatusPrefixes(const QStringList &prefixes);
 
-    static QString getPrefix(const QString& str, const QStringList& prefixes);
-    static QString removePrefix(const QString& str, const QStringList& prefixes);
+    static QString getPrefix(const QString &str, const QStringList &prefixes);
+    static QString removePrefix(const QString &str, const QStringList &prefixes);
 
-    static IrcNetwork* create(IrcConnection* connection)
+    static IrcNetwork *create(IrcConnection *connection)
     {
         return new IrcNetwork(connection);
     }
 
-    static IrcNetworkPrivate* get(const IrcNetwork* network)
+    static IrcNetworkPrivate *get(const IrcNetwork *network)
     {
         return network->d_ptr.data();
     }
 
-    IrcNetwork* q_ptr;
+    IrcNetwork *q_ptr;
     QPointer<IrcConnection> connection;
     bool initialized;
     QString name;

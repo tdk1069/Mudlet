@@ -37,18 +37,36 @@ IRC_BEGIN_NAMESPACE
 
 class IrcToken
 {
-public:
-    IrcToken() : idx(-1), pos(-1) { }
-    IrcToken(int index, int position, const QString& text)
-        : idx(index), pos(position), str(text) { }
+  public:
+    IrcToken() : idx(-1), pos(-1)
+    {
+    }
+    IrcToken(int index, int position, const QString &text) : idx(index), pos(position), str(text)
+    {
+    }
 
-    bool isValid() const { return idx != -1; }
-    int index() const { return idx; }
-    int position() const { return pos; }
-    int length() const { return str.length(); }
-    QString text() const { return str; }
+    bool isValid() const
+    {
+        return idx != -1;
+    }
+    int index() const
+    {
+        return idx;
+    }
+    int position() const
+    {
+        return pos;
+    }
+    int length() const
+    {
+        return str.length();
+    }
+    QString text() const
+    {
+        return str;
+    }
 
-private:
+  private:
     int idx;
     int pos;
     QString str;
@@ -57,8 +75,8 @@ private:
 
 class IrcTokenizer
 {
-public:
-    IrcTokenizer(const QString& str = QString());
+  public:
+    IrcTokenizer(const QString &str = QString());
 
     int count() const;
     bool isEmpty() const;
@@ -67,11 +85,11 @@ public:
     IrcTokenizer mid(int index) const;
 
     void clear();
-    void replace(int index, const QString& text);
+    void replace(int index, const QString &text);
     IrcToken find(int pos) const;
     QString toString() const;
 
-private:
+  private:
     int len;
     QList<IrcToken> t;
 };

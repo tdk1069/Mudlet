@@ -179,10 +179,13 @@ QString TTextCodec_437::convertToUnicode(const char *in, int length, ConverterSt
 {
     QString result;
     bool headerDone = false;
-    if (state) {
+    if (state)
+    {
         // zero is false:
-        if (!state->state_data[0]) {
-            if (state->flags & QTextCodec::IgnoreHeader) {
+        if (!state->state_data[0])
+        {
+            if (state->flags & QTextCodec::IgnoreHeader)
+            {
                 headerDone = true;
             }
             // non-zero, including -1 is true:
@@ -192,12 +195,16 @@ QString TTextCodec_437::convertToUnicode(const char *in, int length, ConverterSt
 
     // If we get here and headerDone is false then we need to insert the BOM
     result += QChar::ByteOrderMark;
-    for (int i = 0; i < length; ++i) {
+    for (int i = 0; i < length; ++i)
+    {
         unsigned char ch = in[i];
-        if (ch < 0x80) {
+        if (ch < 0x80)
+        {
             // ASCII - which is the same as Latin1 when the MS Bit is not set:
             result += QLatin1Char(ch);
-        } else {
+        }
+        else
+        {
             // Extended ASCII - look it up in the CptoUnicode table:
             result += CptoUnicode.at(in[i] - 128);
         }
@@ -209,10 +216,13 @@ QString TTextCodec_667::convertToUnicode(const char *in, int length, ConverterSt
 {
     QString result;
     bool headerDone = false;
-    if (state) {
+    if (state)
+    {
         // zero is false:
-        if (!state->state_data[0]) {
-            if (state->flags & QTextCodec::IgnoreHeader) {
+        if (!state->state_data[0])
+        {
+            if (state->flags & QTextCodec::IgnoreHeader)
+            {
                 headerDone = true;
             }
             // non-zero, including -1 is true:
@@ -222,12 +232,16 @@ QString TTextCodec_667::convertToUnicode(const char *in, int length, ConverterSt
 
     // If we get here and headerDone is false then we need to insert the BOM
     result += QChar::ByteOrderMark;
-    for (int i = 0; i < length; ++i) {
+    for (int i = 0; i < length; ++i)
+    {
         unsigned char ch = in[i];
-        if (ch < 0x80) {
+        if (ch < 0x80)
+        {
             // ASCII - which is the same as Latin1 when the MS Bit is not set:
             result += QLatin1Char(ch);
-        } else {
+        }
+        else
+        {
             // Extended ASCII - look it up in the CptoUnicode table:
             result += CptoUnicode.at(in[i] - 128);
         }
@@ -239,10 +253,13 @@ QString TTextCodec_737::convertToUnicode(const char *in, int length, ConverterSt
 {
     QString result;
     bool headerDone = false;
-    if (state) {
+    if (state)
+    {
         // zero is false:
-        if (!state->state_data[0]) {
-            if (state->flags & QTextCodec::IgnoreHeader) {
+        if (!state->state_data[0])
+        {
+            if (state->flags & QTextCodec::IgnoreHeader)
+            {
                 headerDone = true;
             }
             // non-zero, including -1 is true:
@@ -252,12 +269,16 @@ QString TTextCodec_737::convertToUnicode(const char *in, int length, ConverterSt
 
     // If we get here and headerDone is false then we need to insert the BOM
     result += QChar::ByteOrderMark;
-    for (int i = 0; i < length; ++i) {
+    for (int i = 0; i < length; ++i)
+    {
         unsigned char ch = in[i];
-        if (ch < 0x80) {
+        if (ch < 0x80)
+        {
             // ASCII - which is the same as Latin1 when the MS Bit is not set:
             result += QLatin1Char(ch);
-        } else {
+        }
+        else
+        {
             // Extended ASCII - look it up in the CptoUnicode table:
             result += CptoUnicode.at(in[i] - 128);
         }
@@ -273,10 +294,13 @@ QString TTextCodec_869::convertToUnicode(const char *in, int length, ConverterSt
     QString result;
     bool headerDone = false;
     int invalidCharacters = 0;
-    if (state) {
+    if (state)
+    {
         // zero is false:
-        if (!state->state_data[0]) {
-            if (state->flags & QTextCodec::IgnoreHeader) {
+        if (!state->state_data[0])
+        {
+            if (state->flags & QTextCodec::IgnoreHeader)
+            {
                 headerDone = true;
             }
             // non-zero, including -1 is true:
@@ -286,14 +310,19 @@ QString TTextCodec_869::convertToUnicode(const char *in, int length, ConverterSt
 
     // If we get here and headerDone is false then we need to insert the BOM
     result += QChar::ByteOrderMark;
-    for (int i = 0; i < length; ++i) {
+    for (int i = 0; i < length; ++i)
+    {
         unsigned char ch = in[i];
-        if (ch < 0x80) {
+        if (ch < 0x80)
+        {
             // ASCII - which is the same as Latin1 when the MS Bit is not set:
             result += QLatin1Char(ch);
-        } else {
+        }
+        else
+        {
             // Extended ASCII - look it up in the CptoUnicode table:
-            if (CptoUnicode.at(in[i] - 128) == QChar(0xFFFD)) {
+            if (CptoUnicode.at(in[i] - 128) == QChar(0xFFFD))
+            {
                 // Oops, isn't a valid character there!
                 ++invalidCharacters;
             }
@@ -301,7 +330,8 @@ QString TTextCodec_869::convertToUnicode(const char *in, int length, ConverterSt
         }
     }
 
-    if (state) {
+    if (state)
+    {
         state->invalidChars += invalidCharacters;
     }
 
@@ -331,7 +361,8 @@ QByteArray TTextCodec_437::convertFromUnicode(const QChar *in, int length, Conve
     int i = 0;
     QByteArray result;
 
-    if (!length) {
+    if (!length)
+    {
         // Avoid extra tests elsewere on an empty Unicode string
         return {};
     }
@@ -339,9 +370,12 @@ QByteArray TTextCodec_437::convertFromUnicode(const QChar *in, int length, Conve
     // Without state OR
     // With state AND state_data[1] being zero
     // - skip over first QChar if it IS the Byte Order Mark
-    if (state) {
-        if (state->state_data[1] == 0) {
-            if (in[i] == QChar::ByteOrderMark) {
+    if (state)
+    {
+        if (state->state_data[1] == 0)
+        {
+            if (in[i] == QChar::ByteOrderMark)
+            {
                 ++i;
                 --remainingChars;
             }
@@ -349,30 +383,38 @@ QByteArray TTextCodec_437::convertFromUnicode(const QChar *in, int length, Conve
             // THIS instance:
             state->state_data[1] = -1;
         }
-
-    } else {
-        if (in[i] == QChar::ByteOrderMark) {
+    }
+    else
+    {
+        if (in[i] == QChar::ByteOrderMark)
+        {
             ++i;
             // Redundent but keeps things simpler if debugging.
             --remainingChars;
         }
     }
 
-    for ( ; i < length; ++i) {
-        if (Q_UNLIKELY(in[i].isHighSurrogate())) {
+    for (; i < length; ++i)
+    {
+        if (Q_UNLIKELY(in[i].isHighSurrogate()))
+        {
             // No character in the CP437 encoding is beyond the BMP so this is
             // always going to be an invalid character
-            if ((i+1) < length) {
+            if ((i + 1) < length)
+            {
                 // We do have at least one more QChar
-                if (in[i+1].isLowSurrogate()) {
+                if (in[i + 1].isLowSurrogate())
+                {
                     // And the pair of them are a non-BMP character,
                     // So produce a replacement and skip over them BOTH:
                     ++i;
                     --remainingChars;
                 }
-
-            } else {
-                if (state) {
+            }
+            else
+            {
+                if (state)
+                {
                     // exit the loop without changing remainingChars so that
                     // this character remains to be processed next time:
                     break;
@@ -381,39 +423,46 @@ QByteArray TTextCodec_437::convertFromUnicode(const QChar *in, int length, Conve
             // produce a replacement character
             result += replacement;
             ++invalidChars;
-
-
-        } else if (Q_UNLIKELY(in[i].isHighSurrogate())) {
+        }
+        else if (Q_UNLIKELY(in[i].isHighSurrogate()))
+        {
             // We would already have skipped over the Low part of a surrogate
             // pair in the prior branch so this is a separate bogus Low
             // surrogate one, so produce a replacement and skip over just this QChar
             result += replacement;
             ++invalidChars;
-
-        } else if (in[i] < QLatin1Char('\x80')) {
+        }
+        else if (in[i] < QLatin1Char('\x80'))
+        {
             // Within BMP and is ASCII QChar, so can use QLatinChar
             result += in[i].cell();
-
-        } else {
+        }
+        else
+        {
             // In range of Extended ASCII \x80 up to end of BMP \xffff so let's
             // find out if it is in the lookup table.
             int pos = CptoUnicode.indexOf(in[i]);
             // Protect against a bogus index that will break the use of an
             // quint8 afterwards:
-            Q_ASSERT_X(pos < 128, "TTextCodec_437", "lookup table is malformed and oversized so that a bogus index of 128 or more was found");
-            if (pos < 0) {
+            Q_ASSERT_X(pos < 128, "TTextCodec_437",
+                       "lookup table is malformed and oversized so that a bogus index of 128 or more was found");
+            if (pos < 0)
+            {
                 // -1 is the sentinel value for not there, greater than 127 is
                 // unreachable - or should be.
                 result += replacement;
                 ++invalidChars;
-            } else {
+            }
+            else
+            {
                 result += static_cast<char>(pos + 128);
             }
         }
         --remainingChars;
     }
 
-    if (state) {
+    if (state)
+    {
         // If this is raised above zero then the QTextCodec::canEncode(...)
         // methods will return a false value:
         state->invalidChars += invalidChars;
@@ -435,7 +484,8 @@ QByteArray TTextCodec_667::convertFromUnicode(const QChar *in, int length, Conve
     int i = 0;
     QByteArray result;
 
-    if (!length) {
+    if (!length)
+    {
         // Avoid extra tests elsewere on an empty Unicode string
         return {};
     }
@@ -443,9 +493,12 @@ QByteArray TTextCodec_667::convertFromUnicode(const QChar *in, int length, Conve
     // Without state OR
     // With state AND state_data[1] being zero
     // - skip over first QChar if it IS the Byte Order Mark
-    if (state) {
-        if (state->state_data[1] == 0) {
-            if (in[i] == QChar::ByteOrderMark) {
+    if (state)
+    {
+        if (state->state_data[1] == 0)
+        {
+            if (in[i] == QChar::ByteOrderMark)
+            {
                 ++i;
                 --remainingChars;
             }
@@ -453,30 +506,38 @@ QByteArray TTextCodec_667::convertFromUnicode(const QChar *in, int length, Conve
             // THIS instance:
             state->state_data[1] = -1;
         }
-
-    } else {
-        if (in[i] == QChar::ByteOrderMark) {
+    }
+    else
+    {
+        if (in[i] == QChar::ByteOrderMark)
+        {
             ++i;
             // Redundent but keeps things simpler if debugging.
             --remainingChars;
         }
     }
 
-    for ( ; i < length; ++i) {
-        if (Q_UNLIKELY(in[i].isHighSurrogate())) {
+    for (; i < length; ++i)
+    {
+        if (Q_UNLIKELY(in[i].isHighSurrogate()))
+        {
             // No character in the CP437 encoding is beyond the BMP so this is
             // always going to be an invalid character
-            if ((i+1) < length) {
+            if ((i + 1) < length)
+            {
                 // We do have at least one more QChar
-                if (in[i+1].isLowSurrogate()) {
+                if (in[i + 1].isLowSurrogate())
+                {
                     // And the pair of them are a non-BMP character,
                     // So produce a replacement and skip over them BOTH:
                     ++i;
                     --remainingChars;
                 }
-
-            } else {
-                if (state) {
+            }
+            else
+            {
+                if (state)
+                {
                     // exit the loop without changing remainingChars so that
                     // this character remains to be processed next time:
                     break;
@@ -485,39 +546,46 @@ QByteArray TTextCodec_667::convertFromUnicode(const QChar *in, int length, Conve
             // produce a replacement character
             result += replacement;
             ++invalidChars;
-
-
-        } else if (Q_UNLIKELY(in[i].isHighSurrogate())) {
+        }
+        else if (Q_UNLIKELY(in[i].isHighSurrogate()))
+        {
             // We would already have skipped over the Low part of a surrogate
             // pair in the prior branch so this is a separate bogus Low
             // surrogate one, so produce a replacement and skip over just this QChar
             result += replacement;
             ++invalidChars;
-
-        } else if (in[i] < QLatin1Char('\x80')) {
+        }
+        else if (in[i] < QLatin1Char('\x80'))
+        {
             // Within BMP and is ASCII QChar, so can use QLatinChar
             result += in[i].cell();
-
-        } else {
+        }
+        else
+        {
             // In range of Extended ASCII \x80 up to end of BMP \xffff so let's
             // find out if it is in the lookup table.
             int pos = CptoUnicode.indexOf(in[i]);
             // Protect against a bogus index that will break the use of an
             // quint8 afterwards:
-            Q_ASSERT_X(pos < 128, "TTextCodec_667", "lookup table is malformed and oversized so that a bogus index of 128 or more was found");
-            if (pos < 0) {
+            Q_ASSERT_X(pos < 128, "TTextCodec_667",
+                       "lookup table is malformed and oversized so that a bogus index of 128 or more was found");
+            if (pos < 0)
+            {
                 // -1 is the sentinel value for not there, greater than 127 is
                 // unreachable - or should be.
                 result += replacement;
                 ++invalidChars;
-            } else {
+            }
+            else
+            {
                 result += static_cast<char>(pos + 128);
             }
         }
         --remainingChars;
     }
 
-    if (state) {
+    if (state)
+    {
         // If this is raised above zero then the QTextCodec::canEncode(...)
         // methods will return a false value:
         state->invalidChars += invalidChars;
@@ -539,7 +607,8 @@ QByteArray TTextCodec_737::convertFromUnicode(const QChar *in, int length, Conve
     int i = 0;
     QByteArray result;
 
-    if (!length) {
+    if (!length)
+    {
         // Avoid extra tests elsewere on an empty Unicode string
         return {};
     }
@@ -547,9 +616,12 @@ QByteArray TTextCodec_737::convertFromUnicode(const QChar *in, int length, Conve
     // Without state OR
     // With state AND state_data[1] being zero
     // - skip over first QChar if it IS the Byte Order Mark
-    if (state) {
-        if (state->state_data[1] == 0) {
-            if (in[i] == QChar::ByteOrderMark) {
+    if (state)
+    {
+        if (state->state_data[1] == 0)
+        {
+            if (in[i] == QChar::ByteOrderMark)
+            {
                 ++i;
                 --remainingChars;
             }
@@ -557,30 +629,38 @@ QByteArray TTextCodec_737::convertFromUnicode(const QChar *in, int length, Conve
             // THIS instance:
             state->state_data[1] = -1;
         }
-
-    } else {
-        if (in[i] == QChar::ByteOrderMark) {
+    }
+    else
+    {
+        if (in[i] == QChar::ByteOrderMark)
+        {
             ++i;
             // Redundent but keeps things simpler if debugging.
             --remainingChars;
         }
     }
 
-    for ( ; i < length; ++i) {
-        if (Q_UNLIKELY(in[i].isHighSurrogate())) {
+    for (; i < length; ++i)
+    {
+        if (Q_UNLIKELY(in[i].isHighSurrogate()))
+        {
             // No character in the CP437 encoding is beyond the BMP so this is
             // always going to be an invalid character
-            if ((i+1) < length) {
+            if ((i + 1) < length)
+            {
                 // We do have at least one more QChar
-                if (in[i+1].isLowSurrogate()) {
+                if (in[i + 1].isLowSurrogate())
+                {
                     // And the pair of them are a non-BMP character,
                     // So produce a replacement and skip over them BOTH:
                     ++i;
                     --remainingChars;
                 }
-
-            } else {
-                if (state) {
+            }
+            else
+            {
+                if (state)
+                {
                     // exit the loop without changing remainingChars so that
                     // this character remains to be processed next time:
                     break;
@@ -589,39 +669,46 @@ QByteArray TTextCodec_737::convertFromUnicode(const QChar *in, int length, Conve
             // produce a replacement character
             result += replacement;
             ++invalidChars;
-
-
-        } else if (Q_UNLIKELY(in[i].isHighSurrogate())) {
+        }
+        else if (Q_UNLIKELY(in[i].isHighSurrogate()))
+        {
             // We would already have skipped over the Low part of a surrogate
             // pair in the prior branch so this is a separate bogus Low
             // surrogate one, so produce a replacement and skip over just this QChar
             result += replacement;
             ++invalidChars;
-
-        } else if (in[i] < QLatin1Char('\x80')) {
+        }
+        else if (in[i] < QLatin1Char('\x80'))
+        {
             // Within BMP and is ASCII QChar, so can use QLatinChar
             result += in[i].cell();
-
-        } else {
+        }
+        else
+        {
             // In range of Extended ASCII \x80 up to end of BMP \xffff so let's
             // find out if it is in the lookup table.
             int pos = CptoUnicode.indexOf(in[i]);
             // Protect against a bogus index that will break the use of an
             // quint8 afterwards:
-            Q_ASSERT_X(pos < 128, "TTextCodec_737", "lookup table is malformed and oversized so that a bogus index of 128 or more was found");
-            if (pos < 0) {
+            Q_ASSERT_X(pos < 128, "TTextCodec_737",
+                       "lookup table is malformed and oversized so that a bogus index of 128 or more was found");
+            if (pos < 0)
+            {
                 // -1 is the sentinel value for not there, greater than 127 is
                 // unreachable - or should be.
                 result += replacement;
                 ++invalidChars;
-            } else {
+            }
+            else
+            {
                 result += static_cast<char>(pos + 128);
             }
         }
         --remainingChars;
     }
 
-    if (state) {
+    if (state)
+    {
         // If this is raised above zero then the QTextCodec::canEncode(...)
         // methods will return a false value:
         state->invalidChars += invalidChars;
@@ -643,7 +730,8 @@ QByteArray TTextCodec_869::convertFromUnicode(const QChar *in, int length, Conve
     int i = 0;
     QByteArray result;
 
-    if (!length) {
+    if (!length)
+    {
         // Avoid extra tests elsewere on an empty Unicode string
         return {};
     }
@@ -651,9 +739,12 @@ QByteArray TTextCodec_869::convertFromUnicode(const QChar *in, int length, Conve
     // Without state OR
     // With state AND state_data[1] being zero
     // - skip over first QChar if it IS the Byte Order Mark
-    if (state) {
-        if (state->state_data[1] == 0) {
-            if (in[i] == QChar::ByteOrderMark) {
+    if (state)
+    {
+        if (state->state_data[1] == 0)
+        {
+            if (in[i] == QChar::ByteOrderMark)
+            {
                 ++i;
                 --remainingChars;
             }
@@ -661,30 +752,38 @@ QByteArray TTextCodec_869::convertFromUnicode(const QChar *in, int length, Conve
             // THIS instance:
             state->state_data[1] = -1;
         }
-
-    } else {
-        if (in[i] == QChar::ByteOrderMark) {
+    }
+    else
+    {
+        if (in[i] == QChar::ByteOrderMark)
+        {
             ++i;
             // Redundent but keeps things simpler if debugging.
             --remainingChars;
         }
     }
 
-    for ( ; i < length; ++i) {
-        if (Q_UNLIKELY(in[i].isHighSurrogate())) {
+    for (; i < length; ++i)
+    {
+        if (Q_UNLIKELY(in[i].isHighSurrogate()))
+        {
             // No character in the CP437 encoding is beyond the BMP so this is
             // always going to be an invalid character
-            if ((i+1) < length) {
+            if ((i + 1) < length)
+            {
                 // We do have at least one more QChar
-                if (in[i+1].isLowSurrogate()) {
+                if (in[i + 1].isLowSurrogate())
+                {
                     // And the pair of them are a non-BMP character,
                     // So produce a replacement and skip over them BOTH:
                     ++i;
                     --remainingChars;
                 }
-
-            } else {
-                if (state) {
+            }
+            else
+            {
+                if (state)
+                {
                     // exit the loop without changing remainingChars so that
                     // this character remains to be processed next time:
                     break;
@@ -693,39 +792,46 @@ QByteArray TTextCodec_869::convertFromUnicode(const QChar *in, int length, Conve
             // produce a replacement character
             result += replacement;
             ++invalidChars;
-
-
-        } else if (Q_UNLIKELY(in[i].isHighSurrogate())) {
+        }
+        else if (Q_UNLIKELY(in[i].isHighSurrogate()))
+        {
             // We would already have skipped over the Low part of a surrogate
             // pair in the prior branch so this is a separate bogus Low
             // surrogate one, so produce a replacement and skip over just this QChar
             result += replacement;
             ++invalidChars;
-
-        } else if (in[i] < QLatin1Char('\x80')) {
+        }
+        else if (in[i] < QLatin1Char('\x80'))
+        {
             // Within BMP and is ASCII QChar, so can use QLatinChar
             result += in[i].cell();
-
-        } else {
+        }
+        else
+        {
             // In range of Extended ASCII \x80 up to end of BMP \xffff so let's
             // find out if it is in the lookup table.
             int pos = CptoUnicode.indexOf(in[i]);
             // Protect against a bogus index that will break the use of an
             // quint8 afterwards:
-            Q_ASSERT_X(pos < 128, "TTextCodec_869", "lookup table is malformed and oversized so that a bogus index of 128 or more was found");
-            if (pos < 0) {
+            Q_ASSERT_X(pos < 128, "TTextCodec_869",
+                       "lookup table is malformed and oversized so that a bogus index of 128 or more was found");
+            if (pos < 0)
+            {
                 // -1 is the sentinel value for not there, greater than 127 is
                 // unreachable - or should be.
                 result += replacement;
                 ++invalidChars;
-            } else {
+            }
+            else
+            {
                 result += static_cast<char>(pos + 128);
             }
         }
         --remainingChars;
     }
 
-    if (state) {
+    if (state)
+    {
         // If this is raised above zero then the QTextCodec::canEncode(...)
         // methods will return a false value:
         state->invalidChars += invalidChars;

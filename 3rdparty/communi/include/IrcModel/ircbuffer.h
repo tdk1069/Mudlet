@@ -31,10 +31,10 @@
 
 #include <Irc>
 #include <IrcGlobal>
-#include <QtCore/qobject.h>
-#include <QtCore/qvariant.h>
 #include <QtCore/qmetatype.h>
+#include <QtCore/qobject.h>
 #include <QtCore/qscopedpointer.h>
+#include <QtCore/qvariant.h>
 
 IRC_BEGIN_NAMESPACE
 
@@ -52,17 +52,17 @@ class IRC_MODEL_EXPORT IrcBuffer : public QObject
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(QString prefix READ prefix WRITE setPrefix NOTIFY prefixChanged)
-    Q_PROPERTY(IrcConnection* connection READ connection CONSTANT)
-    Q_PROPERTY(IrcNetwork* network READ network CONSTANT)
-    Q_PROPERTY(IrcBufferModel* model READ model CONSTANT)
+    Q_PROPERTY(IrcConnection *connection READ connection CONSTANT)
+    Q_PROPERTY(IrcNetwork *network READ network CONSTANT)
+    Q_PROPERTY(IrcBufferModel *model READ model CONSTANT)
     Q_PROPERTY(bool active READ isActive NOTIFY activeChanged)
     Q_PROPERTY(bool channel READ isChannel CONSTANT)
     Q_PROPERTY(bool sticky READ isSticky WRITE setSticky NOTIFY stickyChanged)
     Q_PROPERTY(bool persistent READ isPersistent WRITE setPersistent NOTIFY persistentChanged)
     Q_PROPERTY(QVariantMap userData READ userData WRITE setUserData NOTIFY userDataChanged)
 
-public:
-    Q_INVOKABLE explicit IrcBuffer(QObject* parent = 0);
+  public:
+    Q_INVOKABLE explicit IrcBuffer(QObject *parent = 0);
     virtual ~IrcBuffer();
 
     QString title() const;
@@ -70,11 +70,11 @@ public:
     QString prefix() const;
 
     bool isChannel() const;
-    Q_INVOKABLE IrcChannel* toChannel();
+    Q_INVOKABLE IrcChannel *toChannel();
 
-    IrcConnection* connection() const;
-    IrcNetwork* network() const;
-    IrcBufferModel* model() const;
+    IrcConnection *connection() const;
+    IrcNetwork *network() const;
+    IrcBufferModel *model() const;
 
     virtual bool isActive() const;
 
@@ -85,29 +85,29 @@ public:
     void setPersistent(bool persistent);
 
     QVariantMap userData() const;
-    void setUserData(const QVariantMap& data);
+    void setUserData(const QVariantMap &data);
 
-    Q_INVOKABLE bool sendCommand(IrcCommand* command);
+    Q_INVOKABLE bool sendCommand(IrcCommand *command);
 
-public Q_SLOTS:
-    void setName(const QString& name);
-    void setPrefix(const QString& prefix);
-    void receiveMessage(IrcMessage* message);
-    virtual void close(const QString& reason = QString());
+  public Q_SLOTS:
+    void setName(const QString &name);
+    void setPrefix(const QString &prefix);
+    void receiveMessage(IrcMessage *message);
+    virtual void close(const QString &reason = QString());
 
-Q_SIGNALS:
-    void titleChanged(const QString& title);
-    void nameChanged(const QString& name);
-    void prefixChanged(const QString& name);
-    void messageReceived(IrcMessage* message);
-    void destroyed(IrcBuffer* buffer);
+  Q_SIGNALS:
+    void titleChanged(const QString &title);
+    void nameChanged(const QString &name);
+    void prefixChanged(const QString &name);
+    void messageReceived(IrcMessage *message);
+    void destroyed(IrcBuffer *buffer);
     void activeChanged(bool active);
     void stickyChanged(bool sticky);
     void persistentChanged(bool persistent);
-    void userDataChanged(const QVariantMap& data);
+    void userDataChanged(const QVariantMap &data);
 
-protected:
-    IrcBuffer(IrcBufferPrivate& dd, QObject* parent);
+  protected:
+    IrcBuffer(IrcBufferPrivate &dd, QObject *parent);
 
     QScopedPointer<IrcBufferPrivate> d_ptr;
     Q_DECLARE_PRIVATE(IrcBuffer)
@@ -115,12 +115,12 @@ protected:
 };
 
 #ifndef QT_NO_DEBUG_STREAM
-IRC_MODEL_EXPORT QDebug operator<<(QDebug debug, const IrcBuffer* buffer);
+IRC_MODEL_EXPORT QDebug operator<<(QDebug debug, const IrcBuffer *buffer);
 #endif // QT_NO_DEBUG_STREAM
 
 IRC_END_NAMESPACE
 
-Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcBuffer*))
-Q_DECLARE_METATYPE(QList<IRC_PREPEND_NAMESPACE(IrcBuffer*)>)
+Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcBuffer *))
+Q_DECLARE_METATYPE(QList<IRC_PREPEND_NAMESPACE(IrcBuffer *)>)
 
 #endif // IRCBUFFER_H

@@ -20,21 +20,20 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "HostManager.h"
 #include "mudlet.h"
 
 #include "pre_guard.h"
-#include <chrono>
 #include <QDesktopWidget>
 #include <QDir>
+#include <chrono>
 #if defined(Q_OS_WIN32) && !defined(INCLUDE_UPDATER)
 #include <QMessageBox>
 #endif // defined(Q_OS_WIN32) && !defined(INCLUDE_UPDATER)
+#include "post_guard.h"
+#include <QCommandLineParser>
 #include <QPainter>
 #include <QSplashScreen>
-#include <QCommandLineParser>
-#include "post_guard.h"
 
 using namespace std::chrono_literals;
 
@@ -45,7 +44,7 @@ using namespace std::chrono_literals;
 #include <pcre.h>
 #endif // _MSC_VER && _DEBUG
 
-TConsole* spDebugConsole = nullptr;
+TConsole *spDebugConsole = nullptr;
 
 #if defined(Q_OS_WIN32)
 bool runUpdate();
@@ -56,12 +55,12 @@ bool runUpdate();
 
 #define PCRE_CLIENT_TYPE (_CLIENT_BLOCK | ((('P' << 8) | 'C') << 16))
 
-static void* pcre_malloc_dbg(size_t size)
+static void *pcre_malloc_dbg(size_t size)
 {
     return ::_malloc_dbg(size, PCRE_CLIENT_TYPE, __FILE__, __LINE__);
 }
 
-static void pcre_free_dbg(void* ptr)
+static void pcre_free_dbg(void *ptr)
 {
     return ::_free_dbg(ptr, PCRE_CLIENT_TYPE);
 }
@@ -69,21 +68,23 @@ static void pcre_free_dbg(void* ptr)
 #endif // _DEBUG && _MSC_VER
 
 #if defined(INCLUDE_FONTS)
-void copyFont(const QString& externalPathName, const QString& resourcePathName, const QString& fileName)
+void copyFont(const QString &externalPathName, const QString &resourcePathName, const QString &fileName)
 {
-    if (!QFile::exists(QStringLiteral("%1/%2").arg(externalPathName, fileName))) {
+    if (!QFile::exists(QStringLiteral("%1/%2").arg(externalPathName, fileName)))
+    {
         QFile fileToCopy(QStringLiteral(":/%1/%2").arg(resourcePathName, fileName));
         fileToCopy.copy(QStringLiteral("%1/%2").arg(externalPathName, fileName));
     }
 }
 #endif
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     // print stdout to console if Mudlet is started in a console in Windows
     // credit to https://stackoverflow.com/a/41701133 for the workaround
 #ifdef Q_OS_WIN32
-    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+    if (AttachConsole(ATTACH_PARENT_PROCESS))
+    {
         freopen("CONOUT$", "w", stdout);
         freopen("CONOUT$", "w", stderr);
     }
@@ -92,12 +93,13 @@ int main(int argc, char* argv[])
     // Enable leak detection for MSVC debug builds.
     {
         // Check for a debugger and prompt if one is not attached.
-        while (!IsDebuggerPresent()
-               && IDYES == MessageBox(0,
-                                      "You are starting debug mudlet without a debugger attached. If you wish to attach one and verify that it worked, click yes. To continue without a debugger, "
-                                      "click no.",
-                                      "Mudlet Debug",
-                                      MB_ICONINFORMATION | MB_YESNO | MB_DEFBUTTON2)) {
+        while (!IsDebuggerPresent() &&
+               IDYES == MessageBox(0,
+                                   "You are starting debug mudlet without a debugger attached. If you wish to attach "
+                                   "one and verify that it worked, click yes. To continue without a debugger, "
+                                   "click no.",
+                                   "Mudlet Debug", MB_ICONINFORMATION | MB_YESNO | MB_DEFBUTTON2))
+        {
             ;
         }
 
@@ -106,7 +108,8 @@ int main(int argc, char* argv[])
         _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
         // Create a log file for writing leaks.
-        HANDLE hLogFile = CreateFile("stderr.txt", GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+        HANDLE hLogFile =
+            CreateFile("stderr.txt", GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
         _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
         _CrtSetReportFile(_CRT_WARN, hLogFile);
 
@@ -123,7 +126,7 @@ int main(int argc, char* argv[])
 
     // due to a Qt bug, this only safely works for both non- and HiDPI displays on 5.12+
     // 5.6 - 5.11 make the application blow up in size on non-HiDPI displays
-#if defined (Q_OS_UNIX) && (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
+#if defined(Q_OS_UNIX) && (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 
@@ -139,11 +142,12 @@ int main(int argc, char* argv[])
     QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 #endif
 
-    auto app = qobject_cast<QApplication*>(new QApplication(argc, argv));
+    auto app = qobject_cast<QApplication *>(new QApplication(argc, argv));
 
 #if defined(Q_OS_WIN32) && defined(INCLUDE_UPDATER)
     auto abortLaunch = runUpdate();
-    if (abortLaunch) {
+    if (abortLaunch)
+    {
         return 0;
     }
 #endif
@@ -153,25 +157,36 @@ int main(int argc, char* argv[])
     app->setOverrideCursor(QCursor(Qt::WaitCursor));
     app->setOrganizationName(QStringLiteral("Mudlet"));
 
-    if (mudlet::scmIsPublicTestVersion) {
+    if (mudlet::scmIsPublicTestVersion)
+    {
         app->setApplicationName(QStringLiteral("Mudlet Public Test Build"));
         app->setApplicationVersion(APP_VERSION APP_BUILD);
-    } else {
+    }
+    else
+    {
         app->setApplicationName(QStringLiteral("Mudlet"));
         app->setApplicationVersion(APP_VERSION);
     }
 
     QCommandLineParser parser;
-    QCommandLineOption profileToOpen(QStringLiteral("profile"), QCoreApplication::translate("main", "Profile to open automatically"), QCoreApplication::translate("main", "profile"));
+    QCommandLineOption profileToOpen(QStringLiteral("profile"),
+                                     QCoreApplication::translate("main", "Profile to open automatically"),
+                                     QCoreApplication::translate("main", "profile"));
     parser.addOption(profileToOpen);
 
-    QCommandLineOption showHelp(QStringList() << "h" <<"help", QCoreApplication::translate("main", "Display help and exit"));
+    QCommandLineOption showHelp(QStringList() << "h"
+                                              << "help",
+                                QCoreApplication::translate("main", "Display help and exit"));
     parser.addOption(showHelp);
 
-    QCommandLineOption showVersion(QStringList() << "v" << "version", QCoreApplication::translate("main", "Display version and exit"));
+    QCommandLineOption showVersion(QStringList() << "v"
+                                                 << "version",
+                                   QCoreApplication::translate("main", "Display version and exit"));
     parser.addOption(showVersion);
 
-    QCommandLineOption beQuiet(QStringList() << "q" << "quiet", QCoreApplication::translate("main", "Display help and exit"));
+    QCommandLineOption beQuiet(QStringList() << "q"
+                                             << "quiet",
+                               QCoreApplication::translate("main", "Display help and exit"));
     parser.addOption(beQuiet);
 
     parser.parse(app->arguments());
@@ -179,16 +194,18 @@ int main(int argc, char* argv[])
     // Non-GUI actions --help and --version as suggested by GNU coding standards,
     // section 4.7: http://www.gnu.org/prep/standards/standards.html#Command_002dLine-Interfaces
     QStringList texts;
-    if (parser.isSet(showHelp)) {
+    if (parser.isSet(showHelp))
+    {
         // Do "help" action
-        texts << QCoreApplication::translate("main", "Usage: %1 [OPTION...]\n"
-                                                     "       -h, --help           displays this message.\n"
-                                                     "       -v, --version        displays version information.\n"
-                                                     "       -q, --quiet          no splash screen on startup.\n"
-                                                     "       --profile=<profile>  additional profile to open\n\n"
-                                                     "There are other inherited options that arise from the Qt Libraries which are\n"
-                                                     "less likely to be useful for normal use of this application:\n")
-                 .arg(QLatin1String(APP_TARGET));
+        texts << QCoreApplication::translate(
+                     "main", "Usage: %1 [OPTION...]\n"
+                             "       -h, --help           displays this message.\n"
+                             "       -v, --version        displays version information.\n"
+                             "       -q, --quiet          no splash screen on startup.\n"
+                             "       --profile=<profile>  additional profile to open\n\n"
+                             "There are other inherited options that arise from the Qt Libraries which are\n"
+                             "less likely to be useful for normal use of this application:\n")
+                     .arg(QLatin1String(APP_TARGET));
         // From documentation and from http://qt-project.org/doc/qt-5/qapplication.html:
         texts << QStringLiteral("       --dograb        ignore any implicit or explicit -nograb.\n"
                                 "                       --dograb wins over --nograb even when --nograb is last on\n"
@@ -197,7 +214,7 @@ int main(int argc, char* argv[])
         texts << QStringLiteral("       --nograb        the application should never grab the mouse or the\n"
                                 "                       keyboard. This option is set by default when Mudlet is\n"
                                 "                       running in the gdb debugger under Linux.\n");
-#else // ! defined(Q_OS_LINUX)
+#else  // ! defined(Q_OS_LINUX)
         texts << QStringLiteral("       --nograb        the application should never grab the mouse or the\n"
                                 "                       keyboard.\n");
 #endif // ! defined(Q_OS_LINUX)
@@ -216,7 +233,7 @@ int main(int argc, char* argv[])
                                 "                       are relative to the Style Sheet file's path.\n"
                                 "       --stylesheet stylesheet  is the same as listed above.\n");
 // Not sure about MacOS case as that does not use X
-#if defined(Q_OS_UNIX) && (! defined(Q_OS_MACOS))
+#if defined(Q_OS_UNIX) && (!defined(Q_OS_MACOS))
         texts << QStringLiteral("       --sync          forces the X server to perform each X client request\n"
                                 "                       immediately and not use buffer optimization. It makes the\n"
                                 "                       program easier to debug and often much slower. The --sync\n"
@@ -235,21 +252,26 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    if (parser.isSet(showVersion)) {
+    if (parser.isSet(showVersion))
+    {
         // Do "version" action - wording and format is quite tightly specified by the coding standards
 #if defined(QT_DEBUG)
         texts << QCoreApplication::translate("main", "%1 %2%3 (with debug symbols, without optimisations)\n",
-         "%1 is the name of the application like mudlet or Mudlet.exe, %2 is the version number like 3.20 and %3 is a build suffix like -dev")
-                 .arg(QLatin1String(APP_TARGET), QLatin1String(APP_VERSION), QLatin1String(APP_BUILD));
-#else // ! defined(QT_DEBUG)
+                                             "%1 is the name of the application like mudlet or Mudlet.exe, %2 is the "
+                                             "version number like 3.20 and %3 is a build suffix like -dev")
+                     .arg(QLatin1String(APP_TARGET), QLatin1String(APP_VERSION), QLatin1String(APP_BUILD));
+#else  // ! defined(QT_DEBUG)
         texts << QLatin1String(APP_TARGET " " APP_VERSION APP_BUILD " \n");
 #endif // ! defined(QT_DEBUG)
         texts << QCoreApplication::translate("main", "Qt libraries %1 (compilation) %2 (runtime)\n",
-             "%1 and %2 are version numbers").arg(QLatin1String(QT_VERSION_STR), qVersion());
+                                             "%1 and %2 are version numbers")
+                     .arg(QLatin1String(QT_VERSION_STR), qVersion());
         texts << QCoreApplication::translate("main", "Copyright © 2008-2020  Mudlet developers\n");
-        texts << QCoreApplication::translate("main", "Licence GPLv2+: GNU GPL version 2 or later - http://gnu.org/licenses/gpl.html\n");
-        texts << QCoreApplication::translate("main", "This is free software: you are free to change and redistribute it.\n"
-                                                     "There is NO WARRANTY, to the extent permitted by law.\n");
+        texts << QCoreApplication::translate(
+            "main", "Licence GPLv2+: GNU GPL version 2 or later - http://gnu.org/licenses/gpl.html\n");
+        texts << QCoreApplication::translate("main",
+                                             "This is free software: you are free to change and redistribute it.\n"
+                                             "There is NO WARRANTY, to the extent permitted by law.\n");
         std::cout << texts.join(QString()).toStdString();
         return 0;
     }
@@ -259,24 +281,28 @@ int main(int argc, char* argv[])
      *******************************************************************/
     QString cliProfile = parser.value(profileToOpen);
 
-
     bool show_splash = !(parser.isSet(beQuiet)); // Not --quiet.
 #if defined(INCLUDE_VARIABLE_SPLASH_SCREEN)
-    QImage splashImage(mudlet::scmIsReleaseVersion ? QStringLiteral(":/Mudlet_splashscreen_main.png")
-                                                   : mudlet::scmIsPublicTestVersion ? QStringLiteral(":/Mudlet_splashscreen_ptb.png")
-                                                                                    : QStringLiteral(":/Mudlet_splashscreen_development.png"));
+    QImage splashImage(mudlet::scmIsReleaseVersion
+                           ? QStringLiteral(":/Mudlet_splashscreen_main.png")
+                           : mudlet::scmIsPublicTestVersion ? QStringLiteral(":/Mudlet_splashscreen_ptb.png")
+                                                            : QStringLiteral(":/Mudlet_splashscreen_development.png"));
 #else
     QImage splashImage(QStringLiteral(":/Mudlet_splashscreen_main.png"));
 #endif
 
-    if (show_splash) {
+    if (show_splash)
+    {
         QPainter painter(&splashImage);
         unsigned fontSize = 16;
-        QString sourceVersionText = QString(QCoreApplication::translate("main", "Version: %1").arg(APP_VERSION APP_BUILD));
+        QString sourceVersionText =
+            QString(QCoreApplication::translate("main", "Version: %1").arg(APP_VERSION APP_BUILD));
 
         bool isWithinSpace = false;
-        while (!isWithinSpace) {
-            QFont font("DejaVu Serif", fontSize, QFont::Bold | QFont::Serif | QFont::PreferMatch | QFont::PreferAntialias);
+        while (!isWithinSpace)
+        {
+            QFont font("DejaVu Serif", fontSize,
+                       QFont::Bold | QFont::Serif | QFont::PreferMatch | QFont::PreferAntialias);
             QTextLayout versionTextLayout(sourceVersionText, font, painter.device());
             versionTextLayout.beginLayout();
             // Start work in this text item
@@ -285,11 +311,12 @@ int main(int argc, char* argv[])
             // see how wide it is..., assuming actually that it will only take one
             // line of text
             versionTextline.setLineWidth(280);
-            //Splashscreen bitmap is (now) 320x360 - hopefully entire line will all fit into 280
+            // Splashscreen bitmap is (now) 320x360 - hopefully entire line will all fit into 280
             versionTextline.setPosition(QPointF(0, 0));
             // Only pretend, so we can see how much space it will take
             QTextLine dummy = versionTextLayout.createLine();
-            if (!dummy.isValid()) {
+            if (!dummy.isValid())
+            {
                 // No second line so have got all text in first so can do it
                 isWithinSpace = true;
                 qreal versionTextWidth = versionTextline.naturalTextWidth();
@@ -300,7 +327,9 @@ int main(int argc, char* argv[])
                 // end the layout process and paint it out
                 painter.setPen(QColor(176, 64, 0, 255)); // #b04000
                 versionTextLayout.draw(&painter, QPointF(0, 0));
-            } else {
+            }
+            else
+            {
                 // Too big - text has spilled over onto a second line - so try again
                 fontSize--;
                 versionTextLayout.clearLayout();
@@ -311,7 +340,8 @@ int main(int argc, char* argv[])
         // Repeat for other text, but we know it will fit at given size
         // PLACEMARKER: Date-stamp needing annual update
         QString sourceCopyrightText = QStringLiteral("©️ Mudlet makers 2008-2020");
-        QFont font(QStringLiteral("DejaVu Serif"), 16, QFont::Bold | QFont::Serif | QFont::PreferMatch | QFont::PreferAntialias);
+        QFont font(QStringLiteral("DejaVu Serif"), 16,
+                   QFont::Bold | QFont::Serif | QFont::PreferMatch | QFont::PreferAntialias);
         QTextLayout copyrightTextLayout(sourceCopyrightText, font, painter.device());
         copyrightTextLayout.beginLayout();
         QTextLine copyrightTextline = copyrightTextLayout.createLine();
@@ -325,7 +355,8 @@ int main(int argc, char* argv[])
     }
     QPixmap pixmap = QPixmap::fromImage(splashImage);
     QSplashScreen splash(pixmap);
-    if (show_splash) {
+    if (show_splash)
+    {
         splash.show();
     }
     app->processEvents();
@@ -336,24 +367,31 @@ int main(int argc, char* argv[])
     QString homeDirectory = mudlet::getMudletPath(mudlet::mainPath);
     QDir dir;
     bool first_launch = false;
-    if (!dir.exists(homeDirectory)) {
+    if (!dir.exists(homeDirectory))
+    {
         dir.mkpath(homeDirectory);
         first_launch = true;
     }
 
 #if defined(INCLUDE_FONTS)
-    QString bitstreamVeraFontDirectory(QStringLiteral("%1/ttf-bitstream-vera-1.10").arg(mudlet::getMudletPath(mudlet::mainFontsPath)));
-    if (!dir.exists(bitstreamVeraFontDirectory)) {
+    QString bitstreamVeraFontDirectory(
+        QStringLiteral("%1/ttf-bitstream-vera-1.10").arg(mudlet::getMudletPath(mudlet::mainFontsPath)));
+    if (!dir.exists(bitstreamVeraFontDirectory))
+    {
         dir.mkpath(bitstreamVeraFontDirectory);
     }
-    QString ubuntuFontDirectory(QStringLiteral("%1/ubuntu-font-family-0.83").arg(mudlet::getMudletPath(mudlet::mainFontsPath)));
-    if (!dir.exists(ubuntuFontDirectory)) {
+    QString ubuntuFontDirectory(
+        QStringLiteral("%1/ubuntu-font-family-0.83").arg(mudlet::getMudletPath(mudlet::mainFontsPath)));
+    if (!dir.exists(ubuntuFontDirectory))
+    {
         dir.mkpath(ubuntuFontDirectory);
     }
 #if defined(Q_OS_LINUX)
     // Only needed/works on Linux to provide color emojis:
-    QString notoFontDirectory(QStringLiteral("%1/noto-color-emoji-2019-11-19-unicode12").arg(mudlet::getMudletPath(mudlet::mainFontsPath)));
-    if (!dir.exists(notoFontDirectory)) {
+    QString notoFontDirectory(
+        QStringLiteral("%1/noto-color-emoji-2019-11-19-unicode12").arg(mudlet::getMudletPath(mudlet::mainFontsPath)));
+    if (!dir.exists(notoFontDirectory))
+    {
         dir.mkpath(notoFontDirectory);
     }
 #endif
@@ -370,10 +408,12 @@ int main(int argc, char* argv[])
     // but there is a term in the Ubuntu licence that makes them currently (and
     // for the prior seven years) not quite the right side of the Debian Free
     // Software Guidelines.
-    copyFont(bitstreamVeraFontDirectory, QLatin1String("fonts/ttf-bitstream-vera-1.10"), QLatin1String("COPYRIGHT.TXT"));
+    copyFont(bitstreamVeraFontDirectory, QLatin1String("fonts/ttf-bitstream-vera-1.10"),
+             QLatin1String("COPYRIGHT.TXT"));
     copyFont(bitstreamVeraFontDirectory, QLatin1String("fonts/ttf-bitstream-vera-1.10"), QLatin1String("local.conf"));
     copyFont(bitstreamVeraFontDirectory, QLatin1String("fonts/ttf-bitstream-vera-1.10"), QLatin1String("README.TXT"));
-    copyFont(bitstreamVeraFontDirectory, QLatin1String("fonts/ttf-bitstream-vera-1.10"), QLatin1String("RELEASENOTES.TXT"));
+    copyFont(bitstreamVeraFontDirectory, QLatin1String("fonts/ttf-bitstream-vera-1.10"),
+             QLatin1String("RELEASENOTES.TXT"));
     copyFont(bitstreamVeraFontDirectory, QLatin1String("fonts/ttf-bitstream-vera-1.10"), QLatin1String("Vera.ttf"));
     copyFont(bitstreamVeraFontDirectory, QLatin1String("fonts/ttf-bitstream-vera-1.10"), QLatin1String("VeraBd.ttf"));
     copyFont(bitstreamVeraFontDirectory, QLatin1String("fonts/ttf-bitstream-vera-1.10"), QLatin1String("VeraBI.ttf"));
@@ -407,9 +447,12 @@ int main(int argc, char* argv[])
     copyFont(ubuntuFontDirectory, QLatin1String("fonts/ubuntu-font-family-0.83"), QLatin1String("UbuntuMono-RI.ttf"));
 
 #if defined(Q_OS_LINUX)
-    copyFont(notoFontDirectory, QStringLiteral("fonts/noto-color-emoji-2019-11-19-unicode12"), QStringLiteral("NotoColorEmoji.ttf"));
-    copyFont(notoFontDirectory, QStringLiteral("fonts/noto-color-emoji-2019-11-19-unicode12"), QStringLiteral("LICENSE"));
-    copyFont(notoFontDirectory, QStringLiteral("fonts/noto-color-emoji-2019-11-19-unicode12"), QStringLiteral("README"));
+    copyFont(notoFontDirectory, QStringLiteral("fonts/noto-color-emoji-2019-11-19-unicode12"),
+             QStringLiteral("NotoColorEmoji.ttf"));
+    copyFont(notoFontDirectory, QStringLiteral("fonts/noto-color-emoji-2019-11-19-unicode12"),
+             QStringLiteral("LICENSE"));
+    copyFont(notoFontDirectory, QStringLiteral("fonts/noto-color-emoji-2019-11-19-unicode12"),
+             QStringLiteral("README"));
 #endif // defined(Q_OS_LINUX)
 #endif // defined(INCLUDE_FONTS)
 
@@ -431,25 +474,31 @@ int main(int argc, char* argv[])
      */
     QString homeLinkWindows = QStringLiteral("%1/mudlet-data.lnk").arg(QDir::homePath());
     QFile oldLinkFile(homeLink);
-    if (oldLinkFile.exists()) {
+    if (oldLinkFile.exists())
+    {
         // A One-time fix up past error that did not include the ".lnk" extension
         oldLinkFile.rename(homeLinkWindows);
-    } else {
+    }
+    else
+    {
         QFile linkFile(homeLinkWindows);
-        if (!linkFile.exists()) {
+        if (!linkFile.exists())
+        {
             QFile::link(homeDirectory, homeLinkWindows);
         }
     }
 #else
     QFile linkFile(homeLink);
-    if (!linkFile.exists() && first_launch) {
+    if (!linkFile.exists() && first_launch)
+    {
         QFile::link(homeDirectory, homeLink);
     }
 #endif
 
     mudlet::start();
 
-    if (first_launch) {
+    if (first_launch)
+    {
         // give Mudlet window decent size - most of the screen on non-HiDPI displays
         auto desktop = qApp->desktop();
         auto initialSpace = desktop->availableGeometry(desktop->screenNumber());
@@ -457,7 +506,8 @@ int main(int argc, char* argv[])
         mudlet::self()->move(initialSpace.width() / 8, initialSpace.height() / 8);
     }
 
-    if (show_splash) {
+    if (show_splash)
+    {
         splash.finish(mudlet::self());
     }
 
@@ -474,7 +524,8 @@ int main(int argc, char* argv[])
 #endif // INCLUDE_UPDATER
 
     QTimer::singleShot(2s, qApp, []() {
-        if (mudlet::self()->storingPasswordsSecurely()) {
+        if (mudlet::self()->storingPasswordsSecurely())
+        {
             mudlet::self()->migratePasswordsToSecureStorage();
         }
 
@@ -499,21 +550,27 @@ int main(int argc, char* argv[])
 bool runUpdate()
 {
     QFileInfo updatedInstaller(QCoreApplication::applicationDirPath() + QStringLiteral("/new-mudlet-setup.exe"));
-    QFileInfo seenUpdatedInstaller(QCoreApplication::applicationDirPath() + QStringLiteral("/new-mudlet-setup-seen.exe"));
+    QFileInfo seenUpdatedInstaller(QCoreApplication::applicationDirPath() +
+                                   QStringLiteral("/new-mudlet-setup-seen.exe"));
     QDir updateDir;
-    if (updatedInstaller.exists() && updatedInstaller.isFile() && updatedInstaller.isExecutable()) {
-        if (!updateDir.remove(seenUpdatedInstaller.absoluteFilePath())) {
+    if (updatedInstaller.exists() && updatedInstaller.isFile() && updatedInstaller.isExecutable())
+    {
+        if (!updateDir.remove(seenUpdatedInstaller.absoluteFilePath()))
+        {
             qWarning() << "Couldn't delete previous installer";
         }
 
-        if (!updateDir.rename(updatedInstaller.absoluteFilePath(), seenUpdatedInstaller.absoluteFilePath())) {
+        if (!updateDir.rename(updatedInstaller.absoluteFilePath(), seenUpdatedInstaller.absoluteFilePath()))
+        {
             qWarning() << "Failed to prep installer: couldn't rename it";
         }
 
         QProcess::startDetached(seenUpdatedInstaller.absoluteFilePath());
         return true;
-    } else if (seenUpdatedInstaller.exists() && !updateDir.remove(seenUpdatedInstaller.absoluteFilePath())) {
-         // no new updater and only the old one? Then we're restarting from an update: delete the old installer
+    }
+    else if (seenUpdatedInstaller.exists() && !updateDir.remove(seenUpdatedInstaller.absoluteFilePath()))
+    {
+        // no new updater and only the old one? Then we're restarting from an update: delete the old installer
         qWarning() << "Couldn't delete old uninstaller";
     }
     return false;

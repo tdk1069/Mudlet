@@ -38,39 +38,40 @@
 #define IRC_STATIC
 #if defined(IRC_SHARED)
 
-#  if defined(BUILD_IRC_CORE)
-#    define IRC_CORE_EXPORT Q_DECL_EXPORT
-#  else
-#    define IRC_CORE_EXPORT Q_DECL_IMPORT
-#  endif
+#if defined(BUILD_IRC_CORE)
+#define IRC_CORE_EXPORT Q_DECL_EXPORT
+#else
+#define IRC_CORE_EXPORT Q_DECL_IMPORT
+#endif
 
-#  if defined(BUILD_IRC_MODEL)
-#    define IRC_MODEL_EXPORT Q_DECL_EXPORT
-#  else
-#    define IRC_MODEL_EXPORT Q_DECL_IMPORT
-#  endif
+#if defined(BUILD_IRC_MODEL)
+#define IRC_MODEL_EXPORT Q_DECL_EXPORT
+#else
+#define IRC_MODEL_EXPORT Q_DECL_IMPORT
+#endif
 
-#  if defined(BUILD_IRC_UTIL)
-#    define IRC_UTIL_EXPORT Q_DECL_EXPORT
-#  else
-#    define IRC_UTIL_EXPORT Q_DECL_IMPORT
-#  endif
+#if defined(BUILD_IRC_UTIL)
+#define IRC_UTIL_EXPORT Q_DECL_EXPORT
+#else
+#define IRC_UTIL_EXPORT Q_DECL_IMPORT
+#endif
 
 #elif defined(IRC_STATIC) || defined(BUILD_IRC_CORE) || defined(BUILD_IRC_MODEL) || defined(BUILD_IRC_UTIL)
 
-#    define IRC_CORE_EXPORT
-#    define IRC_MODEL_EXPORT
-#    define IRC_UTIL_EXPORT
+#define IRC_CORE_EXPORT
+#define IRC_MODEL_EXPORT
+#define IRC_UTIL_EXPORT
 
 #else
-#  error Installation problem: either IRC_SHARED or IRC_STATIC must be defined!
+#error Installation problem: either IRC_SHARED or IRC_STATIC must be defined!
 #endif
 
 /*!
     \def IRC_VERSION
 
-    This macro expands a numeric value of the form 0xMMNNPP (MM = major, NN = minor, PP = patch) that specifies Communi's version number.
-    For example, if you compile your application against Communi 1.2.3, the IRC_VERSION macro will expand to 0x010203.
+    This macro expands a numeric value of the form 0xMMNNPP (MM = major, NN = minor, PP = patch) that specifies
+ Communi's version number. For example, if you compile your application against Communi 1.2.3, the IRC_VERSION macro
+ will expand to 0x010203.
 
     You can use IRC_VERSION to use the latest Communi features where available. For example:
     \code
@@ -96,21 +97,24 @@
 
 #ifdef IRC_NAMESPACE
 
-# define IRC_PREPEND_NAMESPACE(name) ::IRC_NAMESPACE::name
-# define IRC_USE_NAMESPACE using namespace ::IRC_NAMESPACE;
-# define IRC_BEGIN_NAMESPACE namespace IRC_NAMESPACE {
-# define IRC_END_NAMESPACE }
-# define IRC_FORWARD_DECLARE_CLASS(name) \
-    IRC_BEGIN_NAMESPACE class name; IRC_END_NAMESPACE \
+#define IRC_PREPEND_NAMESPACE(name) ::IRC_NAMESPACE::name
+#define IRC_USE_NAMESPACE using namespace ::IRC_NAMESPACE;
+#define IRC_BEGIN_NAMESPACE                                                                                            \
+    namespace IRC_NAMESPACE                                                                                            \
+    {
+#define IRC_END_NAMESPACE }
+#define IRC_FORWARD_DECLARE_CLASS(name)                                                                                \
+    IRC_BEGIN_NAMESPACE class name;                                                                                    \
+    IRC_END_NAMESPACE                                                                                                  \
     using IRC_PREPEND_NAMESPACE(name);
 
 #else
 
-# define IRC_PREPEND_NAMESPACE(name) ::name
-# define IRC_USE_NAMESPACE
-# define IRC_BEGIN_NAMESPACE
-# define IRC_END_NAMESPACE
-# define IRC_FORWARD_DECLARE_CLASS(name) class name;
+#define IRC_PREPEND_NAMESPACE(name) ::name
+#define IRC_USE_NAMESPACE
+#define IRC_BEGIN_NAMESPACE
+#define IRC_END_NAMESPACE
+#define IRC_FORWARD_DECLARE_CLASS(name) class name;
 
 #endif // IRC_NAMESPACE
 

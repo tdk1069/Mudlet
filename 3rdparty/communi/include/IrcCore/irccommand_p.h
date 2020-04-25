@@ -37,7 +37,7 @@ IRC_BEGIN_NAMESPACE
 
 class IrcCommandPrivate
 {
-public:
+  public:
     IrcCommandPrivate();
 
     QString params(int index) const;
@@ -47,12 +47,12 @@ public:
     QByteArray encoding;
     QPointer<IrcConnection> connection;
 
-    static IrcCommandPrivate* get(const IrcCommand* command)
+    static IrcCommandPrivate *get(const IrcCommand *command)
     {
         return command->d_ptr.data();
     }
 
-    static IrcCommand* createCommand(IrcCommand::Type type, const QStringList& parameters);
+    static IrcCommand *createCommand(IrcCommand::Type type, const QStringList &parameters);
 };
 
 IRC_END_NAMESPACE

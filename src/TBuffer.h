@@ -23,24 +23,23 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TTextCodec.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QApplication>
 #include <QChar>
 #include <QColor>
 #include <QDebug>
 #include <QMap>
-#include <QQueue>
 #include <QPoint>
 #include <QPointer>
+#include <QQueue>
 #include <QString>
 #include <QStringBuilder>
 #include <QStringList>
 #include <QTime>
 #include <QVector>
-#include "post_guard.h"
 
 #include <deque>
 #include <string>
@@ -52,8 +51,9 @@ class TChar
 {
     friend class TBuffer;
 
-public:
-    enum AttributeFlag {
+  public:
+    enum AttributeFlag
+    {
         None = 0x0,
         // Replaces TCHAR_BOLD 2
         Bold = 0x1,
@@ -79,41 +79,72 @@ public:
     Q_DECLARE_FLAGS(AttributeFlags, AttributeFlag)
 
     TChar();
-    TChar(const QColor& fg, const QColor& bg, const TChar::AttributeFlags flags = TChar::None, const int linkIndex = 0);
-    TChar(Host*);
-    TChar(const TChar&);
+    TChar(const QColor &fg, const QColor &bg, const TChar::AttributeFlags flags = TChar::None, const int linkIndex = 0);
+    TChar(Host *);
+    TChar(const TChar &);
 
-    bool operator==(const TChar&);
-    void setColors(const QColor& newForeGroundColor, const QColor& newBackGroundColor) {
+    bool operator==(const TChar &);
+    void setColors(const QColor &newForeGroundColor, const QColor &newBackGroundColor)
+    {
         mFgColor = newForeGroundColor;
         mBgColor = newBackGroundColor;
     }
     // Only considers the following flags: Bold, Italic, Overline, Reverse,
     // Strikeout, Underline, does not consider Echo:
-    void setAllDisplayAttributes(const AttributeFlags newDisplayAttributes) { mFlags = (mFlags & ~TestMask) | (newDisplayAttributes & TestMask); }
-    void setForeground(const QColor& newColor) { mFgColor = newColor; }
-    void setBackground(const QColor& newColor) { mBgColor = newColor; }
-    void setTextFormat(const QColor& newFgColor, const QColor& newBgColor, const AttributeFlags newDisplayAttributes) {
+    void setAllDisplayAttributes(const AttributeFlags newDisplayAttributes)
+    {
+        mFlags = (mFlags & ~TestMask) | (newDisplayAttributes & TestMask);
+    }
+    void setForeground(const QColor &newColor)
+    {
+        mFgColor = newColor;
+    }
+    void setBackground(const QColor &newColor)
+    {
+        mBgColor = newColor;
+    }
+    void setTextFormat(const QColor &newFgColor, const QColor &newBgColor, const AttributeFlags newDisplayAttributes)
+    {
         setColors(newFgColor, newBgColor);
         setAllDisplayAttributes(newDisplayAttributes);
     }
 
-    const QColor& foreground() const { return mFgColor; }
-    const QColor& background() const { return mBgColor; }
-    AttributeFlags allDisplayAttributes() const { return mFlags & TestMask; }
-    void select() { mIsSelected = true; }
-    void deselect() { mIsSelected = false; }
-    bool isSelected() const { return mIsSelected; }
-    int linkIndex () const { return mLinkIndex; }
+    const QColor &foreground() const
+    {
+        return mFgColor;
+    }
+    const QColor &background() const
+    {
+        return mBgColor;
+    }
+    AttributeFlags allDisplayAttributes() const
+    {
+        return mFlags & TestMask;
+    }
+    void select()
+    {
+        mIsSelected = true;
+    }
+    void deselect()
+    {
+        mIsSelected = false;
+    }
+    bool isSelected() const
+    {
+        return mIsSelected;
+    }
+    int linkIndex() const
+    {
+        return mLinkIndex;
+    }
 
-private:
+  private:
     QColor mFgColor;
     QColor mBgColor;
     AttributeFlags mFlags;
     // Kept as a separate flag because it must often be handled separately
     bool mIsSelected;
     int mLinkIndex;
-
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS(TChar::AttributeFlags)
 
@@ -132,17 +163,20 @@ enum TMXPMode
     MXP_MODE_TEMP_SECURE
 };
 
-struct MxpEvent {
+struct MxpEvent
+{
     QString name;
     QMap<QString, QString> attrs;
     QStringList actions;
 
     MxpEvent(QString name, QMap<QString, QString> attrs, QStringList actions)
-            : name(name), attrs(attrs), actions(actions)
-    {}
+        : name(name), attrs(attrs), actions(actions)
+    {
+    }
 };
 
-class TBuffer {
+class TBuffer
+{
     // private - a map of computer-friendly encoding names as keys,
     // value is the encoding data.
     // Look to mudlet::mEncodingNameTable for the GUI "human" names for the keys:
@@ -156,46 +190,61 @@ class TBuffer {
     // a line is usually set to wrap at 200 max
     inline static const int MAX_CHARACTERS_PER_ECHO = 10000;
 
-public:
-    TBuffer(Host* pH);
-    QPoint insert(QPoint&, const QString& text, int, int, int, int, int, int, bool bold, bool italics, bool underline, bool strikeout);
-    bool insertInLine(QPoint& cursor, const QString& what, TChar& format);
-    void expandLine(int y, int count, TChar&);
-    int wrapLine(int startLine, int screenWidth, int indentSize, TChar& format);
+  public:
+    TBuffer(Host *pH);
+    QPoint insert(QPoint &, const QString &text, int, int, int, int, int, int, bool bold, bool italics, bool underline,
+                  bool strikeout);
+    bool insertInLine(QPoint &cursor, const QString &what, TChar &format);
+    void expandLine(int y, int count, TChar &);
+    int wrapLine(int startLine, int screenWidth, int indentSize, TChar &format);
     void log(int, int);
     int skipSpacesAtBeginOfLine(const int row, const int column);
-    void addLink(bool, const QString& text, QStringList& command, QStringList& hint, TChar format);
-    QString bufferToHtml(const bool showTimeStamp = false, const int row = -1, const int endColumn = -1, const int startColumn = 0,  int spacePadding = 0);
-    int size() { return static_cast<int>(buffer.size()); }
-    QString& line(int n);
-    int find(int line, const QString& what, int pos);
+    void addLink(bool, const QString &text, QStringList &command, QStringList &hint, TChar format);
+    QString bufferToHtml(const bool showTimeStamp = false, const int row = -1, const int endColumn = -1,
+                         const int startColumn = 0, int spacePadding = 0);
+    int size()
+    {
+        return static_cast<int>(buffer.size());
+    }
+    QString &line(int n);
+    int find(int line, const QString &what, int pos);
     int wrap(int);
-    QStringList split(int line, const QString& splitter);
-    QStringList split(int line, const QRegularExpression& splitter);
-    bool replaceInLine(QPoint& start, QPoint& end, const QString& with, TChar& format);
+    QStringList split(int line, const QString &splitter);
+    QStringList split(int line, const QRegularExpression &splitter);
+    bool replaceInLine(QPoint &start, QPoint &end, const QString &with, TChar &format);
     bool deleteLine(int);
     bool deleteLines(int from, int to);
-    bool applyAttribute(const QPoint& P_begin, const QPoint& P_end, const TChar::AttributeFlags attributes, const bool state);
-    bool applyLink(const QPoint& P_begin, const QPoint& P_end, const QStringList& linkFunction, const QStringList& linkHist);
-    bool applyFgColor(const QPoint&, const QPoint&, const QColor&);
-    bool applyBgColor(const QPoint&, const QPoint&, const QColor&);
-    void appendBuffer(const TBuffer& chunk);
-    bool moveCursor(QPoint& where);
+    bool applyAttribute(const QPoint &P_begin, const QPoint &P_end, const TChar::AttributeFlags attributes,
+                        const bool state);
+    bool applyLink(const QPoint &P_begin, const QPoint &P_end, const QStringList &linkFunction,
+                   const QStringList &linkHist);
+    bool applyFgColor(const QPoint &, const QPoint &, const QColor &);
+    bool applyBgColor(const QPoint &, const QPoint &, const QColor &);
+    void appendBuffer(const TBuffer &chunk);
+    bool moveCursor(QPoint &where);
     int getLastLineNumber();
     QStringList getEndLines(int);
     void clear();
     QPoint getEndPos();
-    void translateToPlainText(std::string& s, bool isFromServer = false);
-    void append(const QString& chunk, int sub_start, int sub_end, const QColor& fg, const QColor& bg, const TChar::AttributeFlags flags = TChar::None, const int linkID = 0);
+    void translateToPlainText(std::string &s, bool isFromServer = false);
+    void append(const QString &chunk, int sub_start, int sub_end, const QColor &fg, const QColor &bg,
+                const TChar::AttributeFlags flags = TChar::None, const int linkID = 0);
     // Only the bits within TChar::TestMask are considered for formatting:
-    void append(const QString& chunk, const int sub_start, const int sub_end, const TChar format, const int linkID = 0);
-    void appendLine(const QString& chunk, const int sub_start, const int sub_end, const QColor& fg, const QColor& bg, TChar::AttributeFlags flags = TChar::None, const int linkID = 0);
-    void setWrapAt(int i) { mWrapAt = i; }
-    void setWrapIndent(int i) { mWrapIndent = i; }
+    void append(const QString &chunk, const int sub_start, const int sub_end, const TChar format, const int linkID = 0);
+    void appendLine(const QString &chunk, const int sub_start, const int sub_end, const QColor &fg, const QColor &bg,
+                    TChar::AttributeFlags flags = TChar::None, const int linkID = 0);
+    void setWrapAt(int i)
+    {
+        mWrapAt = i;
+    }
+    void setWrapIndent(int i)
+    {
+        mWrapIndent = i;
+    }
     void updateColors();
-    TBuffer copy(QPoint&, QPoint&);
-    TBuffer cut(QPoint&, QPoint&);
-    void paste(QPoint&, TBuffer);
+    TBuffer copy(QPoint &, QPoint &);
+    TBuffer cut(QPoint &, QPoint &);
+    void paste(QPoint &, TBuffer);
     void setBufferSize(int requestedLinesLimit, int batch);
     int getMaxBufferSize();
     static const QList<QByteArray> getEncodingNames();
@@ -203,7 +252,7 @@ public:
     // It would have been nice to do this with Qt's signals and slots but that
     // is apparently incompatible with using a default constructor - sigh!
     void encodingChanged(const QByteArray &);
-    static int lengthInGraphemes(const QString& text);
+    static int lengthInGraphemes(const QString &text);
 
     QQueue<MxpEvent> mMxpEvents;
 
@@ -272,19 +321,18 @@ public:
     std::string mAssembleRef;
     bool mEchoingText;
 
-
-private:
+  private:
     void shrinkBuffer();
     int calculateWrapPosition(int lineNumber, int begin, int end);
     void handleNewLine();
-    bool processUtf8Sequence(const std::string&, bool, size_t, size_t&, bool&);
-    bool processGBSequence(const std::string&, bool, bool, size_t, size_t&, bool&);
-    bool processBig5Sequence(const std::string&, bool, size_t, size_t&, bool&);
-    QString processSupportsRequest(const QString& attributes);
-    void decodeSGR(const QString&);
-    void decodeSGR38(const QStringList&, bool isColonSeparated = true);
-    void decodeSGR48(const QStringList&, bool isColonSeparated = true);
-    void decodeOSC(const QString&);
+    bool processUtf8Sequence(const std::string &, bool, size_t, size_t &, bool &);
+    bool processGBSequence(const std::string &, bool, bool, size_t, size_t &, bool &);
+    bool processBig5Sequence(const std::string &, bool, size_t, size_t &, bool &);
+    QString processSupportsRequest(const QString &attributes);
+    void decodeSGR(const QString &);
+    void decodeSGR38(const QStringList &, bool isColonSeparated = true);
+    void decodeSGR48(const QStringList &, bool isColonSeparated = true);
+    void decodeOSC(const QString &);
     void resetColors();
 
     static const int scmMaxLinks = 2000;
@@ -299,7 +347,6 @@ private:
     // ESC character followed by the ']' one:
     bool mGotOSC;
     bool mIsDefaultColor;
-
 
     QColor mBlack;
     QColor mLightBlack;
@@ -353,37 +400,44 @@ private:
     QString lastTextToLog;
 
     QByteArray mEncoding;
-    QTextCodec* mMainIncomingCodec;
+    QTextCodec *mMainIncomingCodec;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
 // Dumper for the TChar::AttributeFlags - so that qDebug gives a detailed broken
 // down results when presented with the value rather than just a hex value.
 // Note "inline" is REQUIRED:
-inline QDebug& operator<<(QDebug& debug, const TChar::AttributeFlags& attributes)
+inline QDebug &operator<<(QDebug &debug, const TChar::AttributeFlags &attributes)
 {
     QDebugStateSaver saver(debug);
     QString result = QLatin1String("TChar::AttributeFlags(");
     QStringList presentAttributes;
-    if (attributes & TChar::Bold) {
+    if (attributes & TChar::Bold)
+    {
         presentAttributes << QLatin1String("Bold (0x01)");
     }
-    if (attributes & TChar::Italic) {
+    if (attributes & TChar::Italic)
+    {
         presentAttributes << QLatin1String("Italic (0x02)");
     }
-    if (attributes & TChar::Underline) {
+    if (attributes & TChar::Underline)
+    {
         presentAttributes << QLatin1String("Underline (0x04)");
     }
-    if (attributes & TChar::Overline) {
+    if (attributes & TChar::Overline)
+    {
         presentAttributes << QLatin1String("Overline (0x08)");
     }
-    if (attributes & TChar::StrikeOut) {
+    if (attributes & TChar::StrikeOut)
+    {
         presentAttributes << QLatin1String("StrikeOut (0x10)");
     }
-    if (attributes & TChar::Reverse) {
+    if (attributes & TChar::Reverse)
+    {
         presentAttributes << QLatin1String("Reverse (0x20)");
     }
-    if (attributes & TChar::Echo) {
+    if (attributes & TChar::Echo)
+    {
         presentAttributes << QLatin1String("Echo (0x100)");
     }
     result.append(presentAttributes.join(", "));

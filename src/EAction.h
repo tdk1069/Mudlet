@@ -22,28 +22,26 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QAction>
 #include <QPointer>
-#include "post_guard.h"
 
 class Host;
 class mudlet;
-
 
 class EAction : public QAction
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(EAction)
-    EAction(QIcon&, QString&);
+    EAction(QIcon &, QString &);
 
-public slots:
+  public slots:
     void slot_execute(bool checked);
 
-public: // TODO: private:
+  public: // TODO: private:
     int mID;
     QPointer<Host> mpHost;
 };

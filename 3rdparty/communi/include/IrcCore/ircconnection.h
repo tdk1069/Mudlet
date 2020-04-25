@@ -32,11 +32,11 @@
 #include <IrcGlobal>
 #include <IrcMessage>
 #include <IrcNetwork>
-#include <QtCore/qobject.h>
-#include <QtCore/qvariant.h>
 #include <QtCore/qmetatype.h>
-#include <QtCore/qstringlist.h>
+#include <QtCore/qobject.h>
 #include <QtCore/qscopedpointer.h>
+#include <QtCore/qstringlist.h>
+#include <QtCore/qvariant.h>
 #include <QtNetwork/qabstractsocket.h>
 
 IRC_BEGIN_NAMESPACE
@@ -65,59 +65,60 @@ class IRC_CORE_EXPORT IrcConnection : public QObject
     Q_PROPERTY(bool connected READ isConnected NOTIFY statusChanged)
     Q_PROPERTY(bool enabled READ isEnabled WRITE setEnabled NOTIFY enabledChanged)
     Q_PROPERTY(int reconnectDelay READ reconnectDelay WRITE setReconnectDelay NOTIFY reconnectDelayChanged)
-    Q_PROPERTY(QAbstractSocket* socket READ socket WRITE setSocket)
+    Q_PROPERTY(QAbstractSocket *socket READ socket WRITE setSocket)
     Q_PROPERTY(bool secure READ isSecure WRITE setSecure NOTIFY secureChanged)
     Q_PROPERTY(bool secureSupported READ isSecureSupported)
     Q_PROPERTY(QString saslMechanism READ saslMechanism WRITE setSaslMechanism NOTIFY saslMechanismChanged)
     Q_PROPERTY(QStringList supportedSaslMechanisms READ supportedSaslMechanisms CONSTANT)
     Q_PROPERTY(QVariantMap ctcpReplies READ ctcpReplies WRITE setCtcpReplies NOTIFY ctcpRepliesChanged)
-    Q_PROPERTY(IrcNetwork* network READ network CONSTANT)
-    Q_PROPERTY(IrcProtocol* protocol READ protocol WRITE setProtocol)
+    Q_PROPERTY(IrcNetwork *network READ network CONSTANT)
+    Q_PROPERTY(IrcProtocol *protocol READ protocol WRITE setProtocol)
     Q_ENUMS(Status)
 
-public:
-    explicit IrcConnection(QObject* parent = 0);
-    explicit IrcConnection(const QString& host, QObject* parent = 0);
+  public:
+    explicit IrcConnection(QObject *parent = 0);
+    explicit IrcConnection(const QString &host, QObject *parent = 0);
     virtual ~IrcConnection();
 
-    Q_INVOKABLE IrcConnection* clone(QObject *parent = 0) const;
+    Q_INVOKABLE IrcConnection *clone(QObject *parent = 0) const;
 
     QString host() const;
-    void setHost(const QString& host);
+    void setHost(const QString &host);
 
     int port() const;
     void setPort(int port);
 
     QStringList servers() const;
-    void setServers(const QStringList& servers);
+    void setServers(const QStringList &servers);
 
-    Q_INVOKABLE static bool isValidServer(const QString& server);
+    Q_INVOKABLE static bool isValidServer(const QString &server);
 
     QString userName() const;
-    void setUserName(const QString& name);
+    void setUserName(const QString &name);
 
     QString nickName() const;
-    void setNickName(const QString& name);
+    void setNickName(const QString &name);
 
     QString realName() const;
-    void setRealName(const QString& name);
+    void setRealName(const QString &name);
 
     QString password() const;
-    void setPassword(const QString& password);
+    void setPassword(const QString &password);
 
     QStringList nickNames() const;
-    void setNickNames(const QStringList& names);
+    void setNickNames(const QStringList &names);
 
     QString displayName() const;
-    void setDisplayName(const QString& name);
+    void setDisplayName(const QString &name);
 
     QVariantMap userData() const;
-    void setUserData(const QVariantMap& data);
+    void setUserData(const QVariantMap &data);
 
     QByteArray encoding() const;
-    void setEncoding(const QByteArray& encoding);
+    void setEncoding(const QByteArray &encoding);
 
-    enum Status {
+    enum Status
+    {
         Inactive,
         Waiting,
         Connecting,
@@ -134,47 +135,47 @@ public:
     int reconnectDelay() const;
     void setReconnectDelay(int seconds);
 
-    QAbstractSocket* socket() const;
-    void setSocket(QAbstractSocket* socket);
+    QAbstractSocket *socket() const;
+    void setSocket(QAbstractSocket *socket);
 
     bool isSecure() const;
     void setSecure(bool secure);
     static bool isSecureSupported();
 
     QString saslMechanism() const;
-    void setSaslMechanism(const QString& mechanism);
+    void setSaslMechanism(const QString &mechanism);
 
     static QStringList supportedSaslMechanisms();
 
     QVariantMap ctcpReplies() const;
-    void setCtcpReplies(const QVariantMap& replies);
+    void setCtcpReplies(const QVariantMap &replies);
 
-    IrcNetwork* network() const;
+    IrcNetwork *network() const;
 
-    IrcProtocol* protocol() const;
-    void setProtocol(IrcProtocol* protocol);
+    IrcProtocol *protocol() const;
+    void setProtocol(IrcProtocol *protocol);
 
-    void installMessageFilter(QObject* filter);
-    void removeMessageFilter(QObject* filter);
+    void installMessageFilter(QObject *filter);
+    void removeMessageFilter(QObject *filter);
 
-    void installCommandFilter(QObject* filter);
-    void removeCommandFilter(QObject* filter);
+    void installCommandFilter(QObject *filter);
+    void removeCommandFilter(QObject *filter);
 
     Q_INVOKABLE QByteArray saveState(int version = 0) const;
-    Q_INVOKABLE bool restoreState(const QByteArray& state, int version = 0);
+    Q_INVOKABLE bool restoreState(const QByteArray &state, int version = 0);
 
-public Q_SLOTS:
+  public Q_SLOTS:
     void open();
     void close();
-    void quit(const QString& reason = QString());
+    void quit(const QString &reason = QString());
     void setEnabled(bool enabled = true);
     void setDisabled(bool disabled = true);
 
-    bool sendCommand(IrcCommand* command);
-    bool sendData(const QByteArray& data);
-    bool sendRaw(const QString& message);
+    bool sendCommand(IrcCommand *command);
+    bool sendData(const QByteArray &data);
+    bool sendRaw(const QString &message);
 
-Q_SIGNALS:
+  Q_SIGNALS:
     void connecting();
     void connected();
     void disconnected();
@@ -183,59 +184,59 @@ Q_SIGNALS:
     void socketStateChanged(QAbstractSocket::SocketState state);
     void secureError();
 
-    void nickNameReserved(QString* alternate); // deprecated
-    void nickNameRequired(const QString& reserved, QString* alternate);
-    void channelKeyRequired(const QString& channel, QString* key);
+    void nickNameReserved(QString *alternate); // deprecated
+    void nickNameRequired(const QString &reserved, QString *alternate);
+    void channelKeyRequired(const QString &channel, QString *key);
 
-    void messageReceived(IrcMessage* message);
+    void messageReceived(IrcMessage *message);
 
-    void accountMessageReceived(IrcAccountMessage* message);
-    void awayMessageReceived(IrcAwayMessage* message);
-    void batchMessageReceived(IrcBatchMessage* message);
-    void capabilityMessageReceived(IrcCapabilityMessage* message);
-    void errorMessageReceived(IrcErrorMessage* message);
-    void hostChangeMessageReceived(IrcHostChangeMessage* message);
-    void inviteMessageReceived(IrcInviteMessage* message);
-    void joinMessageReceived(IrcJoinMessage* message);
-    void kickMessageReceived(IrcKickMessage* message);
-    void modeMessageReceived(IrcModeMessage* message);
-    void motdMessageReceived(IrcMotdMessage* message);
-    void namesMessageReceived(IrcNamesMessage* message);
-    void nickMessageReceived(IrcNickMessage* message);
-    void noticeMessageReceived(IrcNoticeMessage* message);
-    void numericMessageReceived(IrcNumericMessage* message);
-    void partMessageReceived(IrcPartMessage* message);
-    void pingMessageReceived(IrcPingMessage* message);
-    void pongMessageReceived(IrcPongMessage* message);
-    void privateMessageReceived(IrcPrivateMessage* message);
-    void quitMessageReceived(IrcQuitMessage* message);
-    void topicMessageReceived(IrcTopicMessage* message);
-    void whoisMessageReceived(IrcWhoisMessage* message);
-    void whowasMessageReceived(IrcWhowasMessage* message);
-    void whoReplyMessageReceived(IrcWhoReplyMessage* message);
+    void accountMessageReceived(IrcAccountMessage *message);
+    void awayMessageReceived(IrcAwayMessage *message);
+    void batchMessageReceived(IrcBatchMessage *message);
+    void capabilityMessageReceived(IrcCapabilityMessage *message);
+    void errorMessageReceived(IrcErrorMessage *message);
+    void hostChangeMessageReceived(IrcHostChangeMessage *message);
+    void inviteMessageReceived(IrcInviteMessage *message);
+    void joinMessageReceived(IrcJoinMessage *message);
+    void kickMessageReceived(IrcKickMessage *message);
+    void modeMessageReceived(IrcModeMessage *message);
+    void motdMessageReceived(IrcMotdMessage *message);
+    void namesMessageReceived(IrcNamesMessage *message);
+    void nickMessageReceived(IrcNickMessage *message);
+    void noticeMessageReceived(IrcNoticeMessage *message);
+    void numericMessageReceived(IrcNumericMessage *message);
+    void partMessageReceived(IrcPartMessage *message);
+    void pingMessageReceived(IrcPingMessage *message);
+    void pongMessageReceived(IrcPongMessage *message);
+    void privateMessageReceived(IrcPrivateMessage *message);
+    void quitMessageReceived(IrcQuitMessage *message);
+    void topicMessageReceived(IrcTopicMessage *message);
+    void whoisMessageReceived(IrcWhoisMessage *message);
+    void whowasMessageReceived(IrcWhowasMessage *message);
+    void whoReplyMessageReceived(IrcWhoReplyMessage *message);
 
-    void hostChanged(const QString& host);
+    void hostChanged(const QString &host);
     void portChanged(int port);
-    void serversChanged(const QStringList& servers);
-    void userNameChanged(const QString& name);
-    void nickNameChanged(const QString& name);
-    void realNameChanged(const QString& name);
-    void passwordChanged(const QString& password);
-    void nickNamesChanged(const QStringList& names);
-    void displayNameChanged(const QString& name);
-    void userDataChanged(const QVariantMap& data);
+    void serversChanged(const QStringList &servers);
+    void userNameChanged(const QString &name);
+    void nickNameChanged(const QString &name);
+    void realNameChanged(const QString &name);
+    void passwordChanged(const QString &password);
+    void nickNamesChanged(const QStringList &names);
+    void displayNameChanged(const QString &name);
+    void userDataChanged(const QVariantMap &data);
     void reconnectDelayChanged(int seconds);
     void enabledChanged(bool enabled);
     void secureChanged(bool secure);
-    void saslMechanismChanged(const QString& mechanism);
-    void ctcpRepliesChanged(const QVariantMap& replies);
+    void saslMechanismChanged(const QString &mechanism);
+    void ctcpRepliesChanged(const QVariantMap &replies);
 
-    void destroyed(IrcConnection* connection);
+    void destroyed(IrcConnection *connection);
 
-protected Q_SLOTS:
-    virtual IrcCommand* createCtcpReply(IrcPrivateMessage* request) const;
+  protected Q_SLOTS:
+    virtual IrcCommand *createCtcpReply(IrcPrivateMessage *request) const;
 
-private:
+  private:
     friend class IrcProtocol;
     friend class IrcProtocolPrivate;
     QScopedPointer<IrcConnectionPrivate> d_ptr;
@@ -249,17 +250,17 @@ private:
     Q_PRIVATE_SLOT(d_func(), void _irc_sslErrors())
     Q_PRIVATE_SLOT(d_func(), void _irc_reconnect())
     Q_PRIVATE_SLOT(d_func(), void _irc_readData())
-    Q_PRIVATE_SLOT(d_func(), void _irc_filterDestroyed(QObject*))
+    Q_PRIVATE_SLOT(d_func(), void _irc_filterDestroyed(QObject *))
 };
 
 #ifndef QT_NO_DEBUG_STREAM
 IRC_CORE_EXPORT QDebug operator<<(QDebug debug, IrcConnection::Status status);
-IRC_CORE_EXPORT QDebug operator<<(QDebug debug, const IrcConnection* connection);
+IRC_CORE_EXPORT QDebug operator<<(QDebug debug, const IrcConnection *connection);
 #endif // QT_NO_DEBUG_STREAM
 
 IRC_END_NAMESPACE
 
-Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcConnection*))
+Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcConnection *))
 Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcConnection::Status))
 
 #endif // IRCCONNECTION_H

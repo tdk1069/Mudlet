@@ -29,19 +29,21 @@
 #ifndef IRCCOMMANDPARSER_P_H
 #define IRCCOMMANDPARSER_P_H
 
-#include "irccommandparser.h"
 #include "irccommand.h"
+#include "irccommandparser.h"
 
 #include <QList>
-#include <QString>
 #include <QMultiMap>
+#include <QString>
 #include <QStringList>
 
 IRC_BEGIN_NAMESPACE
 
 struct IrcParameterInfo
 {
-    IrcParameterInfo() : optional(false), channel(false), current(false), multi(false) { }
+    IrcParameterInfo() : optional(false), channel(false), current(false), multi(false)
+    {
+    }
     bool optional;
     bool channel;
     bool current;
@@ -52,7 +54,9 @@ struct IrcParameterInfo
 
 struct IrcCommandInfo
 {
-    IrcCommandInfo() : type(IrcCommand::Custom), min(0), max(0) { }
+    IrcCommandInfo() : type(IrcCommand::Custom), min(0), max(0)
+    {
+    }
 
     QString fullSyntax()
     {
@@ -68,18 +72,18 @@ struct IrcCommandInfo
 
 class IrcCommandParserPrivate
 {
-public:
+  public:
     IrcCommandParserPrivate();
 
-    QList<IrcCommandInfo> find(const QString& command) const;
-    static IrcCommandInfo parseSyntax(IrcCommand::Type type, const QString& syntax);
-    IrcCommand* parseCommand(const IrcCommandInfo& command, const QString& input) const;
-    bool processParameters(const IrcCommandInfo& command, const QString& input, QStringList* params) const;
-    bool processCommand(QString* input, int* removed = 0) const;
-    bool processMessage(QString* input, int* removed = 0) const;
+    QList<IrcCommandInfo> find(const QString &command) const;
+    static IrcCommandInfo parseSyntax(IrcCommand::Type type, const QString &syntax);
+    IrcCommand *parseCommand(const IrcCommandInfo &command, const QString &input) const;
+    bool processParameters(const IrcCommandInfo &command, const QString &input, QStringList *params) const;
+    bool processCommand(QString *input, int *removed = 0) const;
+    bool processMessage(QString *input, int *removed = 0) const;
     bool onChannel() const;
 
-    static IrcCommandParserPrivate* get(IrcCommandParser* parser)
+    static IrcCommandParserPrivate *get(IrcCommandParser *parser)
     {
         return parser->d_func();
     }

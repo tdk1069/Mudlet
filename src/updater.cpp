@@ -25,11 +25,11 @@
 #include "../3rdparty/sparkle-glue/SparkleAutoUpdater.h"
 #endif
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QPushButton>
 #include <QtConcurrent>
 #include <chrono>
-#include "post_guard.h"
 
 using namespace std::chrono_literals;
 
@@ -41,18 +41,18 @@ using namespace std::chrono_literals;
 //   and promptly quits. Installer updates Mudlet and launches Mudlet when its done
 // mac: handled completely outside of Mudlet by Sparkle
 
-Updater::Updater(QObject* parent, QSettings* settings) : QObject(parent)
-, updateDialog(nullptr)
-, mpInstallOrRestart(new QPushButton(tr("Update")))
-, mUpdateInstalled(false)
+Updater::Updater(QObject *parent, QSettings *settings)
+    : QObject(parent), updateDialog(nullptr), mpInstallOrRestart(new QPushButton(tr("Update"))), mUpdateInstalled(false)
 {
     Q_ASSERT_X(settings, "updater", "QSettings object is required for the updater to work");
     this->settings = settings;
 
     feed = new dblsqd::Feed(QStringLiteral("https://feeds.dblsqd.com/MKMMR7HNSP65PquQQbiDIw"),
-                            mudlet::scmIsPublicTestVersion ? QStringLiteral("public-test-build") : QStringLiteral("release"));
+                            mudlet::scmIsPublicTestVersion ? QStringLiteral("public-test-build")
+                                                           : QStringLiteral("release"));
 
-    if (!mDailyCheck) {
+    if (!mDailyCheck)
+    {
         mDailyCheck = std::make_unique<QTimer>();
     }
 }
@@ -76,15 +76,20 @@ void Updater::checkUpdatesOnStart()
 
     mDailyCheck->setInterval(12h);
     QObject::connect(mDailyCheck.get(), &QTimer::timeout, this, [this] {
-          auto updates = feed->getUpdates(dblsqd::Release::getCurrentRelease());
-          qWarning() << "Daily check for updates:" << updates.size() << "update(s) available";
-          if (updates.isEmpty()) {
-              return;
-          } else if (!updateAutomatically()) {
-              emit signal_updateAvailable(updates.size());
-          } else {
-              feed->downloadRelease(updates.first());
-          }
+        auto updates = feed->getUpdates(dblsqd::Release::getCurrentRelease());
+        qWarning() << "Daily check for updates:" << updates.size() << "update(s) available";
+        if (updates.isEmpty())
+        {
+            return;
+        }
+        else if (!updateAutomatically())
+        {
+            emit signal_updateAvailable(updates.size());
+        }
+        else
+        {
+            feed->downloadRelease(updates.first());
+        }
     });
     mDailyCheck->start();
 }
@@ -129,9 +134,11 @@ void Updater::showChangelog() const
 void Updater::finishSetup()
 {
 #if defined(Q_OS_LINUX)
-    qWarning() << "Successfully updated Mudlet to" << feed->getUpdates(dblsqd::Release::getCurrentRelease()).constFirst().getVersion();
+    qWarning() << "Successfully updated Mudlet to"
+               << feed->getUpdates(dblsqd::Release::getCurrentRelease()).constFirst().getVersion();
 #elif defined(Q_OS_WIN32)
-    qWarning() << "Mudlet prepped to update to" << feed->getUpdates(dblsqd::Release::getCurrentRelease()).first().getVersion() << "on restart";
+    qWarning() << "Mudlet prepped to update to"
+               << feed->getUpdates(dblsqd::Release::getCurrentRelease()).first().getVersion() << "on restart";
 #endif
     recordUpdateTime();
     recordUpdatedVersion();
@@ -143,7 +150,8 @@ void Updater::finishSetup()
 void Updater::setupOnMacOS()
 {
     CocoaInitializer initializer;
-    msparkleUpdater = new SparkleAutoUpdater(QStringLiteral("https://feeds.dblsqd.com/MKMMR7HNSP65PquQQbiDIw/release/mac/x86_64/appcast"));
+    msparkleUpdater = new SparkleAutoUpdater(
+        QStringLiteral("https://feeds.dblsqd.com/MKMMR7HNSP65PquQQbiDIw/release/mac/x86_64/appcast"));
     // don't need to explicitly check for updates - sparkle will do so on its own
 }
 #endif // Q_OS_MACOS
@@ -153,17 +161,23 @@ void Updater::setupOnWindows()
 {
     // Setup to automatically download the new release when an update is available
     QObject::connect(feed, &dblsqd::Feed::ready, [=]() {
-        if (mudlet::scmIsDevelopmentVersion) {
+        if (mudlet::scmIsDevelopmentVersion)
+        {
             return;
         }
 
         auto updates = feed->getUpdates(dblsqd::Release::getCurrentRelease());
         qWarning() << "Checked for updates:" << updates.size() << "update(s) available";
-        if (updates.isEmpty()) {
+        if (updates.isEmpty())
+        {
             return;
-        } else if (!updateAutomatically()) {
+        }
+        else if (!updateAutomatically())
+        {
             emit signal_updateAvailable(updates.size());
-        } else {
+        }
+        else
+        {
             feed->downloadRelease(updates.first());
         }
     });
@@ -171,11 +185,13 @@ void Updater::setupOnWindows()
     // Setup to run setup.exe to replace the old installation
     QObject::connect(feed, &dblsqd::Feed::downloadFinished, [=]() {
         // if automatic updates are enabled, and this isn't a manual check, perform the automatic update
-        if (!(updateAutomatically() && updateDialog->isHidden())) {
+        if (!(updateAutomatically() && updateDialog->isHidden()))
+        {
             return;
         }
 
-        QFuture<void> future = QtConcurrent::run(this, &Updater::prepareSetupOnWindows, feed->getDownloadFile()->fileName());
+        QFuture<void> future =
+            QtConcurrent::run(this, &Updater::prepareSetupOnWindows, feed->getDownloadFile()->fileName());
 
         // replace current binary with the unzipped one
         auto watcher = new QFutureWatcher<void>;
@@ -184,7 +200,9 @@ void Updater::setupOnWindows()
     });
 
     // finally, create the dblsqd objects. Constructing the UpdateDialog triggers the update check
-    updateDialog = new dblsqd::UpdateDialog(feed, updateAutomatically() ? dblsqd::UpdateDialog::OnLastWindowClosed : dblsqd::UpdateDialog::Manual, nullptr, settings);
+    updateDialog = new dblsqd::UpdateDialog(
+        feed, updateAutomatically() ? dblsqd::UpdateDialog::OnLastWindowClosed : dblsqd::UpdateDialog::Manual, nullptr,
+        settings);
     mpInstallOrRestart->setText(tr("Update"));
     updateDialog->addInstallButton(mpInstallOrRestart);
     connect(updateDialog, &dblsqd::UpdateDialog::installButtonClicked, this, &Updater::installOrRestartClicked);
@@ -192,17 +210,19 @@ void Updater::setupOnWindows()
 
 // moved the new updater to the same directory as mudlet.exe so it is run on the next
 // launch. Don't run it ourselves right now since it insists on launching Mudlet when it's done
-void Updater::prepareSetupOnWindows(const QString& downloadedSetupName)
+void Updater::prepareSetupOnWindows(const QString &downloadedSetupName)
 {
     QDir dir;
     auto newPath = QString(QCoreApplication::applicationDirPath() + QStringLiteral("/new-mudlet-setup.exe"));
     QFileInfo newPathFileInfo(newPath);
-    if (newPathFileInfo.exists() && !dir.remove(newPathFileInfo.absoluteFilePath())) {
+    if (newPathFileInfo.exists() && !dir.remove(newPathFileInfo.absoluteFilePath()))
+    {
         qDebug() << "Couldn't delete the old installer";
     }
 
     // dir.rename actually moves a file
-    if (!dir.rename(downloadedSetupName, newPath)) {
+    if (!dir.rename(downloadedSetupName, newPath))
+    {
         qWarning() << "Moving new installer into " << newPath << "failed";
         return;
     }
@@ -218,18 +238,24 @@ void Updater::setupOnLinux()
     QObject::connect(feed, &dblsqd::Feed::ready, this, [=]() {
         // don't update development builds to prevent auto-update from overwriting your
         // compiled binary while in development
-        if (mudlet::scmIsDevelopmentVersion) {
+        if (mudlet::scmIsDevelopmentVersion)
+        {
             return;
         }
 
         auto updates = feed->getUpdates(dblsqd::Release::getCurrentRelease());
         qWarning() << "Checked for updates:" << updates.size() << "update(s) available";
-        if (updates.isEmpty()) {
+        if (updates.isEmpty())
+        {
             return;
-        } else if (!updateAutomatically()) {
+        }
+        else if (!updateAutomatically())
+        {
             emit signal_updateAvailable(updates.size());
             return;
-        } else {
+        }
+        else
+        {
             feed->downloadRelease(updates.first());
         }
     });
@@ -237,7 +263,8 @@ void Updater::setupOnLinux()
     // Setup to unzip and replace old binary when the download is done
     QObject::connect(feed, &dblsqd::Feed::downloadFinished, this, [=]() {
         // if automatic updates are enabled, and this isn't a manual check, perform the automatic update
-        if (!(updateAutomatically() && updateDialog->isHidden())) {
+        if (!(updateAutomatically() && updateDialog->isHidden()))
+        {
             return;
         }
 
@@ -250,24 +277,32 @@ void Updater::setupOnLinux()
     });
 
     // finally, create the dblsqd objects. Constructing the UpdateDialog triggers the update check
-    updateDialog = new dblsqd::UpdateDialog(feed, updateAutomatically() ? dblsqd::UpdateDialog::OnLastWindowClosed : dblsqd::UpdateDialog::Manual, nullptr, settings);
+    updateDialog = new dblsqd::UpdateDialog(
+        feed, updateAutomatically() ? dblsqd::UpdateDialog::OnLastWindowClosed : dblsqd::UpdateDialog::Manual, nullptr,
+        settings);
     mpInstallOrRestart->setText(tr("Update"));
     updateDialog->addInstallButton(mpInstallOrRestart);
     connect(updateDialog, &dblsqd::UpdateDialog::installButtonClicked, this, &Updater::installOrRestartClicked);
 }
 
-void Updater::untarOnLinux(const QString& fileName)
+void Updater::untarOnLinux(const QString &fileName)
 {
-    Q_ASSERT_X(QThread::currentThread() != QCoreApplication::instance()->thread(), "untarOnLinux", "method should not be called in the main GUI thread to avoid a degradation in UX");
+    Q_ASSERT_X(QThread::currentThread() != QCoreApplication::instance()->thread(), "untarOnLinux",
+               "method should not be called in the main GUI thread to avoid a degradation in UX");
 
     QProcess tar;
     tar.setProcessChannelMode(QProcess::MergedChannels);
     // we can assume tar to be present on a Linux system. If it's not, it'd be rather broken.
     // tar output folder has to end with a slash
-    tar.start(QStringLiteral("tar"), QStringList() << QStringLiteral("-xvf") << fileName << QStringLiteral("-C") << QStandardPaths::writableLocation(QStandardPaths::TempLocation) + QStringLiteral("/"));
-    if (!tar.waitForFinished()) {
+    tar.start(QStringLiteral("tar"),
+              QStringList() << QStringLiteral("-xvf") << fileName << QStringLiteral("-C")
+                            << QStandardPaths::writableLocation(QStandardPaths::TempLocation) + QStringLiteral("/"));
+    if (!tar.waitForFinished())
+    {
         qWarning() << "Untarring" << fileName << "failed:" << tar.errorString();
-    } else {
+    }
+    else
+    {
         unzippedBinaryName = tar.readAll().trimmed();
     }
 }
@@ -276,24 +311,27 @@ void Updater::updateBinaryOnLinux()
 {
     QFileInfo unzippedBinary(QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/" + unzippedBinaryName);
     auto systemEnvironment = QProcessEnvironment::systemEnvironment();
-    auto appimageLocation = systemEnvironment.contains(QStringLiteral("APPIMAGE")) ?
-                systemEnvironment.value(QStringLiteral("APPIMAGE"), QString()) :
-                QCoreApplication::applicationFilePath();
+    auto appimageLocation = systemEnvironment.contains(QStringLiteral("APPIMAGE"))
+                                ? systemEnvironment.value(QStringLiteral("APPIMAGE"), QString())
+                                : QCoreApplication::applicationFilePath();
 
-    const QString& installedBinaryPath(appimageLocation);
+    const QString &installedBinaryPath(appimageLocation);
 
     auto executablePermissions = unzippedBinary.permissions();
     executablePermissions |= QFileDevice::ExeOwner | QFileDevice::ExeUser;
 
     QDir dir;
     // dir.rename actually moves a file
-    if (!(dir.remove(installedBinaryPath) && dir.rename(unzippedBinary.filePath(), installedBinaryPath))) {
-        qWarning() << "updating" << installedBinaryPath << "with new version from" << unzippedBinary.filePath() << "failed";
+    if (!(dir.remove(installedBinaryPath) && dir.rename(unzippedBinary.filePath(), installedBinaryPath)))
+    {
+        qWarning() << "updating" << installedBinaryPath << "with new version from" << unzippedBinary.filePath()
+                   << "failed";
         return;
     }
 
     QFile updatedBinary(appimageLocation);
-    if (!updatedBinary.setPermissions(executablePermissions)) {
+    if (!updatedBinary.setPermissions(executablePermissions))
+    {
         qWarning() << "couldn't set executable permissions on updated Mudlet binary at" << installedBinaryPath;
         return;
     }
@@ -302,7 +340,7 @@ void Updater::updateBinaryOnLinux()
 }
 #endif // Q_OS_LINUX
 
-void Updater::installOrRestartClicked(QAbstractButton* button, const QString& filePath)
+void Updater::installOrRestartClicked(QAbstractButton *button, const QString &filePath)
 {
     Q_UNUSED(button)
 
@@ -311,7 +349,8 @@ void Updater::installOrRestartClicked(QAbstractButton* button, const QString& fi
 #if !defined(Q_OS_MACOS)
 
     // if the update is already installed, then the button says 'Restart' - do so
-    if (mUpdateInstalled) {
+    if (mUpdateInstalled)
+    {
         // timer is necessary as calling close right way doesn't seem to do the trick
         QTimer::singleShot(0, this, [=]() {
             updateDialog->close();
@@ -320,7 +359,8 @@ void Updater::installOrRestartClicked(QAbstractButton* button, const QString& fi
 
         // if the updater is launched manually instead of when Mudlet is quit,
         // close Mudlet ourselves
-        if (mudlet::self()) {
+        if (mudlet::self())
+        {
             mudlet::self()->forceClose();
         }
         QProcess::startDetached(qApp->arguments()[0], qApp->arguments());
@@ -358,13 +398,15 @@ void Updater::recordUpdateTime() const
 {
     QFile file(mudlet::getMudletPath(mudlet::mainDataItemPath, QStringLiteral("mudlet_updated_at")));
     bool opened = file.open(QIODevice::WriteOnly);
-    if (!opened) {
+    if (!opened)
+    {
         qWarning() << "Couldn't open update timestamp file for writing.";
         return;
     }
 
     QDataStream ifs(&file);
-    if (mudlet::scmRunTimeQtVersion >= QVersionNumber(5, 13, 0)) {
+    if (mudlet::scmRunTimeQtVersion >= QVersionNumber(5, 13, 0))
+    {
         ifs.setVersion(mudlet::scmQDataStreamFormat_5_12);
     }
     ifs << QDateTime::currentDateTime().toMSecsSinceEpoch();
@@ -377,13 +419,15 @@ void Updater::recordUpdatedVersion() const
 {
     QFile file(mudlet::getMudletPath(mudlet::mainDataItemPath, QStringLiteral("mudlet_updated_from")));
     bool opened = file.open(QIODevice::WriteOnly);
-    if (!opened) {
+    if (!opened)
+    {
         qWarning() << "Couldn't open update version file for writing.";
         return;
     }
 
     QDataStream ifs(&file);
-    if (mudlet::scmRunTimeQtVersion >= QVersionNumber(5, 13, 0)) {
+    if (mudlet::scmRunTimeQtVersion >= QVersionNumber(5, 13, 0))
+    {
         ifs.setVersion(mudlet::scmQDataStreamFormat_5_12);
     }
     ifs << APP_VERSION;
@@ -400,19 +444,22 @@ bool Updater::shouldShowChangelog()
     return false;
 #endif
 
-    if (mudlet::scmIsDevelopmentVersion || !updateAutomatically()) {
+    if (mudlet::scmIsDevelopmentVersion || !updateAutomatically())
+    {
         return false;
     }
 
     QFile file(mudlet::self()->getMudletPath(mudlet::mainDataItemPath, QStringLiteral("mudlet_updated_at")));
     bool opened = file.open(QIODevice::ReadOnly);
     qint64 updateTimestamp;
-    if (!opened) {
+    if (!opened)
+    {
         file.remove();
         return false;
     }
     QDataStream ifs(&file);
-    if (mudlet::scmRunTimeQtVersion >= QVersionNumber(5, 13, 0)) {
+    if (mudlet::scmRunTimeQtVersion >= QVersionNumber(5, 13, 0))
+    {
         ifs.setVersion(mudlet::scmQDataStreamFormat_5_12);
     }
     ifs >> updateTimestamp;
@@ -435,12 +482,14 @@ QString Updater::getPreviousVersion() const
     QFile file(mudlet::self()->getMudletPath(mudlet::mainDataItemPath, QStringLiteral("mudlet_updated_from")));
     bool opened = file.open(QIODevice::ReadOnly);
     QString previousVersion;
-    if (!opened) {
+    if (!opened)
+    {
         file.remove();
         return QString();
     }
     QDataStream ifs(&file);
-    if (mudlet::scmRunTimeQtVersion >= QVersionNumber(5, 13, 0)) {
+    if (mudlet::scmRunTimeQtVersion >= QVersionNumber(5, 13, 0))
+    {
         ifs.setVersion(mudlet::scmQDataStreamFormat_5_12);
     }
     ifs >> previousVersion;

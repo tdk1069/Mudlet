@@ -27,19 +27,19 @@
 */
 
 #include "irccompleter.h"
+#include "ircbuffermodel.h"
+#include "ircchannel.h"
 #include "irccommandparser.h"
 #include "irccommandparser_p.h"
-#include "ircbuffermodel.h"
-#include "ircusermodel.h"
 #include "ircnetwork.h"
-#include "ircchannel.h"
 #include "irctoken_p.h"
 #include "ircuser.h"
+#include "ircusermodel.h"
 
-#include <QTextBoundaryFinder>
-#include <QPointer>
 #include <QList>
 #include <QPair>
+#include <QPointer>
+#include <QTextBoundaryFinder>
 
 IRC_BEGIN_NAMESPACE
 
@@ -95,15 +95,19 @@ IRC_BEGIN_NAMESPACE
 
 #ifndef IRC_DOXYGEN
 
-static bool isPrefixed(const QString& text, int pos, const QStringList& prefixes, int* len)
+static bool isPrefixed(const QString &text, int pos, const QStringList &prefixes, int *len)
 {
-    foreach (const QString& prefix, prefixes) {
+    foreach (const QString &prefix, prefixes)
+    {
         const int ll = prefix.length();
-        if (text.mid(pos, ll) == prefix) {
+        if (text.mid(pos, ll) == prefix)
+        {
             if (len)
                 *len = 0;
             return true;
-        } else if (text.mid(pos - ll, ll) == prefix) {
+        }
+        else if (text.mid(pos - ll, ll) == prefix)
+        {
             if (len)
                 *len = ll;
             return true;
@@ -114,11 +118,24 @@ static bool isPrefixed(const QString& text, int pos, const QStringList& prefixes
 
 struct IrcCompletion
 {
-    IrcCompletion() : text(), cursor(-1) { }
-    IrcCompletion(const QString& txt, int pos) : text(txt), cursor(pos) { }
-    bool isValid() const { return !text.isNull() && cursor != -1; }
-    bool operator ==(const IrcCompletion& other) const { return text == other.text && cursor == other.cursor; }
-    bool operator !=(const IrcCompletion& other) const { return text != other.text || cursor != other.cursor; }
+    IrcCompletion() : text(), cursor(-1)
+    {
+    }
+    IrcCompletion(const QString &txt, int pos) : text(txt), cursor(pos)
+    {
+    }
+    bool isValid() const
+    {
+        return !text.isNull() && cursor != -1;
+    }
+    bool operator==(const IrcCompletion &other) const
+    {
+        return text == other.text && cursor == other.cursor;
+    }
+    bool operator!=(const IrcCompletion &other) const
+    {
+        return text != other.text || cursor != other.cursor;
+    }
     QString text;
     int cursor;
 };
@@ -127,14 +144,14 @@ class IrcCompleterPrivate
 {
     Q_DECLARE_PUBLIC(IrcCompleter)
 
-public:
+  public:
     IrcCompleterPrivate();
 
     void completeNext(IrcCompleter::Direction direction);
-    QList<IrcCompletion> completeCommands(const QString& text, int pos) const;
-    QList<IrcCompletion> completeWords(const QString& text, int pos) const;
+    QList<IrcCompletion> completeCommands(const QString &text, int pos) const;
+    QList<IrcCompletion> completeWords(const QString &text, int pos) const;
 
-    IrcCompleter* q_ptr;
+    IrcCompleter *q_ptr;
 
     int index;
     int cursor;
@@ -154,13 +171,17 @@ void IrcCompleterPrivate::completeNext(IrcCompleter::Direction direction)
 {
     Q_Q(IrcCompleter);
     Q_ASSERT(!completions.isEmpty());
-    if (direction == IrcCompleter::Forward) {
+    if (direction == IrcCompleter::Forward)
+    {
         index = (index + 1) % completions.length();
-    } else {
+    }
+    else
+    {
         if (--index < 0)
             index = completions.length() - 1;
     }
-    if (index >= 0 && index < completions.length()) {
+    if (index >= 0 && index < completions.length())
+    {
         const IrcCompletion completion = completions.at(index);
         text = completion.text;
         cursor = completion.cursor;
@@ -168,7 +189,7 @@ void IrcCompleterPrivate::completeNext(IrcCompleter::Direction direction)
     }
 }
 
-static IrcCompletion completeCommand(const QString& text, const QString& command)
+static IrcCompletion completeCommand(const QString &text, const QString &command)
 {
     IrcTokenizer tokenizer(text);
     tokenizer.replace(0, command);
@@ -179,7 +200,7 @@ static IrcCompletion completeCommand(const QString& text, const QString& command
     return IrcCompletion(completion, ++next);
 }
 
-QList<IrcCompletion> IrcCompleterPrivate::completeCommands(const QString& text, int pos) const
+QList<IrcCompletion> IrcCompleterPrivate::completeCommands(const QString &text, int pos) const
 {
     if (!parser)
         return QList<IrcCompletion>();
@@ -188,11 +209,14 @@ QList<IrcCompletion> IrcCompleterPrivate::completeCommands(const QString& text, 
 
     int removed = 0;
     QString input = text;
-    IrcCommandParserPrivate* pp = IrcCommandParserPrivate::get(parser);
-    if (pp->processCommand(&input, &removed)) {
+    IrcCommandParserPrivate *pp = IrcCommandParserPrivate::get(parser);
+    if (pp->processCommand(&input, &removed))
+    {
         const QString command = input.split(QLatin1Char(' '), QString::SkipEmptyParts).value(0).toUpper();
-        if (!command.isEmpty()) {
-            foreach (const IrcCommandInfo& cmd, pp->commands) {
+        if (!command.isEmpty())
+        {
+            foreach (const IrcCommandInfo &cmd, pp->commands)
+            {
                 if (cmd.command == command)
                     return QList<IrcCompletion>() << completeCommand(text, text.left(removed) + cmd.command);
                 if (cmd.command.startsWith(command))
@@ -205,7 +229,7 @@ QList<IrcCompletion> IrcCompleterPrivate::completeCommands(const QString& text, 
     return completions;
 }
 
-static IrcCompletion completeWord(const QString& text, int from, int len, const QString& word)
+static IrcCompletion completeWord(const QString &text, int from, int len, const QString &word)
 {
     QString completion = QString(text).replace(from, len, word);
     int next = from + word.length();
@@ -214,7 +238,7 @@ static IrcCompletion completeWord(const QString& text, int from, int len, const 
     return IrcCompletion(completion, ++next);
 }
 
-QList<IrcCompletion> IrcCompleterPrivate::completeWords(const QString& text, int pos) const
+QList<IrcCompletion> IrcCompleterPrivate::completeWords(const QString &text, int pos) const
 {
     if (!buffer || !buffer->network())
         return QList<IrcCompletion>();
@@ -223,7 +247,8 @@ QList<IrcCompletion> IrcCompleterPrivate::completeWords(const QString& text, int
 
     const IrcToken token = IrcTokenizer(text).find(pos);
     const QPair<int, int> bounds = qMakePair(token.position(), token.length());
-    if (bounds.first != -1 && bounds.second != -1) {
+    if (bounds.first != -1 && bounds.second != -1)
+    {
         const QString word = text.mid(bounds.first, bounds.second);
 
         int pfx = 0;
@@ -232,12 +257,15 @@ QList<IrcCompletion> IrcCompleterPrivate::completeWords(const QString& text, int
         if (isChannel && pfx > 0)
             prefix = text.mid(bounds.first - pfx, pfx);
 
-        if (!isChannel) {
+        if (!isChannel)
+        {
             IrcUserModel userModel;
             userModel.setSortMethod(Irc::SortByActivity);
-            userModel.setChannel(qobject_cast<IrcChannel*>(buffer));
-            foreach (IrcUser* user, userModel.users()) {
-                if (user->name().startsWith(word, Qt::CaseInsensitive)) {
+            userModel.setChannel(qobject_cast<IrcChannel *>(buffer));
+            foreach (IrcUser *user, userModel.users())
+            {
+                if (user->name().startsWith(word, Qt::CaseInsensitive))
+                {
                     QString name = user->name();
                     if (token.index() == 0)
                         name += suffix;
@@ -248,10 +276,12 @@ QList<IrcCompletion> IrcCompleterPrivate::completeWords(const QString& text, int
             }
         }
 
-        QList<IrcBuffer*> buffers = buffer->model()->buffers();
+        QList<IrcBuffer *> buffers = buffer->model()->buffers();
         buffers.move(buffers.indexOf(buffer), 0); // promote the current buffer
-        foreach (IrcBuffer* buffer, buffers) {
-            if (!buffer->isChannel()) {
+        foreach (IrcBuffer *buffer, buffers)
+        {
+            if (!buffer->isChannel())
+            {
                 // it would be very confusing to auto-complete the titles of other
                 // open query (or server) buffers, because it makes it look like such
                 // user would be on the channel
@@ -276,7 +306,7 @@ QList<IrcCompletion> IrcCompleterPrivate::completeWords(const QString& text, int
 /*!
     Constructs a completer with \a parent.
  */
-IrcCompleter::IrcCompleter(QObject* parent) : QObject(parent), d_ptr(new IrcCompleterPrivate)
+IrcCompleter::IrcCompleter(QObject *parent) : QObject(parent), d_ptr(new IrcCompleterPrivate)
 {
     Q_D(IrcCompleter);
     d->q_ptr = this;
@@ -310,10 +340,11 @@ QString IrcCompleter::suffix() const
     return d->suffix;
 }
 
-void IrcCompleter::setSuffix(const QString& suffix)
+void IrcCompleter::setSuffix(const QString &suffix)
 {
     Q_D(IrcCompleter);
-    if (d->suffix != suffix) {
+    if (d->suffix != suffix)
+    {
         d->suffix = suffix;
         emit suffixChanged(suffix);
     }
@@ -329,16 +360,17 @@ void IrcCompleter::setSuffix(const QString& suffix)
     \par Notifier signal:
     \li void <b>bufferChanged</b>(\ref IrcBuffer* buffer)
  */
-IrcBuffer* IrcCompleter::buffer() const
+IrcBuffer *IrcCompleter::buffer() const
 {
     Q_D(const IrcCompleter);
     return d->buffer;
 }
 
-void IrcCompleter::setBuffer(IrcBuffer* buffer)
+void IrcCompleter::setBuffer(IrcBuffer *buffer)
 {
     Q_D(IrcCompleter);
-    if (d->buffer != buffer) {
+    if (d->buffer != buffer)
+    {
         d->buffer = buffer;
         emit bufferChanged(buffer);
     }
@@ -354,16 +386,17 @@ void IrcCompleter::setBuffer(IrcBuffer* buffer)
     \par Notifier signal:
     \li void <b>parserChanged</b>(\ref IrcCommandParser* parser)
  */
-IrcCommandParser* IrcCompleter::parser() const
+IrcCommandParser *IrcCompleter::parser() const
 {
     Q_D(const IrcCompleter);
     return d->parser;
 }
 
-void IrcCompleter::setParser(IrcCommandParser* parser)
+void IrcCompleter::setParser(IrcCommandParser *parser)
 {
     Q_D(IrcCompleter);
-    if (d->parser != parser) {
+    if (d->parser != parser)
+    {
         d->parser = parser;
         emit parserChanged(parser);
     }
@@ -374,10 +407,11 @@ void IrcCompleter::setParser(IrcCommandParser* parser)
     matches to the specified \a direction, and emits completed()
     if a suitable completion is found.
  */
-void IrcCompleter::complete(const QString& text, int cursor, Direction direction)
+void IrcCompleter::complete(const QString &text, int cursor, Direction direction)
 {
     Q_D(IrcCompleter);
-    if (!d->completions.isEmpty() && d->cursor == cursor && d->text == text) {
+    if (!d->completions.isEmpty() && d->cursor == cursor && d->text == text)
+    {
         d->completeNext(direction);
         return;
     }
@@ -386,7 +420,8 @@ void IrcCompleter::complete(const QString& text, int cursor, Direction direction
     if (completions.isEmpty() || IrcTokenizer(text).find(cursor).index() > 0)
         completions = d->completeWords(text, cursor);
 
-    if (d->completions != completions) {
+    if (d->completions != completions)
+    {
         d->index = -1;
         d->completions = completions;
     }

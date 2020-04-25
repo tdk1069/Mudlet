@@ -19,50 +19,37 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TKey.h"
-
 
 #include "Host.h"
 #include "TDebug.h"
 #include "mudlet.h"
 
-TKey::TKey(TKey* parent, Host* pHost)
-: Tree<TKey>( parent )
-, exportItem(true)
-, mModuleMasterFolder(false)
-, mpHost( pHost )
-, mNeedsToBeCompiled( true )
-, mModuleMember(false)
-, mKeyCode()
-, mKeyModifier()
+TKey::TKey(TKey *parent, Host *pHost)
+    : Tree<TKey>(parent), exportItem(true), mModuleMasterFolder(false), mpHost(pHost), mNeedsToBeCompiled(true),
+      mModuleMember(false), mKeyCode(), mKeyModifier()
 {
 }
 
-TKey::TKey(QString name, Host* pHost)
-: Tree<TKey>( nullptr )
-, exportItem( true )
-, mModuleMasterFolder( false )
-, mName( name )
-, mpHost( pHost )
-, mNeedsToBeCompiled( true )
-, mModuleMember(false)
-, mKeyCode()
-, mKeyModifier()
+TKey::TKey(QString name, Host *pHost)
+    : Tree<TKey>(nullptr), exportItem(true), mModuleMasterFolder(false), mName(name), mpHost(pHost),
+      mNeedsToBeCompiled(true), mModuleMember(false), mKeyCode(), mKeyModifier()
 {
 }
 
 TKey::~TKey()
 {
-    if (!mpHost) {
+    if (!mpHost)
+    {
         return;
     }
     mpHost->getKeyUnit()->unregisterKey(this);
 }
 
-void TKey::setName(const QString& name)
+void TKey::setName(const QString &name)
 {
-    if (!isTemporary()) {
+    if (!isTemporary())
+    {
         mpHost->getKeyUnit()->mLookupTable.remove(mName, this);
     }
     mName = name;
@@ -72,23 +59,34 @@ void TKey::setName(const QString& name)
 bool TKey::match(int key, int modifier, const bool isToMatchAll)
 {
     bool isAMatch = false;
-    if (isActive()) {
-        if (!isFolder()) {
-            if ((mKeyCode == key) && (mKeyModifier == modifier)) {
+    if (isActive())
+    {
+        if (!isFolder())
+        {
+            if ((mKeyCode == key) && (mKeyModifier == modifier))
+            {
                 execute();
-                if (isToMatchAll) {
+                if (isToMatchAll)
+                {
                     isAMatch = true;
-                } else {
+                }
+                else
+                {
                     return true;
                 }
             }
         }
 
-        for (auto childKey : *mpMyChildrenList) {
-            if (childKey->match(key, modifier, isToMatchAll)) {
-                if (isToMatchAll) {
+        for (auto childKey : *mpMyChildrenList)
+        {
+            if (childKey->match(key, modifier, isToMatchAll))
+            {
+                if (isToMatchAll)
+                {
                     isAMatch = true;
-                } else {
+                }
+                else
+                {
                     return true;
                 }
             }
@@ -98,33 +96,36 @@ bool TKey::match(int key, int modifier, const bool isToMatchAll)
     return isAMatch;
 }
 
-
 bool TKey::registerKey()
 {
-    if (!mpHost) {
+    if (!mpHost)
+    {
         qDebug() << "ERROR: TAlias::registerTrigger() pHost=0";
         return false;
     }
     return mpHost->getKeyUnit()->registerKey(this);
 }
 
-
-void TKey::enableKey(const QString& name)
+void TKey::enableKey(const QString &name)
 {
-    if (mName == name) {
+    if (mName == name)
+    {
         setIsActive(true);
     }
-    for (auto key : *mpMyChildrenList) {
+    for (auto key : *mpMyChildrenList)
+    {
         key->enableKey(name);
     }
 }
 
-void TKey::disableKey(const QString& name)
+void TKey::disableKey(const QString &name)
 {
-    if (mName == name) {
+    if (mName == name)
+    {
         setIsActive(false);
     }
-    for (auto key : *mpMyChildrenList) {
+    for (auto key : *mpMyChildrenList)
+    {
         key->disableKey(name);
     }
 }
@@ -132,33 +133,44 @@ void TKey::disableKey(const QString& name)
 void TKey::compileAll()
 {
     mNeedsToBeCompiled = true;
-    if (!compileScript()) {
-        if (mudlet::debugMode) {
-            TDebug(Qt::white, Qt::red) << "ERROR: Lua compile error. compiling script of key binding:" << mName << "\n" >> 0;
+    if (!compileScript())
+    {
+        if (mudlet::debugMode)
+        {
+            TDebug(Qt::white, Qt::red) << "ERROR: Lua compile error. compiling script of key binding:" << mName
+                                       << "\n" >>
+                0;
         }
         mOK_code = false;
     }
-    for (auto key : *mpMyChildrenList) {
+    for (auto key : *mpMyChildrenList)
+    {
         key->compileAll();
     }
 }
 
 void TKey::compile()
 {
-    if (mNeedsToBeCompiled) {
-        if (!compileScript()) {
-            if (mudlet::debugMode) {
-                TDebug(Qt::white, Qt::red) << "ERROR: Lua compile error. compiling script of key binding:" << mName << "\n" >> 0;
+    if (mNeedsToBeCompiled)
+    {
+        if (!compileScript())
+        {
+            if (mudlet::debugMode)
+            {
+                TDebug(Qt::white, Qt::red)
+                        << "ERROR: Lua compile error. compiling script of key binding:" << mName << "\n" >>
+                    0;
             }
             mOK_code = false;
         }
     }
-    for (auto key : *mpMyChildrenList) {
+    for (auto key : *mpMyChildrenList)
+    {
         key->compile();
     }
 }
 
-bool TKey::setScript(QString& script)
+bool TKey::setScript(QString &script)
 {
     mScript = script;
     mNeedsToBeCompiled = true;
@@ -171,11 +183,14 @@ bool TKey::compileScript()
     mFuncName = QString("Key") + QString::number(mID);
     QString code = QString("function ") + mFuncName + QString("()\n") + mScript + QString("\nend\n");
     QString error;
-    if (mpHost->mLuaInterpreter.compile(code, error, QString("Key: ") + getName())) {
+    if (mpHost->mLuaInterpreter.compile(code, error, QString("Key: ") + getName()))
+    {
         mNeedsToBeCompiled = false;
         mOK_code = true;
         return true;
-    } else {
+    }
+    else
+    {
         mOK_code = false;
         setError(error);
         return false;
@@ -184,11 +199,14 @@ bool TKey::compileScript()
 
 void TKey::execute()
 {
-    if (mCommand.size() > 0) {
+    if (mCommand.size() > 0)
+    {
         mpHost->send(mCommand);
     }
-    if (mNeedsToBeCompiled) {
-        if (!compileScript()) {
+    if (mNeedsToBeCompiled)
+    {
+        if (!compileScript())
+        {
             return;
         }
     }

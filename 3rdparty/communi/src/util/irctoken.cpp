@@ -32,12 +32,13 @@
 IRC_BEGIN_NAMESPACE
 
 #ifndef IRC_DOXYGEN
-static QList<IrcToken> tokenize(const QString& str)
+static QList<IrcToken> tokenize(const QString &str)
 {
     int idx = -1;
     int pos = 0;
     QList<IrcToken> tokens;
-    foreach (const QString& txt, str.split(QLatin1String(" "))) {
+    foreach (const QString &txt, str.split(QLatin1String(" ")))
+    {
         if (!txt.isEmpty())
             tokens += IrcToken(++idx, pos, txt);
         pos += txt.length() + 1;
@@ -45,7 +46,7 @@ static QList<IrcToken> tokenize(const QString& str)
     return tokens;
 }
 
-IrcTokenizer::IrcTokenizer(const QString& str) : len(str.length()), t(tokenize(str))
+IrcTokenizer::IrcTokenizer(const QString &str) : len(str.length()), t(tokenize(str))
 {
 }
 
@@ -73,10 +74,12 @@ IrcTokenizer IrcTokenizer::mid(int index) const
 {
     IrcTokenizer tt;
     tt.t = t.mid(index);
-    if (!tt.isEmpty()) {
+    if (!tt.isEmpty())
+    {
         int d = tt.t.first().position();
         tt.len = len - d;
-        for (int i = 0; i < tt.t.length(); ++i) {
+        for (int i = 0; i < tt.t.length(); ++i)
+        {
             tt.t[i].idx = i;
             tt.t[i].pos -= d;
         }
@@ -89,10 +92,11 @@ void IrcTokenizer::clear()
     t.clear();
 }
 
-void IrcTokenizer::replace(int index, const QString& text)
+void IrcTokenizer::replace(int index, const QString &text)
 {
     IrcToken token = t.value(index);
-    if (token.isValid()) {
+    if (token.isValid())
+    {
         int d = text.length() - token.length();
         token = IrcToken(index, token.position(), text);
         t.replace(index, token);
@@ -105,7 +109,8 @@ void IrcTokenizer::replace(int index, const QString& text)
 IrcToken IrcTokenizer::find(int pos) const
 {
     IrcToken token;
-    foreach (const IrcToken& tk, t) {
+    foreach (const IrcToken &tk, t)
+    {
         if (tk.position() > pos)
             break;
         token = tk;
@@ -116,7 +121,7 @@ IrcToken IrcTokenizer::find(int pos) const
 QString IrcTokenizer::toString() const
 {
     QString str(len, QLatin1Char(' '));
-    foreach (const IrcToken& token, t)
+    foreach (const IrcToken &token, t)
         str.replace(token.position(), token.length(), token.text());
     return str;
 }

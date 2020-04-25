@@ -18,11 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "dlgTimersMainArea.h"
 
-
-dlgTimersMainArea::dlgTimersMainArea(QWidget* pF) : QWidget(pF)
+dlgTimersMainArea::dlgTimersMainArea(QWidget *pF) : QWidget(pF)
 {
     // init generated dialog
     setupUi(this);

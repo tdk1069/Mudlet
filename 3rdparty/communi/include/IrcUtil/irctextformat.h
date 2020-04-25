@@ -30,12 +30,12 @@
 #define IRCTEXTFORMAT_H
 
 #include <IrcGlobal>
-#include <QtCore/qurl.h>
 #include <QtCore/qlist.h>
-#include <QtCore/qobject.h>
-#include <QtCore/qstring.h>
 #include <QtCore/qmetatype.h>
+#include <QtCore/qobject.h>
 #include <QtCore/qscopedpointer.h>
+#include <QtCore/qstring.h>
+#include <QtCore/qurl.h>
 
 IRC_BEGIN_NAMESPACE
 
@@ -45,38 +45,42 @@ class IrcTextFormatPrivate;
 class IRC_UTIL_EXPORT IrcTextFormat : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(IrcPalette* palette READ palette CONSTANT)
+    Q_PROPERTY(IrcPalette *palette READ palette CONSTANT)
     Q_PROPERTY(QString urlPattern READ urlPattern WRITE setUrlPattern)
     Q_PROPERTY(QString plainText READ plainText)
     Q_PROPERTY(QString html READ html)
     Q_PROPERTY(QList<QUrl> urls READ urls)
     Q_ENUMS(SpanFormat)
 
-public:
-    explicit IrcTextFormat(QObject* parent = 0);
+  public:
+    explicit IrcTextFormat(QObject *parent = 0);
     virtual ~IrcTextFormat();
 
-    IrcPalette* palette() const;
+    IrcPalette *palette() const;
 
     QString urlPattern() const;
-    void setUrlPattern(const QString& pattern);
+    void setUrlPattern(const QString &pattern);
 
-    enum SpanFormat { SpanStyle, SpanClass };
+    enum SpanFormat
+    {
+        SpanStyle,
+        SpanClass
+    };
 
     SpanFormat spanFormat() const;
     void setSpanFormat(SpanFormat format);
 
-    Q_INVOKABLE QString toHtml(const QString& text) const;
-    Q_INVOKABLE QString toPlainText(const QString& text) const;
+    Q_INVOKABLE QString toHtml(const QString &text) const;
+    Q_INVOKABLE QString toPlainText(const QString &text) const;
 
     QString plainText() const;
     QString html() const;
     QList<QUrl> urls() const;
 
-public Q_SLOTS:
-    void parse(const QString& text);
+  public Q_SLOTS:
+    void parse(const QString &text);
 
-private:
+  private:
     QScopedPointer<IrcTextFormatPrivate> d_ptr;
     Q_DECLARE_PRIVATE(IrcTextFormat)
     Q_DISABLE_COPY(IrcTextFormat)
@@ -84,7 +88,7 @@ private:
 
 IRC_END_NAMESPACE
 
-Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcTextFormat*))
+Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcTextFormat *))
 Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcTextFormat::SpanFormat))
 
 #endif // IRCTEXTFORMAT_H

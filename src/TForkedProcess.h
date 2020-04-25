@@ -21,36 +21,34 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QProcess>
-#include "post_guard.h"
 
 #include "TLuaInterpreter.h"
-
 
 class TForkedProcess : public QProcess
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(TForkedProcess)
     virtual ~TForkedProcess();
 
-    static int startProcess(TLuaInterpreter*, lua_State*);
+    static int startProcess(TLuaInterpreter *, lua_State *);
 
-private:
-    TForkedProcess(TLuaInterpreter*, lua_State*);
+  private:
+    TForkedProcess(TLuaInterpreter *, lua_State *);
 
     int callBackFunctionRef;
-    TLuaInterpreter* interpreter;
+    TLuaInterpreter *interpreter;
     bool running;
 
-    static int closeInputOfProcess(lua_State* L);
-    static int isProcessRunning(lua_State* L);
-    static int sendMessage(lua_State* L);
+    static int closeInputOfProcess(lua_State *L);
+    static int isProcessRunning(lua_State *L);
+    static int sendMessage(lua_State *L);
 
-private slots:
+  private slots:
     void slotReceivedData();
     void slotFinish(int, QProcess::ExitStatus);
 };

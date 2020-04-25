@@ -22,31 +22,30 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QOpenGLWidget>
-#include "pre_guard.h"
-#include <QPointer>
 #include "post_guard.h"
+#include "pre_guard.h"
+#include <QOpenGLWidget>
+#include <QPointer>
 
 class Host;
 class TMap;
-
 
 class GLWidget : public QOpenGLWidget
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(GLWidget)
-    GLWidget(QWidget* parent = nullptr);
-    GLWidget(TMap* pM, QWidget* parent = nullptr);
+    GLWidget(QWidget *parent = nullptr);
+    GLWidget(TMap *pM, QWidget *parent = nullptr);
     ~GLWidget();
-    void wheelEvent(QWheelEvent* e) override;
+    void wheelEvent(QWheelEvent *e) override;
     void setViewCenter(int, int, int, int);
 
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
-public slots:
+  public slots:
     void showInfo();
     void shiftUp();
     void shiftDown();
@@ -61,7 +60,7 @@ public slots:
     void setYDist(int angle);
     void setZDist(int angle);
     void setScale(int);
-    void goRoom(const QString&);
+    void goRoom(const QString &);
     void fullView();
     void singleView();
     void increaseTop();
@@ -72,7 +71,7 @@ public slots:
     void sideView();
     void topView();
 
-signals:
+  signals:
     void xRotationChanged(int angle);
     void yRotationChanged(int angle);
     void zRotationChanged(int angle);
@@ -80,18 +79,18 @@ signals:
     void yDistChanged(int angle);
     void zDistChanged(int angle);
 
-protected:
+  protected:
     void initializeGL() override;
     void paintGL() override;
     void resizeGL(int width, int height) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseMoveEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
-public:
-    TMap* mpMap;
+  public:
+    TMap *mpMap;
 
-private:
+  private:
     bool is2DView;
 
     int mRID;

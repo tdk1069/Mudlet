@@ -22,19 +22,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QPointer>
 #include <QPushButton>
-#include "post_guard.h"
 
 class Host;
 class TAction;
 
 class TFlipButton : public QPushButton
 {
-public:
-    TFlipButton(TAction*, Host*);
+  public:
+    TFlipButton(TAction *, Host *);
 
     Qt::Orientation orientation() const;
     void setOrientation(Qt::Orientation);
@@ -45,13 +44,13 @@ public:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
-protected:
-    void paintEvent(QPaintEvent*) override;
+  protected:
+    void paintEvent(QPaintEvent *) override;
 
-public:
+  public:
     QStyleOptionButton getStyleOption() const;
 
-    TAction* mpTAction;
+    TAction *mpTAction;
     int mID;
     QPointer<Host> mpHost;
     Qt::Orientation mOrientation;

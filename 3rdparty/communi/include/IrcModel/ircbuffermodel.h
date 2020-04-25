@@ -31,9 +31,9 @@
 
 #include <Irc>
 #include <IrcGlobal>
+#include <QtCore/qabstractitemmodel.h>
 #include <QtCore/qmetatype.h>
 #include <QtCore/qstringlist.h>
-#include <QtCore/qabstractitemmodel.h>
 
 IRC_BEGIN_NAMESPACE
 
@@ -54,36 +54,37 @@ class IRC_MODEL_EXPORT IrcBufferModel : public QAbstractListModel
     Q_PROPERTY(QStringList channels READ channels NOTIFY channelsChanged)
     Q_PROPERTY(Irc::DataRole displayRole READ displayRole WRITE setDisplayRole)
     Q_PROPERTY(bool persistent READ isPersistent WRITE setPersistent NOTIFY persistentChanged)
-    Q_PROPERTY(QList<IrcBuffer*> buffers READ buffers NOTIFY buffersChanged)
-    Q_PROPERTY(IrcConnection* connection READ connection WRITE setConnection NOTIFY connectionChanged)
-    Q_PROPERTY(IrcNetwork* network READ network NOTIFY networkChanged)
-    Q_PROPERTY(IrcBuffer* bufferPrototype READ bufferPrototype WRITE setBufferPrototype NOTIFY bufferPrototypeChanged)
-    Q_PROPERTY(IrcChannel* channelPrototype READ channelPrototype WRITE setChannelPrototype NOTIFY channelPrototypeChanged)
+    Q_PROPERTY(QList<IrcBuffer *> buffers READ buffers NOTIFY buffersChanged)
+    Q_PROPERTY(IrcConnection *connection READ connection WRITE setConnection NOTIFY connectionChanged)
+    Q_PROPERTY(IrcNetwork *network READ network NOTIFY networkChanged)
+    Q_PROPERTY(IrcBuffer *bufferPrototype READ bufferPrototype WRITE setBufferPrototype NOTIFY bufferPrototypeChanged)
+    Q_PROPERTY(
+        IrcChannel *channelPrototype READ channelPrototype WRITE setChannelPrototype NOTIFY channelPrototypeChanged)
     Q_PROPERTY(int joinDelay READ joinDelay WRITE setJoinDelay NOTIFY joinDelayChanged)
     Q_PROPERTY(bool monitorEnabled READ isMonitorEnabled WRITE setMonitorEnabled NOTIFY monitorEnabledChanged)
 
-public:
-    explicit IrcBufferModel(QObject* parent = 0);
+  public:
+    explicit IrcBufferModel(QObject *parent = 0);
     virtual ~IrcBufferModel();
 
-    IrcConnection* connection() const;
-    void setConnection(IrcConnection* connection);
+    IrcConnection *connection() const;
+    void setConnection(IrcConnection *connection);
 
-    IrcNetwork* network() const;
+    IrcNetwork *network() const;
 
     int count() const;
     bool isEmpty() const;
     QStringList channels() const;
-    QList<IrcBuffer*> buffers() const;
-    Q_INVOKABLE IrcBuffer* get(int index) const;
-    Q_INVOKABLE IrcBuffer* find(const QString& title) const;
-    Q_INVOKABLE bool contains(const QString& title) const;
-    Q_INVOKABLE int indexOf(IrcBuffer* buffer) const;
+    QList<IrcBuffer *> buffers() const;
+    Q_INVOKABLE IrcBuffer *get(int index) const;
+    Q_INVOKABLE IrcBuffer *find(const QString &title) const;
+    Q_INVOKABLE bool contains(const QString &title) const;
+    Q_INVOKABLE int indexOf(IrcBuffer *buffer) const;
 
-    Q_INVOKABLE IrcBuffer* add(const QString& title);
-    Q_INVOKABLE void add(IrcBuffer* buffer);
-    Q_INVOKABLE void remove(const QString& title);
-    Q_INVOKABLE void remove(IrcBuffer* buffer);
+    Q_INVOKABLE IrcBuffer *add(const QString &title);
+    Q_INVOKABLE void add(IrcBuffer *buffer);
+    Q_INVOKABLE void remove(const QString &title);
+    Q_INVOKABLE void remove(IrcBuffer *buffer);
 
     Qt::SortOrder sortOrder() const;
     void setSortOrder(Qt::SortOrder order);
@@ -97,19 +98,19 @@ public:
     bool isPersistent() const;
     void setPersistent(bool persistent);
 
-    QModelIndex index(IrcBuffer* buffer) const;
-    IrcBuffer* buffer(const QModelIndex& index) const;
+    QModelIndex index(IrcBuffer *buffer) const;
+    IrcBuffer *buffer(const QModelIndex &index) const;
 
     QHash<int, QByteArray> roleNames() const;
-    int rowCount(const QModelIndex& parent = QModelIndex()) const;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
-    QModelIndex index(int row, int column = 0, const QModelIndex& parent = QModelIndex()) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const;
 
-    IrcBuffer* bufferPrototype() const;
-    void setBufferPrototype(IrcBuffer* prototype);
+    IrcBuffer *bufferPrototype() const;
+    void setBufferPrototype(IrcBuffer *prototype);
 
-    IrcChannel* channelPrototype() const;
-    void setChannelPrototype(IrcChannel* prototype);
+    IrcChannel *channelPrototype() const;
+    void setChannelPrototype(IrcChannel *prototype);
 
     int joinDelay() const;
     void setJoinDelay(int delay);
@@ -118,41 +119,41 @@ public:
     void setMonitorEnabled(bool enabled);
 
     Q_INVOKABLE QByteArray saveState(int version = 0) const;
-    Q_INVOKABLE bool restoreState(const QByteArray& state, int version = 0);
+    Q_INVOKABLE bool restoreState(const QByteArray &state, int version = 0);
 
-public Q_SLOTS:
+  public Q_SLOTS:
     void clear();
-    void receiveMessage(IrcMessage* message);
+    void receiveMessage(IrcMessage *message);
     void sort(int column = 0, Qt::SortOrder order = Qt::AscendingOrder);
     void sort(Irc::SortMethod method, Qt::SortOrder order = Qt::AscendingOrder);
 
-Q_SIGNALS:
+  Q_SIGNALS:
     void countChanged(int count);
     void emptyChanged(bool empty);
-    void added(IrcBuffer* buffer);
-    void removed(IrcBuffer* buffer);
-    void aboutToBeAdded(IrcBuffer* buffer);
-    void aboutToBeRemoved(IrcBuffer* buffer);
+    void added(IrcBuffer *buffer);
+    void removed(IrcBuffer *buffer);
+    void aboutToBeAdded(IrcBuffer *buffer);
+    void aboutToBeRemoved(IrcBuffer *buffer);
     void persistentChanged(bool persistent);
-    void buffersChanged(const QList<IrcBuffer*>& buffers);
-    void channelsChanged(const QStringList& channels);
-    void connectionChanged(IrcConnection* connection);
-    void networkChanged(IrcNetwork* network);
-    void messageIgnored(IrcMessage* message);
-    void bufferPrototypeChanged(IrcBuffer* prototype);
-    void channelPrototypeChanged(IrcChannel* prototype);
-    void destroyed(IrcBufferModel* model);
+    void buffersChanged(const QList<IrcBuffer *> &buffers);
+    void channelsChanged(const QStringList &channels);
+    void connectionChanged(IrcConnection *connection);
+    void networkChanged(IrcNetwork *network);
+    void messageIgnored(IrcMessage *message);
+    void bufferPrototypeChanged(IrcBuffer *prototype);
+    void channelPrototypeChanged(IrcChannel *prototype);
+    void destroyed(IrcBufferModel *model);
     void joinDelayChanged(int delay);
     void monitorEnabledChanged(bool enabled);
 
-protected Q_SLOTS:
-    virtual IrcBuffer* createBuffer(const QString& title);
-    virtual IrcChannel* createChannel(const QString& title);
+  protected Q_SLOTS:
+    virtual IrcBuffer *createBuffer(const QString &title);
+    virtual IrcChannel *createChannel(const QString &title);
 
-protected:
-    virtual bool lessThan(IrcBuffer* one, IrcBuffer* another, Irc::SortMethod method) const;
+  protected:
+    virtual bool lessThan(IrcBuffer *one, IrcBuffer *another, Irc::SortMethod method) const;
 
-private:
+  private:
     friend class IrcBufferLessThan;
     friend class IrcBufferGreaterThan;
     QScopedPointer<IrcBufferModelPrivate> d_ptr;
@@ -162,13 +163,13 @@ private:
     Q_PRIVATE_SLOT(d_func(), void _irc_connected())
     Q_PRIVATE_SLOT(d_func(), void _irc_initialized())
     Q_PRIVATE_SLOT(d_func(), void _irc_disconnected())
-    Q_PRIVATE_SLOT(d_func(), void _irc_bufferDestroyed(IrcBuffer*))
+    Q_PRIVATE_SLOT(d_func(), void _irc_bufferDestroyed(IrcBuffer *))
     Q_PRIVATE_SLOT(d_func(), void _irc_restoreBuffers())
     Q_PRIVATE_SLOT(d_func(), void _irc_monitorStatus())
 };
 
 IRC_END_NAMESPACE
 
-Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcBufferModel*))
+Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcBufferModel *))
 
 #endif // IRCBUFFERMODEL_H

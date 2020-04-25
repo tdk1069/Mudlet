@@ -20,34 +20,37 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "mudlet.h"
 #include "Host.h"
 #include "TConsole.h"
+#include "mudlet.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
-#include <QtEvents>
 #include <QDockWidget>
 #include <QPointer>
 #include <QString>
-#include "post_guard.h"
+#include <QtEvents>
 
 // TDockWidget contains helpers for User Windows QDockWidget.
-class TDockWidget : public QDockWidget {
-public:
+class TDockWidget : public QDockWidget
+{
+  public:
     TDockWidget(Host *, const QString &);
-    void setTConsole(TConsole*);
-    TConsole* getConsole() {return mpConsole;}
+    void setTConsole(TConsole *);
+    TConsole *getConsole()
+    {
+        return mpConsole;
+    }
 
     QString widgetConsoleName;
     bool hasLayoutAlready;
 
-
-protected:
+  protected:
     void closeEvent(QCloseEvent *) override;
     void resizeEvent(QResizeEvent *) override;
     void moveEvent(QMoveEvent *) override;
 
-private:
+  private:
     QPointer<Host> mpHost;
     QPointer<TConsole> mpConsole;
 };

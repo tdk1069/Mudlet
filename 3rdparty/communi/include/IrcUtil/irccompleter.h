@@ -30,9 +30,9 @@
 #define IRCCOMPLETER_H
 
 #include <IrcGlobal>
+#include <QtCore/qmetatype.h>
 #include <QtCore/qobject.h>
 #include <QtCore/qstring.h>
-#include <QtCore/qmetatype.h>
 
 IRC_BEGIN_NAMESPACE
 
@@ -44,39 +44,40 @@ class IRC_UTIL_EXPORT IrcCompleter : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString suffix READ suffix WRITE setSuffix NOTIFY suffixChanged)
-    Q_PROPERTY(IrcBuffer* buffer READ buffer WRITE setBuffer NOTIFY bufferChanged)
-    Q_PROPERTY(IrcCommandParser* parser READ parser WRITE setParser NOTIFY parserChanged)
+    Q_PROPERTY(IrcBuffer *buffer READ buffer WRITE setBuffer NOTIFY bufferChanged)
+    Q_PROPERTY(IrcCommandParser *parser READ parser WRITE setParser NOTIFY parserChanged)
     Q_ENUMS(Direction)
 
-public:
-    explicit IrcCompleter(QObject* parent = 0);
+  public:
+    explicit IrcCompleter(QObject *parent = 0);
     virtual ~IrcCompleter();
 
-    enum Direction {
+    enum Direction
+    {
         Forward,
         Backward
     };
 
     QString suffix() const;
-    IrcBuffer* buffer() const;
-    IrcCommandParser* parser() const;
+    IrcBuffer *buffer() const;
+    IrcCommandParser *parser() const;
 
-public Q_SLOTS:
-    void setSuffix(const QString& suffix);
-    void setBuffer(IrcBuffer* buffer);
-    void setParser(IrcCommandParser* parser);
+  public Q_SLOTS:
+    void setSuffix(const QString &suffix);
+    void setBuffer(IrcBuffer *buffer);
+    void setParser(IrcCommandParser *parser);
 
-    void complete(const QString& text, int cursor, Direction direction = Forward);
+    void complete(const QString &text, int cursor, Direction direction = Forward);
     void reset();
 
-Q_SIGNALS:
-    void suffixChanged(const QString& suffix);
-    void bufferChanged(IrcBuffer* buffer);
-    void parserChanged(IrcCommandParser* parser);
+  Q_SIGNALS:
+    void suffixChanged(const QString &suffix);
+    void bufferChanged(IrcBuffer *buffer);
+    void parserChanged(IrcCommandParser *parser);
 
-    void completed(const QString& text, int cursor);
+    void completed(const QString &text, int cursor);
 
-private:
+  private:
     QScopedPointer<IrcCompleterPrivate> d_ptr;
     Q_DECLARE_PRIVATE(IrcCompleter)
     Q_DISABLE_COPY(IrcCompleter)
@@ -84,7 +85,7 @@ private:
 
 IRC_END_NAMESPACE
 
-Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcCompleter*))
+Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcCompleter *))
 Q_DECLARE_METATYPE(IRC_PREPEND_NAMESPACE(IrcCompleter::Direction))
 
 #endif // IRCCOMPLETER_H

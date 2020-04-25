@@ -19,18 +19,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "dlgVarsMainArea.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QListWidgetItem>
-#include "post_guard.h"
 
-extern "C" {
+extern "C"
+{
 #include <lua.h>
 }
 
-dlgVarsMainArea::dlgVarsMainArea(QWidget* pF) : QWidget(pF)
+dlgVarsMainArea::dlgVarsMainArea(QWidget *pF) : QWidget(pF)
 {
     // init generated dialog
     setupUi(this);
@@ -48,11 +48,11 @@ dlgVarsMainArea::dlgVarsMainArea(QWidget* pF) : QWidget(pF)
     // Now populate the widget - throw away stuff entered from form design
     // before substitute model was attached:
     comboBox_variable_key_type->clear();
-    comboBox_variable_key_type->insertItem(0, tr("Auto-Type"), -1); // LUA_TNONE
-    comboBox_variable_key_type->insertItem(1, tr("key (string)"), 4);  // LUA_TSTRING
-    comboBox_variable_key_type->insertItem(2, tr("index (integer number)"), 3);  // LUA_TNUMBER
-    comboBox_variable_key_type->insertItem(3, tr("table (use \"Add Group\" to create)"), 5);  // LUA_TTABLE
-    comboBox_variable_key_type->insertItem(4, tr("function (cannot create from GUI)"), 6);  // LUA_TFUNCTION
+    comboBox_variable_key_type->insertItem(0, tr("Auto-Type"), -1);                          // LUA_TNONE
+    comboBox_variable_key_type->insertItem(1, tr("key (string)"), 4);                        // LUA_TSTRING
+    comboBox_variable_key_type->insertItem(2, tr("index (integer number)"), 3);              // LUA_TNUMBER
+    comboBox_variable_key_type->insertItem(3, tr("table (use \"Add Group\" to create)"), 5); // LUA_TTABLE
+    comboBox_variable_key_type->insertItem(4, tr("function (cannot create from GUI)"), 6);   // LUA_TFUNCTION
 
     // Magic - part 2 use the features of the substitute data model to disable
     // the required entries - they can still be set programmatically for display
@@ -64,7 +64,6 @@ dlgVarsMainArea::dlgVarsMainArea(QWidget* pF) : QWidget(pF)
     // Disable function type:
     item = contents->item(4);
     item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
-
 
     // Value type widget:
     // Magic - part 1 set up a replacement data model:

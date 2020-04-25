@@ -22,10 +22,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include "ui_trigger_pattern_edit.h"
-#include "post_guard.h"
 
 class QAction;
 
@@ -33,19 +32,17 @@ class dlgTriggerPatternEdit : public QWidget, public Ui::trigger_pattern_edit
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(dlgTriggerPatternEdit)
-    dlgTriggerPatternEdit(QWidget*);
+    dlgTriggerPatternEdit(QWidget *);
 
     int mRow;
 
-
-public slots:
+  public slots:
     void slot_triggerTypeComboBoxChanged(const int);
 
-
-private:
-    QAction* mAction_typeIndication;
+  private:
+    QAction *mAction_typeIndication;
 };
 
 #endif // MUDLET_DLGTRIGGERPATTERNEDIT_H

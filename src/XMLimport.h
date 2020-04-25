@@ -23,18 +23,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "dlgTriggerEditor.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QApplication>
+#include <QClipboard>
 #include <QFile>
 #include <QMap>
 #include <QMultiHash>
 #include <QPointer>
 #include <QXmlStreamReader>
-#include <QClipboard>
-#include "post_guard.h"
 
 class Host;
 class TAction;
@@ -45,17 +44,17 @@ class TTimer;
 class TTrigger;
 class TVar;
 
-
 class XMLimport : public QXmlStreamReader
 {
     Q_DECLARE_TR_FUNCTIONS(XMLimport) // Needed so we can use tr() even though XMLimport is NOT derived from QObject
 
-public:
-    XMLimport(Host*);
-    bool importPackage(QFile*, QString packageName = QString(), int moduleFlag = 0, QString* pVersionString = Q_NULLPTR);
+  public:
+    XMLimport(Host *);
+    bool importPackage(QFile *, QString packageName = QString(), int moduleFlag = 0,
+                       QString *pVersionString = Q_NULLPTR);
     std::pair<dlgTriggerEditor::EditorViewType, int> importFromClipboard();
 
-private:
+  private:
     std::pair<dlgTriggerEditor::EditorViewType, int> readPackage();
     void readUnknownPackage();
 
@@ -69,8 +68,8 @@ private:
     void readVariablePackage();
     void readUnknownMapElement();
     void readMap();
-    void readRoom(QMultiHash<int, int>&, unsigned int*);
-    void readRooms(QMultiHash<int, int>&);
+    void readRoom(QMultiHash<int, int> &, unsigned int *);
+    void readRooms(QMultiHash<int, int> &);
     void readEnvColor();
     void readEnvColors();
     void readArea();
@@ -85,34 +84,34 @@ private:
     void readUnknownScriptElement();
     void readUnknownKeyElement();
 
-    void readHostPackage(Host*);
+    void readHostPackage(Host *);
     void readStopWatchMap();
-    int readTriggerGroup(TTrigger*);
-    int readTimerGroup(TTimer*);
-    int readAliasGroup(TAlias*);
-    int readActionGroup(TAction*);
-    int readScriptGroup(TScript*);
-    int readKeyGroup(TKey*);
-    void readVariableGroup(TVar*);
+    int readTriggerGroup(TTrigger *);
+    int readTimerGroup(TTimer *);
+    int readAliasGroup(TAlias *);
+    int readActionGroup(TAction *);
+    int readScriptGroup(TScript *);
+    int readKeyGroup(TKey *);
+    void readVariableGroup(TVar *);
     void readHiddenVariables();
 
-    void readStringList(QStringList&);
-    void readIntegerList(QList<int>&, const QString&);
-    void readModulesDetailsMap(QMap<QString, QStringList>&);
-    void getVersionString(QString&);
+    void readStringList(QStringList &);
+    void readIntegerList(QList<int> &, const QString &);
+    void readModulesDetailsMap(QMap<QString, QStringList> &);
+    void getVersionString(QString &);
     QString readScriptElement();
 
-    void remapColorsToAnsiNumber(QStringList&, const QList<int>&);
+    void remapColorsToAnsiNumber(QStringList &, const QList<int> &);
 
     QPointer<Host> mpHost;
     QString mPackageName;
-    TTrigger* mpTrigger;
-    TTimer* mpTimer;
-    TAlias* mpAlias;
-    TKey* mpKey;
-    TAction* mpAction;
-    TScript* mpScript;
-    TVar* mpVar;
+    TTrigger *mpTrigger;
+    TTimer *mpTimer;
+    TAlias *mpAlias;
+    TKey *mpKey;
+    TAction *mpAction;
+    TScript *mpScript;
+    TVar *mpVar;
     bool gotTrigger;
     bool gotTimer;
     bool gotAlias;

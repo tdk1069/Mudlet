@@ -21,30 +21,28 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "post_guard.h"
 #include "pre_guard.h"
 #include "ui_composer.h"
 #include <QPointer>
-#include "post_guard.h"
 
 class Host;
-
 
 class dlgComposer : public QMainWindow, public Ui::composer
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(dlgComposer)
-    dlgComposer(Host*);
+    dlgComposer(Host *);
 
     void init(const QString &title, const QString &newText);
 
-public slots:
+  public slots:
     void save();
     void cancel();
 
-private:
+  private:
     QPointer<Host> mpHost;
 };
 

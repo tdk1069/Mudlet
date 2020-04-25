@@ -22,15 +22,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "Tree.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QColor>
 #include <QIcon>
 #include <QPointer>
 #include <QRegularExpression>
-#include "post_guard.h"
 
 class Host;
 class mudlet;
@@ -41,58 +40,186 @@ class TToolBar;
 
 class QMenu;
 
-
 class TAction : public Tree<TAction>, public QObject
 {
     friend class XMLexport;
     friend class XMLimport;
 
-public:
+  public:
     virtual ~TAction();
-    TAction(TAction* parent, Host* pHost);
-    TAction(const QString& name, Host* pHost);
+    TAction(TAction *parent, Host *pHost);
+    TAction(const QString &name, Host *pHost);
     void compileAll();
-    QString getName() { return mName; }
-    void setName(const QString& name);
-    void setButtonColor(QColor c) { if(c != mButtonColor) { setDataChanged(); mButtonColor = c; } }
-    QColor getButtonColor() { return mButtonColor; }
-    void setButtonRotation(int r) { if(r != mButtonRotation) { setDataChanged(); mButtonRotation = r; } }
-    int getButtonRotation() { return mButtonRotation; }
-    void setButtonColumns(int c) { if(c != mButtonColumns) { setDataChanged(); mButtonColumns = c; } }
-    int getButtonColumns() { return mButtonColumns; }
-    bool getButtonFlat() { return mButtonFlat; }
-    void setButtonFlat(bool flat) { if(flat != mButtonFlat) { setDataChanged(); mButtonFlat = flat; } }
+    QString getName()
+    {
+        return mName;
+    }
+    void setName(const QString &name);
+    void setButtonColor(QColor c)
+    {
+        if (c != mButtonColor)
+        {
+            setDataChanged();
+            mButtonColor = c;
+        }
+    }
+    QColor getButtonColor()
+    {
+        return mButtonColor;
+    }
+    void setButtonRotation(int r)
+    {
+        if (r != mButtonRotation)
+        {
+            setDataChanged();
+            mButtonRotation = r;
+        }
+    }
+    int getButtonRotation()
+    {
+        return mButtonRotation;
+    }
+    void setButtonColumns(int c)
+    {
+        if (c != mButtonColumns)
+        {
+            setDataChanged();
+            mButtonColumns = c;
+        }
+    }
+    int getButtonColumns()
+    {
+        return mButtonColumns;
+    }
+    bool getButtonFlat()
+    {
+        return mButtonFlat;
+    }
+    void setButtonFlat(bool flat)
+    {
+        if (flat != mButtonFlat)
+        {
+            setDataChanged();
+            mButtonFlat = flat;
+        }
+    }
 
-    void setSizeX(int s) { if(s != mSizeX) { setDataChanged(); mSizeX = s; } }
-    int getSizeX() { return mSizeX; }
-    void setSizeY(int s) { if(s != mSizeY) { setDataChanged(); mSizeY = s; } }
-    int getSizeY() { return mSizeY; }
+    void setSizeX(int s)
+    {
+        if (s != mSizeX)
+        {
+            setDataChanged();
+            mSizeX = s;
+        }
+    }
+    int getSizeX()
+    {
+        return mSizeX;
+    }
+    void setSizeY(int s)
+    {
+        if (s != mSizeY)
+        {
+            setDataChanged();
+            mSizeY = s;
+        }
+    }
+    int getSizeY()
+    {
+        return mSizeY;
+    }
 
-    void fillMenu(TEasyButtonBar* pT, QMenu* menu);
+    void fillMenu(TEasyButtonBar *pT, QMenu *menu);
     void compile();
     bool compileScript();
     void execute();
-    QString getIcon() { return mIcon; }
-    void setIcon(const QString& icon) { if(icon != mIcon) { mIcon = icon; } }
-    QString getScript() { return mScript; }
-    bool setScript(const QString& script);
-    QString getCommandButtonUp() { return mCommandButtonUp; }
-    void setCommandButtonUp(const QString& cmd) { if(cmd != mCommandButtonUp) { setDataChanged(); mCommandButtonUp = cmd; } }
-    void setCommandButtonDown(const QString& cmd) { if(cmd != mCommandButtonDown) { setDataChanged(); mCommandButtonDown = cmd; } }
-    QString getCommandButtonDown() { return mCommandButtonDown; }
-    bool isPushDownButton() { return mIsPushDownButton; }
-    void setIsPushDownButton(bool b) { if(b != mIsPushDownButton) { setDataChanged(); mIsPushDownButton = b; } }
+    QString getIcon()
+    {
+        return mIcon;
+    }
+    void setIcon(const QString &icon)
+    {
+        if (icon != mIcon)
+        {
+            mIcon = icon;
+        }
+    }
+    QString getScript()
+    {
+        return mScript;
+    }
+    bool setScript(const QString &script);
+    QString getCommandButtonUp()
+    {
+        return mCommandButtonUp;
+    }
+    void setCommandButtonUp(const QString &cmd)
+    {
+        if (cmd != mCommandButtonUp)
+        {
+            setDataChanged();
+            mCommandButtonUp = cmd;
+        }
+    }
+    void setCommandButtonDown(const QString &cmd)
+    {
+        if (cmd != mCommandButtonDown)
+        {
+            setDataChanged();
+            mCommandButtonDown = cmd;
+        }
+    }
+    QString getCommandButtonDown()
+    {
+        return mCommandButtonDown;
+    }
+    bool isPushDownButton()
+    {
+        return mIsPushDownButton;
+    }
+    void setIsPushDownButton(bool b)
+    {
+        if (b != mIsPushDownButton)
+        {
+            setDataChanged();
+            mIsPushDownButton = b;
+        }
+    }
 
-    void setIsFolder(bool b) { if(b != isFolder()) { setDataChanged(); this->Tree::setIsFolder(b);} }
+    void setIsFolder(bool b)
+    {
+        if (b != isFolder())
+        {
+            setDataChanged();
+            this->Tree::setIsFolder(b);
+        }
+    }
 
     bool registerAction();
-    void insertActions(TToolBar* pT, QMenu* menu);
-    void expandToolbar(TToolBar* pT);
-    void insertActions(TEasyButtonBar* pT, QMenu* menu);
-    void expandToolbar(TEasyButtonBar* pT);
-    void setDataSaved() { if(mpParent) { mpParent->setDataSaved(); } mDataChanged = false; }
-    void setDataChanged() { if(mpParent) { mpParent->setDataChanged(); } mDataChanged = true; }
-    bool isDataChanged() { return mDataChanged; }
+    void insertActions(TToolBar *pT, QMenu *menu);
+    void expandToolbar(TToolBar *pT);
+    void insertActions(TEasyButtonBar *pT, QMenu *menu);
+    void expandToolbar(TEasyButtonBar *pT);
+    void setDataSaved()
+    {
+        if (mpParent)
+        {
+            mpParent->setDataSaved();
+        }
+        mDataChanged = false;
+    }
+    void setDataChanged()
+    {
+        if (mpParent)
+        {
+            mpParent->setDataChanged();
+        }
+        mDataChanged = true;
+    }
+    bool isDataChanged()
+    {
+        return mDataChanged;
+    }
 
     QPointer<TToolBar> mpToolBar;
     QPointer<TEasyButtonBar> mpEasyButtonBar;
@@ -134,7 +261,7 @@ public:
     Qt::DockWidgetArea mToolbarLastDockArea;
     bool mToolbarLastFloatingState;
 
-private:
+  private:
     TAction() = default;
 
     QString mFuncName;

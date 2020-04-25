@@ -19,7 +19,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "TVar.h"
 #include <lua.h> // Needed for LUA_TNONE in Constructors!
 
@@ -38,50 +37,20 @@
  */
 
 TVar::TVar()
-: hidden(false)
-, kpointer(Q_NULLPTR)
-, vpointer(Q_NULLPTR)
-, saved(false)
-, reference(false)
-, parent(Q_NULLPTR)
-, name(QString())
-, kType(LUA_TNONE)
-, value(QString())
-, vType(LUA_TNONE)
-, nkType(LUA_TNONE)
-, nName(QString())
+    : hidden(false), kpointer(Q_NULLPTR), vpointer(Q_NULLPTR), saved(false), reference(false), parent(Q_NULLPTR),
+      name(QString()), kType(LUA_TNONE), value(QString()), vType(LUA_TNONE), nkType(LUA_TNONE), nName(QString())
 {
 }
 
-TVar::TVar(TVar* p)
-: hidden(false)
-, kpointer(Q_NULLPTR)
-, vpointer(Q_NULLPTR)
-, saved(false)
-, reference(false)
-, parent(p)
-, name(QString())
-, kType(LUA_TNONE)
-, value(QString())
-, vType(LUA_TNONE)
-, nkType(LUA_TNONE)
-, nName(QString())
+TVar::TVar(TVar *p)
+    : hidden(false), kpointer(Q_NULLPTR), vpointer(Q_NULLPTR), saved(false), reference(false), parent(p),
+      name(QString()), kType(LUA_TNONE), value(QString()), vType(LUA_TNONE), nkType(LUA_TNONE), nName(QString())
 {
 }
 
-TVar::TVar(TVar* p, const QString& kName, const int kt, const QString& val, const int vt)
-: hidden(false)
-, kpointer(Q_NULLPTR)
-, vpointer(Q_NULLPTR)
-, saved(false)
-, reference(false)
-, parent(p)
-, name(kName)
-, kType(kt)
-, value(val)
-, vType(vt)
-, nkType(LUA_TNONE)
-, nName(QString())
+TVar::TVar(TVar *p, const QString &kName, const int kt, const QString &val, const int vt)
+    : hidden(false), kpointer(Q_NULLPTR), vpointer(Q_NULLPTR), saved(false), reference(false), parent(p), name(kName),
+      kType(kt), value(val), vType(vt), nkType(LUA_TNONE), nName(QString())
 {
 }
 
@@ -90,7 +59,7 @@ void TVar::setReference(const bool s)
     reference = s;
 }
 
-void TVar::addChild(TVar* c)
+void TVar::addChild(TVar *c)
 {
     children.append(c);
 }
@@ -100,7 +69,7 @@ QString TVar::getName()
     return name;
 }
 
-bool TVarLessThan(TVar* varA, TVar* varB)
+bool TVarLessThan(TVar *varA, TVar *varB)
 {
     QString a = varA->getName();
     QString b = varB->getName();
@@ -111,16 +80,20 @@ bool TVarLessThan(TVar* varA, TVar* varB)
     // but they would happly return a zero value for a QString that can not be
     // converted to a number and then the IF branch would be taken regardless
     // of whether one or both of the QStrings was NOT actually a number
-    if (a.toInt(&isAOk) && b.toInt(&isBOk) && isAOk && isBOk) {
+    if (a.toInt(&isAOk) && b.toInt(&isBOk) && isAOk && isBOk)
+    {
         return a.toInt() < b.toInt();
-    } else {
+    }
+    else
+    {
         return a.toLower() < b.toLower();
     }
 }
 
-QList<TVar*> TVar::getChildren(const bool isToSort)
+QList<TVar *> TVar::getChildren(const bool isToSort)
 {
-    if (isToSort && children.count() > 1) {
+    if (isToSort && children.count() > 1)
+    {
         std::sort(children.begin(), children.end(), TVarLessThan);
     }
     return children;
@@ -131,12 +104,12 @@ bool TVar::isReference()
     return reference;
 }
 
-void TVar::setParent(TVar* t)
+void TVar::setParent(TVar *t)
 {
     parent = t;
 }
 
-void TVar::removeChild(TVar* t)
+void TVar::removeChild(TVar *t)
 {
     children.removeAll(t);
 }
@@ -156,7 +129,7 @@ int TVar::getValueType()
     return vType;
 }
 
-void TVar::setNewName(const QString& n, const int t)
+void TVar::setNewName(const QString &n, const int t)
 {
     nName = n;
     nkType = t;
@@ -180,13 +153,13 @@ void TVar::clearNewName()
     nkType = LUA_TNIL; // CHECK: Was 0 but perhaps it should have been -1 (LUA_TNONE ?)
 }
 
-bool TVar::setValue(const QString& val)
+bool TVar::setValue(const QString &val)
 {
     value = val;
     return true;
 }
 
-bool TVar::setValue(const QString& val, const int t)
+bool TVar::setValue(const QString &val, const int t)
 {
     value = val;
     vType = t;
@@ -199,20 +172,20 @@ bool TVar::setValueType(const int t)
     return true;
 }
 
-bool TVar::setName(const QString& n, const int kt)
+bool TVar::setName(const QString &n, const int kt)
 {
     name = n;
     kType = kt;
     return true;
 }
 
-bool TVar::setName(const QString& n)
+bool TVar::setName(const QString &n)
 {
     name = n;
     return true;
 }
 
-TVar* TVar::getParent()
+TVar *TVar::getParent()
 {
     return parent;
 }

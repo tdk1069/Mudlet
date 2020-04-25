@@ -24,7 +24,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "ActionUnit.h"
 #include "AliasUnit.h"
 #include "KeyUnit.h"
@@ -36,13 +35,13 @@
 #include "ctelnet.h"
 #include "dlgTriggerEditor.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include <QColor>
 #include <QFile>
 #include <QFont>
 #include <QPointer>
 #include <QTextStream>
-#include "post_guard.h"
 
 class QDialog;
 class QDockWidget;
@@ -58,32 +57,57 @@ class TConsole;
 class dlgNotepad;
 class TMap;
 
-class stopWatch {
+class stopWatch
+{
     friend class XMLimport;
 
-public:
+  public:
     stopWatch();
 
     bool start();
     bool stop();
     bool reset();
-    bool running() const {return mIsRunning;}
+    bool running() const
+    {
+        return mIsRunning;
+    }
     void adjustMilliSeconds(const qint64);
     qint64 getElapsedMilliSeconds() const;
     QString getElapsedDayTimeString() const;
-    void setPersistent(const bool state) {mIsPersistent = state;}
-    bool persistent() const {return mIsPersistent;}
-    void setName(const QString& name) {mName = name;}
-    const QString& name() const {return mName;}
+    void setPersistent(const bool state)
+    {
+        mIsPersistent = state;
+    }
+    bool persistent() const
+    {
+        return mIsPersistent;
+    }
+    void setName(const QString &name)
+    {
+        mName = name;
+    }
+    const QString &name() const
+    {
+        return mName;
+    }
 
 #ifndef QT_NO_DEBUG_STREAM
     // Only used for debugging:
-    bool initialised() const {return mIsInitialised;}
-    qint64 elapsed() const {return mElapsedTime;}
-    QDateTime effectiveStartDateTime() const {return mEffectiveStartDateTime;}
+    bool initialised() const
+    {
+        return mIsInitialised;
+    }
+    qint64 elapsed() const
+    {
+        return mElapsedTime;
+    }
+    QDateTime effectiveStartDateTime() const
+    {
+        return mEffectiveStartDateTime;
+    }
 #endif // QT_NO_DEBUG_STREAM
 
-private:
+  private:
     // true once started the first time - but provides some code short cuts if
     // prior to that:
     bool mIsInitialised;
@@ -108,16 +132,16 @@ private:
 };
 
 #ifndef QT_NO_DEBUG_STREAM
-inline QDebug& operator<<(QDebug& debug, const stopWatch& stopwatch)
+inline QDebug &operator<<(QDebug &debug, const stopWatch &stopwatch)
 {
     QDebugStateSaver saver(debug);
     Q_UNUSED(saver);
-    debug.nospace() << QStringLiteral("stopwatch(mIsRunning: %1 mInitialised: %2 mIsPersistent: %3 mEffectiveStartDateTime: %4 mElapsedTime: %5)")
-                       .arg((stopwatch.running() ? QLatin1String("true") : QLatin1String("false")),
-                            (stopwatch.initialised() ? QLatin1String("true") : QLatin1String("false")),
-                            (stopwatch.persistent() ? QLatin1String("true") : QLatin1String("false")),
-                            stopwatch.effectiveStartDateTime().toString(),
-                            QString::number(stopwatch.elapsed()));
+    debug.nospace() << QStringLiteral("stopwatch(mIsRunning: %1 mInitialised: %2 mIsPersistent: %3 "
+                                      "mEffectiveStartDateTime: %4 mElapsedTime: %5)")
+                           .arg((stopwatch.running() ? QLatin1String("true") : QLatin1String("false")),
+                                (stopwatch.initialised() ? QLatin1String("true") : QLatin1String("false")),
+                                (stopwatch.persistent() ? QLatin1String("true") : QLatin1String("false")),
+                                stopwatch.effectiveStartDateTime().toString(), QString::number(stopwatch.elapsed()));
     return debug;
 }
 #endif // QT_NO_DEBUG_STREAM
@@ -130,11 +154,12 @@ class Host : public QObject
     friend class XMLimport;
     friend class dlgProfilePreferences;
 
-public:
-    Host(int port, const QString& mHostName, const QString& login, const QString& pass, int host_id);
+  public:
+    Host(int port, const QString &mHostName, const QString &login, const QString &pass, int host_id);
     ~Host();
 
-    enum DiscordOptionFlag {
+    enum DiscordOptionFlag
+    {
         DiscordNoOption = 0x0,
         DiscordSetDetail = 0x01,
         DiscordSetState = 0x02,
@@ -149,55 +174,171 @@ public:
     };
     Q_DECLARE_FLAGS(DiscordOptionFlags, DiscordOptionFlag)
 
-
-    QString            getName()                        { QMutexLocker locker(& mLock); return mHostName; }
-    QString            getCommandSeparator()            { QMutexLocker locker(& mLock); return mCommandSeparator; }
-    void               setName(const QString& s );
-    QString            getUrl()                         { QMutexLocker locker(& mLock); return mUrl; }
-    void               setUrl(const QString& s )        { QMutexLocker locker(& mLock); mUrl = s; }
-    QString            getUserDefinedName()             { QMutexLocker locker(& mLock); return mUserDefinedName; }
-    void               setUserDefinedName(const QString& s ) { QMutexLocker locker(& mLock); mUserDefinedName = s; }
-    int                getPort()                        { QMutexLocker locker(& mLock); return mPort; }
-    void               setPort( int p )                 { QMutexLocker locker(& mLock); mPort = p; }
-    void               setAutoReconnect(bool b)         { mTelnet.setAutoReconnect(b); }
-    QString &          getLogin()                       { QMutexLocker locker(& mLock); return mLogin; }
-    void               setLogin(const QString& s )      { QMutexLocker locker(& mLock); mLogin = s; }
-    QString &          getPass()                        { QMutexLocker locker(& mLock); return mPass; }
-    void               setPass(const QString& s )       { QMutexLocker locker(& mLock); mPass = s; }
-    int                getRetries()                     { QMutexLocker locker(& mLock); return mRetries;}
-    void               setRetries( int c )              { QMutexLocker locker(& mLock); mRetries = c; }
-    int                getTimeout()                     { QMutexLocker locker(& mLock); return mTimeout; }
-    void               setTimeout( int seconds )        { QMutexLocker locker(& mLock); mTimeout = seconds; }
-    bool               wideAmbiguousEAsianGlyphs() { QMutexLocker locker(& mLock); return mWideAmbigousWidthGlyphs; }
-    // Uses PartiallyChecked to set the automatic mode, otherwise Checked/Unchecked means use wide/narrow ambiguous glyphs
-    void               setWideAmbiguousEAsianGlyphs(Qt::CheckState state );
+    QString getName()
+    {
+        QMutexLocker locker(&mLock);
+        return mHostName;
+    }
+    QString getCommandSeparator()
+    {
+        QMutexLocker locker(&mLock);
+        return mCommandSeparator;
+    }
+    void setName(const QString &s);
+    QString getUrl()
+    {
+        QMutexLocker locker(&mLock);
+        return mUrl;
+    }
+    void setUrl(const QString &s)
+    {
+        QMutexLocker locker(&mLock);
+        mUrl = s;
+    }
+    QString getUserDefinedName()
+    {
+        QMutexLocker locker(&mLock);
+        return mUserDefinedName;
+    }
+    void setUserDefinedName(const QString &s)
+    {
+        QMutexLocker locker(&mLock);
+        mUserDefinedName = s;
+    }
+    int getPort()
+    {
+        QMutexLocker locker(&mLock);
+        return mPort;
+    }
+    void setPort(int p)
+    {
+        QMutexLocker locker(&mLock);
+        mPort = p;
+    }
+    void setAutoReconnect(bool b)
+    {
+        mTelnet.setAutoReconnect(b);
+    }
+    QString &getLogin()
+    {
+        QMutexLocker locker(&mLock);
+        return mLogin;
+    }
+    void setLogin(const QString &s)
+    {
+        QMutexLocker locker(&mLock);
+        mLogin = s;
+    }
+    QString &getPass()
+    {
+        QMutexLocker locker(&mLock);
+        return mPass;
+    }
+    void setPass(const QString &s)
+    {
+        QMutexLocker locker(&mLock);
+        mPass = s;
+    }
+    int getRetries()
+    {
+        QMutexLocker locker(&mLock);
+        return mRetries;
+    }
+    void setRetries(int c)
+    {
+        QMutexLocker locker(&mLock);
+        mRetries = c;
+    }
+    int getTimeout()
+    {
+        QMutexLocker locker(&mLock);
+        return mTimeout;
+    }
+    void setTimeout(int seconds)
+    {
+        QMutexLocker locker(&mLock);
+        mTimeout = seconds;
+    }
+    bool wideAmbiguousEAsianGlyphs()
+    {
+        QMutexLocker locker(&mLock);
+        return mWideAmbigousWidthGlyphs;
+    }
+    // Uses PartiallyChecked to set the automatic mode, otherwise Checked/Unchecked means use wide/narrow ambiguous
+    // glyphs
+    void setWideAmbiguousEAsianGlyphs(Qt::CheckState state);
     // Is used to set preference dialog control directly:
-    Qt::CheckState     getWideAmbiguousEAsianGlyphsControlState() { QMutexLocker locker(& mLock);
-                                                                       return mAutoAmbigousWidthGlyphsSetting
-                                                                               ? Qt::PartiallyChecked
-                                                                               : (mWideAmbigousWidthGlyphs ? Qt::Checked : Qt::Unchecked); }
-    void               setHaveColorSpaceId(const bool state) { QMutexLocker locker(& mLock); mSGRCodeHasColSpaceId = state; }
-    bool               getHaveColorSpaceId() { QMutexLocker locker(& mLock); return mSGRCodeHasColSpaceId; }
-    void               setMayRedefineColors(const bool state) { QMutexLocker locker(& mLock); mServerMayRedefineColors = state; }
-    bool               getMayRedefineColors() { QMutexLocker locker(& mLock); return mServerMayRedefineColors; }
-    void               setDiscordApplicationID(const QString& s);
-    const QString&     getDiscordApplicationID();
-    void               setSpellDic(const QString&);
-    const QString&     getSpellDic() { QMutexLocker locker(& mLock); return mSpellDic; }
-    void               setUserDictionaryOptions(const bool useDictionary, const bool useShared);
-    void               getUserDictionaryOptions(bool& useDictionary, bool& useShared) { QMutexLocker locker(& mLock); useDictionary = mEnableUserDictionary; useShared = mUseSharedDictionary; }
+    Qt::CheckState getWideAmbiguousEAsianGlyphsControlState()
+    {
+        QMutexLocker locker(&mLock);
+        return mAutoAmbigousWidthGlyphsSetting ? Qt::PartiallyChecked
+                                               : (mWideAmbigousWidthGlyphs ? Qt::Checked : Qt::Unchecked);
+    }
+    void setHaveColorSpaceId(const bool state)
+    {
+        QMutexLocker locker(&mLock);
+        mSGRCodeHasColSpaceId = state;
+    }
+    bool getHaveColorSpaceId()
+    {
+        QMutexLocker locker(&mLock);
+        return mSGRCodeHasColSpaceId;
+    }
+    void setMayRedefineColors(const bool state)
+    {
+        QMutexLocker locker(&mLock);
+        mServerMayRedefineColors = state;
+    }
+    bool getMayRedefineColors()
+    {
+        QMutexLocker locker(&mLock);
+        return mServerMayRedefineColors;
+    }
+    void setDiscordApplicationID(const QString &s);
+    const QString &getDiscordApplicationID();
+    void setSpellDic(const QString &);
+    const QString &getSpellDic()
+    {
+        QMutexLocker locker(&mLock);
+        return mSpellDic;
+    }
+    void setUserDictionaryOptions(const bool useDictionary, const bool useShared);
+    void getUserDictionaryOptions(bool &useDictionary, bool &useShared)
+    {
+        QMutexLocker locker(&mLock);
+        useDictionary = mEnableUserDictionary;
+        useShared = mUseSharedDictionary;
+    }
 
     void closingDown();
     bool isClosingDown();
     unsigned int assemblePath();
     bool checkForMappingScript();
 
-    TriggerUnit* getTriggerUnit() { return &mTriggerUnit; }
-    TimerUnit* getTimerUnit() { return &mTimerUnit; }
-    AliasUnit* getAliasUnit() { return &mAliasUnit; }
-    ActionUnit* getActionUnit() { return &mActionUnit; }
-    KeyUnit* getKeyUnit() { return &mKeyUnit; }
-    ScriptUnit* getScriptUnit() { return &mScriptUnit; }
+    TriggerUnit *getTriggerUnit()
+    {
+        return &mTriggerUnit;
+    }
+    TimerUnit *getTimerUnit()
+    {
+        return &mTimerUnit;
+    }
+    AliasUnit *getAliasUnit()
+    {
+        return &mAliasUnit;
+    }
+    ActionUnit *getActionUnit()
+    {
+        return &mActionUnit;
+    }
+    KeyUnit *getKeyUnit()
+    {
+        return &mKeyUnit;
+    }
+    ScriptUnit *getScriptUnit()
+    {
+        return &mScriptUnit;
+    }
 
     void connectToServer();
     void send(QString cmd, bool wantPrint = true, bool dontExpandAliases = false);
@@ -214,21 +355,27 @@ public:
         mHostID = id;
     }
 
-    TLuaInterpreter* getLuaInterpreter() { return &mLuaInterpreter; }
-    LuaInterface* getLuaInterface() { return mLuaInterface.data(); }
+    TLuaInterpreter *getLuaInterpreter()
+    {
+        return &mLuaInterpreter;
+    }
+    LuaInterface *getLuaInterface()
+    {
+        return mLuaInterface.data();
+    }
 
-    void incomingStreamProcessor(const QString& paragraph, int line);
-    void postIrcMessage(const QString&, const QString&, const QString&);
-    void enableTimer(const QString&);
-    void disableTimer(const QString&);
-    void enableTrigger(const QString&);
-    void disableTrigger(const QString&);
-    void enableKey(const QString&);
-    void disableKey(const QString&);
-    bool killTimer(const QString&);
-    bool killTrigger(const QString&);
+    void incomingStreamProcessor(const QString &paragraph, int line);
+    void postIrcMessage(const QString &, const QString &, const QString &);
+    void enableTimer(const QString &);
+    void disableTimer(const QString &);
+    void enableTrigger(const QString &);
+    void disableTrigger(const QString &);
+    void enableKey(const QString &);
+    void disableKey(const QString &);
+    bool killTimer(const QString &);
+    bool killTrigger(const QString &);
 
-    QPair<int, QString> createStopWatch(const QString&);
+    QPair<int, QString> createStopWatch(const QString &);
     bool destroyStopWatch(const int);
     bool adjustStopWatch(const int, const qint64 milliSeconds);
     QList<int> getStopWatchIds() const;
@@ -236,29 +383,35 @@ public:
     QPair<bool, QString> getBrokenDownStopWatchTime(const int) const;
     bool makeStopWatchPersistent(const int, const bool);
     QPair<bool, QString> resetStopWatch(const int);
-    QPair<bool, QString> resetStopWatch(const QString&);
+    QPair<bool, QString> resetStopWatch(const QString &);
     QPair<bool, QString> startStopWatch(const int);
-    QPair<bool, QString> startStopWatch(const QString&);
+    QPair<bool, QString> startStopWatch(const QString &);
     QPair<bool, QString> stopStopWatch(const int);
-    QPair<bool, QString> stopStopWatch(const QString&);
-    stopWatch* getStopWatch(const int id) const { return mStopWatchMap.value(id); }
-    int findStopWatchId(const QString&) const;
-    QPair<bool, QString> setStopWatchName(const int, const QString&);
-    QPair<bool, QString> setStopWatchName(const QString&, const QString&);
+    QPair<bool, QString> stopStopWatch(const QString &);
+    stopWatch *getStopWatch(const int id) const
+    {
+        return mStopWatchMap.value(id);
+    }
+    int findStopWatchId(const QString &) const;
+    QPair<bool, QString> setStopWatchName(const int, const QString &);
+    QPair<bool, QString> setStopWatchName(const QString &, const QString &);
     QPair<bool, QString> resetAndRestartStopWatch(const int);
 
     void startSpeedWalk();
     void saveModules(int sync, bool backup = true);
-    void reloadModule(const QString& reloadModuleName);
-    std::pair<bool, QString> changeModuleSync(const QString& enableModuleName, const QLatin1String &value);
-    std::pair<bool, QString> getModuleSync(const QString& moduleName);
-    bool blockScripts() { return mBlockScriptCompile; }
+    void reloadModule(const QString &reloadModuleName);
+    std::pair<bool, QString> changeModuleSync(const QString &enableModuleName, const QLatin1String &value);
+    std::pair<bool, QString> getModuleSync(const QString &moduleName);
+    bool blockScripts()
+    {
+        return mBlockScriptCompile;
+    }
     void refreshPackageFonts();
 
-    void registerEventHandler(const QString&, TScript*);
-    void registerAnonymousEventHandler(const QString& name, const QString& fun);
-    void unregisterEventHandler(const QString&, TScript*);
-    void raiseEvent(const TEvent& event);
+    void registerEventHandler(const QString &, TScript *);
+    void registerAnonymousEventHandler(const QString &name, const QString &fun);
+    void unregisterEventHandler(const QString &, TScript *);
+    void raiseEvent(const TEvent &event);
     // This disables all the triggers/timers/keys in preparation to resetting
     // them - and sets a timer to do resetProfile_phase2() when it is safe to do
     // so. We need to do it this way because a lua script containing the call to
@@ -269,8 +422,9 @@ public:
     // This actually does the bulk of the reset but must wait until the profile
     // is quiescent:
     void resetProfile_phase2();
-    std::tuple<bool, QString, QString> saveProfile(const QString& saveLocation = QString(), const QString& saveName = QString(), bool syncModules = false);
-    std::tuple<bool, QString, QString> saveProfileAs(const QString& fileName);
+    std::tuple<bool, QString, QString> saveProfile(const QString &saveLocation = QString(),
+                                                   const QString &saveName = QString(), bool syncModules = false);
+    std::tuple<bool, QString, QString> saveProfileAs(const QString &fileName);
     void stopAllTriggers();
     void reenableAllTriggers();
 
@@ -291,44 +445,52 @@ public:
 
     void adjustNAWS();
 
-    bool installPackage(const QString&, int);
-    bool uninstallPackage(const QString&, int);
-    bool removeDir(const QString&, const QString&);
-    void readPackageConfig(const QString&, QString&);
-    void postMessage(const QString message) { mTelnet.postMessage(message); }
+    bool installPackage(const QString &, int);
+    bool uninstallPackage(const QString &, int);
+    bool removeDir(const QString &, const QString &);
+    void readPackageConfig(const QString &, QString &);
+    void postMessage(const QString message)
+    {
+        mTelnet.postMessage(message);
+    }
     QColor getAnsiColor(const int ansiCode, const bool isBackground = false) const;
-    QPair<bool, QString> writeProfileData(const QString&, const QString&);
-    QString readProfileData(const QString&);
-    void xmlSaved(const QString& xmlName);
+    QPair<bool, QString> writeProfileData(const QString &, const QString &);
+    QString readProfileData(const QString &);
+    void xmlSaved(const QString &xmlName);
     bool currentlySavingProfile();
-    void processDiscordGMCP(const QString& packageMessage, const QString& data);
+    void processDiscordGMCP(const QString &packageMessage, const QString &data);
     void waitForProfileSave();
     void clearDiscordData();
-    void processDiscordMSDP(const QString& variable, QString value);
-    bool discordUserIdMatch(const QString& userName, const QString& userDiscriminator) const;
-    void setMmpMapLocation(const QString& data);
+    void processDiscordMSDP(const QString &variable, QString value);
+    bool discordUserIdMatch(const QString &userName, const QString &userDiscriminator) const;
+    void setMmpMapLocation(const QString &data);
     QString getMmpMapLocation() const;
-    void setMediaLocationGMCP(const QString& mediaUrl);
+    void setMediaLocationGMCP(const QString &mediaUrl);
     QString getMediaLocationGMCP() const;
-    void setMediaLocationMSP(const QString& mediaUrl);
+    void setMediaLocationMSP(const QString &mediaUrl);
     QString getMediaLocationMSP() const;
-    const QFont& getDisplayFont() const { return mDisplayFont; }
-    std::pair<bool, QString> setDisplayFont(const QFont& font);
-    std::pair<bool, QString> setDisplayFont(const QString& fontName);
-    void setDisplayFontFromString(const QString& fontData);
+    const QFont &getDisplayFont() const
+    {
+        return mDisplayFont;
+    }
+    std::pair<bool, QString> setDisplayFont(const QFont &font);
+    std::pair<bool, QString> setDisplayFont(const QString &fontName);
+    void setDisplayFontFromString(const QString &fontData);
     void setDisplayFontSize(int size);
     void setDisplayFontSpacing(const qreal spacing);
     void setDisplayFontStyle(QFont::StyleStrategy s);
     void setDisplayFontFixedPitch(bool enable);
-    void updateProxySettings(QNetworkAccessManager* manager);
-    std::unique_ptr<QNetworkProxy>& getConnectionProxy();
+    void updateProxySettings(QNetworkAccessManager *manager);
+    std::unique_ptr<QNetworkProxy> &getConnectionProxy();
     void updateAnsi16ColorsInTable();
     // Store/retrieve all the settings in one call:
-    void setPlayerRoomStyleDetails(const quint8 styleCode, const quint8 outerDiameter = 120, const quint8 innerDiameter = 70, const QColor& outerColor = QColor(), const QColor& innerColor = QColor());
-    void getPlayerRoomStyleDetails(quint8& styleCode, quint8& outerDiameter, quint8& innerDiameter, QColor& outerColor, QColor& innerColor);
+    void setPlayerRoomStyleDetails(const quint8 styleCode, const quint8 outerDiameter = 120,
+                                   const quint8 innerDiameter = 70, const QColor &outerColor = QColor(),
+                                   const QColor &innerColor = QColor());
+    void getPlayerRoomStyleDetails(quint8 &styleCode, quint8 &outerDiameter, quint8 &innerDiameter, QColor &outerColor,
+                                   QColor &innerColor);
     void setSearchOptions(const dlgTriggerEditor::SearchOptions);
-    std::pair<bool, QString> setMapperTitle(const QString&);
-
+    std::pair<bool, QString> setMapperTitle(const QString &);
 
     cTelnet mTelnet;
     QPointer<TConsole> mpConsole;
@@ -359,7 +521,7 @@ public:
     QString mMediaLocationGMCP;
     QString mMediaLocationMSP;
     QTextStream mErrorLogStream;
-    QMap<QString, QList<TScript*>> mEventHandlerMap;
+    QMap<QString, QList<TScript *>> mEventHandlerMap;
     bool mFORCE_GA_OFF;
     bool mFORCE_NO_COMPRESSION;
     bool mFORCE_SAVE_ON_EXIT;
@@ -387,10 +549,10 @@ public:
     bool mLF_ON_GA;
     bool mNoAntiAlias;
 
-    dlgTriggerEditor* mpEditorDialog;
+    dlgTriggerEditor *mpEditorDialog;
     QScopedPointer<TMap> mpMap;
     QScopedPointer<TMedia> mpMedia;
-    dlgNotepad* mpNotePad;
+    dlgNotepad *mpNotePad;
 
     // This is set when we want commands we typed to be shown on the main
     // TConsole:
@@ -552,21 +714,21 @@ public:
     QString mProfileStyleSheet;
     dlgTriggerEditor::SearchOptions mSearchOptions;
 
-signals:
+  signals:
     // Tells TTextEdit instances for this profile how to draw the ambiguous
     // width characters:
     void signal_changeIsAmbigousWidthGlyphsToBeWide(bool);
     void profileSaveStarted();
     void profileSaveFinished();
-    void signal_changeSpellDict(const QString&);
+    void signal_changeSpellDict(const QString &);
 
-private slots:
+  private slots:
     void slot_reloadModules();
 
-private:
+  private:
     void installPackageFonts(const QString &packageName);
-    void processGMCPDiscordStatus(const QJsonObject& discordInfo);
-    void processGMCPDiscordInfo(const QJsonObject& discordInfo);
+    void processGMCPDiscordStatus(const QJsonObject &discordInfo);
+    void processGMCPDiscordInfo(const QJsonObject &discordInfo);
     void updateModuleZips() const;
     void loadSecuredPassword();
     void removeAllNonPersistentStopWatches();
@@ -588,7 +750,7 @@ private:
 
     QFile mErrorLogFile;
 
-    QMap<QString, TEvent*> mEventMap;
+    QMap<QString, TEvent *> mEventMap;
 
     int mHostID;
     QString mHostName;
@@ -612,17 +774,17 @@ private:
     // createStopWatch() to return 0 during script loading so that we do not get
     // superious stopwatches from being created then (when
     // mIsProfileLoadingSequence is true):
-    QMap<int, stopWatch*> mStopWatchMap;
+    QMap<int, stopWatch *> mStopWatchMap;
 
     QMap<QString, QStringList> mAnonymousEventHandlerFunctions;
 
     QStringList mActiveModules;
 
-    QPushButton* uninstallButton;
-    QListWidget* packageList;
-    QListWidget* moduleList;
-    QPushButton* moduleUninstallButton;
-    QPushButton* moduleInstallButton;
+    QPushButton *uninstallButton;
+    QListWidget *packageList;
+    QListWidget *moduleList;
+    QPushButton *moduleUninstallButton;
+    QPushButton *moduleInstallButton;
 
     bool mHaveMapperScript;
     // This option makes the control on the preferences tristated so the value
@@ -637,7 +799,7 @@ private:
     bool mWideAmbigousWidthGlyphs;
 
     // keeps track of all of the array writers we're currently operating with
-    QHash<QString, XMLexport*> writers;
+    QHash<QString, XMLexport *> writers;
 
     // Will be null/empty if is to use Mudlet's default/own presence
     QString mDiscordApplicationID;

@@ -27,10 +27,10 @@
 */
 
 #include "irclagtimer.h"
-#include "irclagtimer_p.h"
-#include "ircconnection.h"
-#include "ircmessage.h"
 #include "irccommand.h"
+#include "ircconnection.h"
+#include "irclagtimer_p.h"
+#include "ircmessage.h"
 #include <QDateTime>
 
 IRC_BEGIN_NAMESPACE
@@ -62,21 +62,23 @@ IrcLagTimerPrivate::IrcLagTimerPrivate() : q_ptr(0), connection(0), interval(DEF
 {
 }
 
-bool IrcLagTimerPrivate::messageFilter(IrcMessage* msg)
+bool IrcLagTimerPrivate::messageFilter(IrcMessage *msg)
 {
     if (msg->type() == IrcMessage::Pong)
-        return processPongReply(static_cast<IrcPongMessage*>(msg));
+        return processPongReply(static_cast<IrcPongMessage *>(msg));
     return false;
 }
 
-bool IrcLagTimerPrivate::processPongReply(IrcPongMessage* msg)
+bool IrcLagTimerPrivate::processPongReply(IrcPongMessage *msg)
 {
 #if QT_VERSION >= 0x040700
     // TODO: configurable format?
-    if (msg->argument().startsWith("communi/")) {
+    if (msg->argument().startsWith("communi/"))
+    {
         bool ok = false;
         qint64 timestamp = msg->argument().mid(8).toLongLong(&ok);
-        if (ok) {
+        if (ok)
+        {
             updateLag(QDateTime::currentMSecsSinceEpoch() - timestamp);
             return true;
         }
@@ -114,11 +116,14 @@ void IrcLagTimerPrivate::_irc_disconnected()
 void IrcLagTimerPrivate::updateTimer()
 {
 #if QT_VERSION >= 0x040700
-    if (connection && interval > 0) {
+    if (connection && interval > 0)
+    {
         timer.setInterval(interval * 1000);
         if (!timer.isActive() && connection->isConnected())
             timer.start();
-    } else {
+    }
+    else
+    {
         if (timer.isActive())
             timer.stop();
         updateLag(-1);
@@ -129,7 +134,8 @@ void IrcLagTimerPrivate::updateTimer()
 void IrcLagTimerPrivate::updateLag(qint64 value)
 {
     Q_Q(IrcLagTimer);
-    if (lag != value) {
+    if (lag != value)
+    {
         lag = qMax(-1ll, value);
         emit q->lagChanged(lag);
     }
@@ -142,12 +148,12 @@ void IrcLagTimerPrivate::updateLag(qint64 value)
     \note If \a parent is an instance of IrcConnection, it will be
     automatically assigned to \ref IrcLagTimer::connection "connection".
  */
-IrcLagTimer::IrcLagTimer(QObject* parent) : QObject(parent), d_ptr(new IrcLagTimerPrivate)
+IrcLagTimer::IrcLagTimer(QObject *parent) : QObject(parent), d_ptr(new IrcLagTimerPrivate)
 {
     Q_D(IrcLagTimer);
     d->q_ptr = this;
     connect(&d->timer, SIGNAL(timeout()), this, SLOT(_irc_pingServer()));
-    setConnection(qobject_cast<IrcConnection*>(parent));
+    setConnection(qobject_cast<IrcConnection *>(parent));
 }
 
 /*!
@@ -164,23 +170,26 @@ IrcLagTimer::~IrcLagTimer()
     \li IrcConnection* <b>connection</b>() const
     \li void <b>setConnection</b>(IrcConnection* connection)
  */
-IrcConnection* IrcLagTimer::connection() const
+IrcConnection *IrcLagTimer::connection() const
 {
     Q_D(const IrcLagTimer);
     return d->connection;
 }
 
-void IrcLagTimer::setConnection(IrcConnection* connection)
+void IrcLagTimer::setConnection(IrcConnection *connection)
 {
     Q_D(IrcLagTimer);
-    if (d->connection != connection) {
-        if (d->connection) {
+    if (d->connection != connection)
+    {
+        if (d->connection)
+        {
             d->connection->removeMessageFilter(d);
             disconnect(d->connection, SIGNAL(connected()), this, SLOT(_irc_connected()));
             disconnect(d->connection, SIGNAL(disconnected()), this, SLOT(_irc_disconnected()));
         }
         d->connection = connection;
-        if (connection) {
+        if (connection)
+        {
             connection->installMessageFilter(d);
             connect(connection, SIGNAL(connected()), this, SLOT(_irc_connected()));
             connect(connection, SIGNAL(disconnected()), this, SLOT(_irc_disconnected()));
@@ -230,7 +239,8 @@ int IrcLagTimer::interval() const
 void IrcLagTimer::setInterval(int seconds)
 {
     Q_D(IrcLagTimer);
-    if (d->interval != seconds) {
+    if (d->interval != seconds)
+    {
         d->interval = seconds;
         d->updateTimer();
     }

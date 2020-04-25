@@ -22,37 +22,35 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
-#include "mudlet.h"
 #include "TAction.h"
 #include "TAlias.h"
 #include "TKey.h"
 #include "TScript.h"
 #include "TTimer.h"
 #include "TTrigger.h"
+#include "mudlet.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
 #include "ui_profile_preferences.h"
-#include <QtCore>
 #include <QDialog>
 #include <QDir>
 #include <QDoubleSpinBox>
 #include <QMap>
-#include "post_guard.h"
+#include <QtCore>
 
 class Host;
-
 
 class dlgProfilePreferences : public QDialog, public Ui::profile_preferences
 {
     Q_OBJECT
 
-public:
+  public:
     Q_DISABLE_COPY(dlgProfilePreferences)
-    dlgProfilePreferences(QWidget*, Host* pHost = nullptr);
+    dlgProfilePreferences(QWidget *, Host *pHost = nullptr);
     void setTab(QString tab);
 
-public slots:
+  public slots:
     // Fonts.
     void setFontSize();
     void setDisplayFont();
@@ -109,9 +107,8 @@ public slots:
     void loadMap();
     void saveMap();
     void copyMap();
-    void slot_chooseProfilesChanged(QAction*);
+    void slot_chooseProfilesChanged(QAction *);
     void slot_showMapGlyphUsage();
-
 
     // Log.
     void slot_setLogDir();
@@ -125,18 +122,18 @@ public slots:
     void hideActionLabel();
     void slot_setEncoding(const int);
 
-    void slot_handleHostAddition(Host*, quint8);
-    void slot_handleHostDeletion(Host*);
+    void slot_handleHostAddition(Host *, quint8);
+    void slot_handleHostDeletion(Host *);
 
-    void slot_guiLanguageChanged(const QString&);
+    void slot_guiLanguageChanged(const QString &);
 
-private slots:
+  private slots:
     void slot_changeShowSpacesAndTabs(bool);
     void slot_changeShowLineFeedsAndParagraphs(bool);
     void slot_script_selected(int index);
     void slot_editor_tab_selected(int tabIndex);
     void slot_theme_selected(int index);
-    void slot_setMapSymbolFont(const QFont&);
+    void slot_setMapSymbolFont(const QFont &);
     void slot_setMapSymbolFontStrategy(bool);
     void slot_changeShowMenuBar(int);
     void slot_changeShowToolBar(int);
@@ -149,7 +146,7 @@ private slots:
     void slot_changeMenuBarVisibility(const mudlet::controlsVisibility);
     void slot_changeToolBarVisibility(const mudlet::controlsVisibility);
     void slot_changeShowIconsOnMenus(const Qt::CheckState);
-    void slot_changeGuiLanguage(const QString&);
+    void slot_changeGuiLanguage(const QString &);
     void slot_passwords_location_changed(int);
     void slot_changePlayerRoomStyle(const int);
     void slot_setPlayerRoomPrimaryColor();
@@ -157,22 +154,22 @@ private slots:
     void slot_setPlayerRoomOuterDiameter(const int);
     void slot_setPlayerRoomInnerDiameter(const int);
 
-private:
+  private:
     void setColors();
     void setColors2();
-    void setColor(QPushButton*, QColor&);
-    void setPlayerRoomColor(QPushButton*, QColor&);
-    void setButtonColor(QPushButton*, const QColor&);
+    void setColor(QPushButton *, QColor &);
+    void setPlayerRoomColor(QPushButton *, QColor &);
+    void setButtonColor(QPushButton *, const QColor &);
     void loadEditorTab();
     void populateThemesList();
     void populateScriptsList();
-    void addTriggersToPreview(TTrigger* pTriggerParent, std::vector<std::tuple<QString, QString, int>>& items);
-    void addAliasesToPreview(TAlias* pAliasParent, std::vector<std::tuple<QString, QString, int>>& items);
-    void addTimersToPreview(TTimer* pTimerParent, std::vector<std::tuple<QString, QString, int>>& items);
-    void addActionsToPreview(TAction* pActionParent, std::vector<std::tuple<QString, QString, int>>& items);
-    void addScriptsToPreview(TScript* pScriptParent, std::vector<std::tuple<QString, QString, int>>& items);
-    void addKeysToPreview(TKey* pKeyParent, std::vector<std::tuple<QString, QString, int>>& items);
-    void initWithHost(Host*);
+    void addTriggersToPreview(TTrigger *pTriggerParent, std::vector<std::tuple<QString, QString, int>> &items);
+    void addAliasesToPreview(TAlias *pAliasParent, std::vector<std::tuple<QString, QString, int>> &items);
+    void addTimersToPreview(TTimer *pTimerParent, std::vector<std::tuple<QString, QString, int>> &items);
+    void addActionsToPreview(TAction *pActionParent, std::vector<std::tuple<QString, QString, int>> &items);
+    void addScriptsToPreview(TScript *pScriptParent, std::vector<std::tuple<QString, QString, int>> &items);
+    void addKeysToPreview(TKey *pKeyParent, std::vector<std::tuple<QString, QString, int>> &items);
+    void initWithHost(Host *);
     void disableHostDetails();
     void enableHostDetails();
     void clearHostDetails();

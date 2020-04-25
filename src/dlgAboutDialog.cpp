@@ -20,31 +20,30 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 // Debugging value to display ALL licences in the dialog
 // #define DEBUG_SHOWALL
-
 
 #include "dlgAboutDialog.h"
 
 #include "mudlet.h"
 
+#include "post_guard.h"
 #include "pre_guard.h"
+#include <QDebug>
 #include <QPainter>
 #include <QTextLayout>
-#include <QDebug>
-#include "post_guard.h"
 
-dlgAboutDialog::dlgAboutDialog(QWidget* parent) : QDialog(parent)
+dlgAboutDialog::dlgAboutDialog(QWidget *parent) : QDialog(parent)
 {
     setupUi(this);
 
     // Copied from main():
 
 #if defined(INCLUDE_VARIABLE_SPLASH_SCREEN)
-    QImage splashImage(mudlet::scmIsReleaseVersion ? QStringLiteral(":/Mudlet_splashscreen_main.png")
-                                                   : mudlet::scmIsPublicTestVersion ? QStringLiteral(":/Mudlet_splashscreen_ptb.png")
-                                                                                    : QStringLiteral(":/Mudlet_splashscreen_development.png"));
+    QImage splashImage(mudlet::scmIsReleaseVersion
+                           ? QStringLiteral(":/Mudlet_splashscreen_main.png")
+                           : mudlet::scmIsPublicTestVersion ? QStringLiteral(":/Mudlet_splashscreen_ptb.png")
+                                                            : QStringLiteral(":/Mudlet_splashscreen_development.png"));
 #else
     QImage splashImage(QStringLiteral(":/Mudlet_splashscreen_main.png"));
 #endif
@@ -56,8 +55,10 @@ dlgAboutDialog::dlgAboutDialog(QWidget* parent) : QDialog(parent)
         QString sourceVersionText = QString("Version: " APP_VERSION APP_BUILD);
 
         bool isWithinSpace = false;
-        while (!isWithinSpace) {
-            QFont font(QStringLiteral("DejaVu Serif"), fontSize, QFont::Bold | QFont::Serif | QFont::PreferMatch | QFont::PreferAntialias);
+        while (!isWithinSpace)
+        {
+            QFont font(QStringLiteral("DejaVu Serif"), fontSize,
+                       QFont::Bold | QFont::Serif | QFont::PreferMatch | QFont::PreferAntialias);
             QTextLayout versionTextLayout(sourceVersionText, font, painter.device());
             versionTextLayout.beginLayout();
             // Start work in this text item
@@ -66,11 +67,12 @@ dlgAboutDialog::dlgAboutDialog(QWidget* parent) : QDialog(parent)
             // see how wide it is..., assuming actually that it will only take one
             // line of text
             versionTextline.setLineWidth(280);
-            //Splashscreen bitmap is (now) 320x360 - hopefully entire line will all fit into 280
+            // Splashscreen bitmap is (now) 320x360 - hopefully entire line will all fit into 280
             versionTextline.setPosition(QPointF(0, 0));
             // Only pretend, so we can see how much space it will take
             QTextLine dummy = versionTextLayout.createLine();
-            if (!dummy.isValid()) {
+            if (!dummy.isValid())
+            {
                 // No second line so have got all text in first so can do it
                 isWithinSpace = true;
                 qreal versionTextWidth = versionTextline.naturalTextWidth();
@@ -81,7 +83,9 @@ dlgAboutDialog::dlgAboutDialog(QWidget* parent) : QDialog(parent)
                 // end the layout process and paint it out
                 painter.setPen(QColor(176, 64, 0, 255)); // #b04000
                 versionTextLayout.draw(&painter, QPointF(0, 0));
-            } else {
+            }
+            else
+            {
                 // Too big - text has spilled over onto a second line - so try again
                 fontSize--;
                 versionTextLayout.clearLayout();
@@ -92,7 +96,8 @@ dlgAboutDialog::dlgAboutDialog(QWidget* parent) : QDialog(parent)
         // Repeat for other text, but we know it will fit at given size
         // PLACEMARKER: Date-stamp needing annual update
         QString sourceCopyrightText = QStringLiteral("©️ Mudlet makers 2008-2020");
-        QFont font(QStringLiteral("DejaVu Serif"), 16, QFont::Bold | QFont::Serif | QFont::PreferMatch | QFont::PreferAntialias);
+        QFont font(QStringLiteral("DejaVu Serif"), 16,
+                   QFont::Bold | QFont::Serif | QFont::PreferMatch | QFont::PreferAntialias);
         QTextLayout copyrightTextLayout(sourceCopyrightText, font, painter.device());
         copyrightTextLayout.beginLayout();
         QTextLine copyrightTextline = copyrightTextLayout.createLine();
@@ -140,8 +145,8 @@ dlgAboutDialog::dlgAboutDialog(QWidget* parent) : QDialog(parent)
     setThirdPartyTab(htmlHead);
 }
 
-void dlgAboutDialog::setAboutTab(const QString& htmlHead) const
-{   // TAB 1 - "About Mudlet"
+void dlgAboutDialog::setAboutTab(const QString &htmlHead) const
+{ // TAB 1 - "About Mudlet"
     // clang-format off
     QString aboutMudletHeader(
         tr("<tr><td><span style=\"color:#bc8942;\"><b>Homepage</b></span></td><td><a href=\"http://www.mudlet.org/\">www.mudlet.org</a></td></tr>\n"
@@ -262,30 +267,33 @@ void dlgAboutDialog::setAboutTab(const QString& htmlHead) const
     // clang-format on
 }
 
-QString dlgAboutDialog::createMakerHTML(const aboutMaker& maker) const
+QString dlgAboutDialog::createMakerHTML(const aboutMaker &maker) const
 {
     QString coloredText = QStringLiteral("<span style=\"color:#%1;\">%2</span>");
     QStringList contactDetails;
-    if (!maker.discord.isEmpty()) {
+    if (!maker.discord.isEmpty())
+    {
         contactDetails.append(coloredText.arg(QStringLiteral("7289DA"), maker.discord));
     }
-    if (!maker.github.isEmpty()) {
+    if (!maker.github.isEmpty())
+    {
         contactDetails.append(coloredText.arg(QStringLiteral("40b040"), maker.github));
     }
-    if (!maker.email.isEmpty()) {
+    if (!maker.email.isEmpty())
+    {
         contactDetails.append(coloredText.arg(QStringLiteral("0000ff"), maker.email));
     }
 
     return QStringLiteral("<p>%1%2 %3</p>\n") // name (big?), contacts (if any?), description
-        .arg(coloredText.arg(QStringLiteral("bc8942"), QStringLiteral("<b>%1</b>")
-             .arg((maker.big) ? QStringLiteral("<big>%1</big>").arg(maker.name) : maker.name)),
-        (contactDetails.isEmpty()) ? QString() :
-             QStringLiteral(" (%1)").arg(contactDetails.join(QChar::Space)),
-        maker.description);
+        .arg(coloredText.arg(QStringLiteral("bc8942"),
+                             QStringLiteral("<b>%1</b>")
+                                 .arg((maker.big) ? QStringLiteral("<big>%1</big>").arg(maker.name) : maker.name)),
+             (contactDetails.isEmpty()) ? QString() : QStringLiteral(" (%1)").arg(contactDetails.join(QChar::Space)),
+             maker.description);
 }
 
-void dlgAboutDialog::setLicenseTab(const QString& htmlHead) const
-{   // TAB 2 - "License"
+void dlgAboutDialog::setLicenseTab(const QString &htmlHead) const
+{ // TAB 2 - "License"
     // clang-format off
     // Only the introductory text at the top is to be translated - the Licence
     // itself MUST NOT be translated as only the English Language version is
@@ -581,8 +589,8 @@ void dlgAboutDialog::setLicenseTab(const QString& htmlHead) const
     // clang-format on
 }
 
-void dlgAboutDialog::setThirdPartyTab(const QString& htmlHead) const
-{   // TAB 3 - Third party items
+void dlgAboutDialog::setThirdPartyTab(const QString &htmlHead) const
+{ // TAB 3 - Third party items
     // clang-format off
     // Only the introductory text at the top and interspersed between items are
     // to be translated - the Licences themselves MUST NOT be translated:
@@ -1005,14 +1013,15 @@ void dlgAboutDialog::setThirdPartyTab(const QString& htmlHead) const
     // clang-format on
 }
 
-void dlgAboutDialog::setSupportersTab(const QString& htmlHead)
+void dlgAboutDialog::setSupportersTab(const QString &htmlHead)
 {
     // see https://www.patreon.com/mudlet if you'd like to be added!
     QStringList mightier_than_swords = {"Maiyannah Bishop", "Qwindor Rousseau"};
     QStringList on_a_plaque = {"Vadim Peretokin"};
     int image_counter{1};
 
-    if (!supportersDocument) {
+    if (!supportersDocument)
+    {
         supportersDocument = std::make_unique<QTextDocument>();
     }
 
@@ -1020,27 +1029,32 @@ void dlgAboutDialog::setSupportersTab(const QString& htmlHead)
     nameFont.setPixelSize(32);
     nameFont.setFamily(QStringLiteral("Bitstream Vera Sans"));
 
-    for (const auto& name: qAsConst(mightier_than_swords)) {
+    for (const auto &name : qAsConst(mightier_than_swords))
+    {
         QImage background(QStringLiteral(":/icons/frame_swords.png"));
         QPainter painter(&background);
         painter.setFont(nameFont);
         painter.drawText(0, 0, background.width(), background.height(), Qt::AlignCenter, name);
-        supportersDocument->addResource(QTextDocument::ImageResource, QUrl(QStringLiteral("data://image%1").arg(image_counter)), background);
+        supportersDocument->addResource(QTextDocument::ImageResource,
+                                        QUrl(QStringLiteral("data://image%1").arg(image_counter)), background);
         image_counter++;
     }
 
-    for (const auto& name: qAsConst(on_a_plaque)) {
+    for (const auto &name : qAsConst(on_a_plaque))
+    {
         QImage background(QStringLiteral(":/icons/frame_plaque.png"));
         QPainter painter(&background);
         painter.setFont(nameFont);
         painter.drawText(0, 0, background.width(), background.height(), Qt::AlignCenter, name);
-        supportersDocument->addResource(QTextDocument::ImageResource, QUrl(QStringLiteral("data://image%1").arg(image_counter)), background);
+        supportersDocument->addResource(QTextDocument::ImageResource,
+                                        QUrl(QStringLiteral("data://image%1").arg(image_counter)), background);
         image_counter++;
     }
 
     QString supporters_image_html;
     auto supporters_amount = mightier_than_swords.size() + on_a_plaque.size();
-    for (auto counter = 1; counter <= supporters_amount; counter++) {
+    for (auto counter = 1; counter <= supporters_amount; counter++)
+    {
         // clang-format off
         supporters_image_html.append(QStringLiteral(R"(
             <div class="container">
@@ -1054,9 +1068,10 @@ void dlgAboutDialog::setSupportersTab(const QString& htmlHead)
                <p align="center"><br>%1<br></p>
                %2
                )")
-                  .arg(tr(R"(
+                                .arg(tr(R"(
                           These formidable folks will be fondly remembered forever<br>for their generous financial support on <a href="https://www.patreon.com/mudlet">Mudlet's patreon</a>:
-                          )"), supporters_image_html));
+                          )"),
+                                     supporters_image_html));
 
     supportersDocument->setHtml(QStringLiteral("<html>%1<body>%2</body></html>").arg(htmlHead, supporters_text));
     textBrowser_supporters->setDocument(supportersDocument.get());

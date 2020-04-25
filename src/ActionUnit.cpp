@@ -19,9 +19,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "ActionUnit.h"
-
 
 #include "TAction.h"
 #include "TCommandLine.h"
@@ -30,26 +28,28 @@
 #include "TToolBar.h"
 #include "mudlet.h"
 
-
-void ActionUnit::_uninstall(TAction* pChild, const QString& packageName)
+void ActionUnit::_uninstall(TAction *pChild, const QString &packageName)
 {
-    std::list<TAction*>* childrenList = pChild->mpMyChildrenList;
-    for (auto action : *childrenList) {
+    std::list<TAction *> *childrenList = pChild->mpMyChildrenList;
+    for (auto action : *childrenList)
+    {
         _uninstall(action, packageName);
         uninstallList.append(action);
     }
 }
 
-
-void ActionUnit::uninstall(const QString& packageName)
+void ActionUnit::uninstall(const QString &packageName)
 {
-    for (auto rootAction : mActionRootNodeList) {
-        if (rootAction->mPackageName == packageName) {
+    for (auto rootAction : mActionRootNodeList)
+    {
+        if (rootAction->mPackageName == packageName)
+        {
             _uninstall(rootAction, packageName);
             uninstallList.append(rootAction);
         }
     }
-    for (auto& action : uninstallList) {
+    for (auto &action : uninstallList)
+    {
         delete action;
     }
     uninstallList.clear();
@@ -57,55 +57,68 @@ void ActionUnit::uninstall(const QString& packageName)
 
 void ActionUnit::compileAll()
 {
-    for (auto action : mActionRootNodeList) {
-        if (action->isActive()) {
+    for (auto action : mActionRootNodeList)
+    {
+        if (action->isActive())
+        {
             action->compileAll();
         }
     }
 }
 
-TAction* ActionUnit::findAction(const QString& name)
+TAction *ActionUnit::findAction(const QString &name)
 {
-    //QMap<int, TAction *>  mActionMap;
+    // QMap<int, TAction *>  mActionMap;
 
-    QMapIterator<int, TAction*> it(mActionMap);
-    while (it.hasNext()) {
+    QMapIterator<int, TAction *> it(mActionMap);
+    while (it.hasNext())
+    {
         it.next();
-        if (it.value()->getName() == name) {
+        if (it.value()->getName() == name)
+        {
             qDebug() << it.value()->getName();
-            TAction* pT = it.value();
+            TAction *pT = it.value();
             return pT;
         }
     }
     return nullptr;
 }
 
-std::vector<TAction*> ActionUnit::findActionsByName(const QString& name)
+std::vector<TAction *> ActionUnit::findActionsByName(const QString &name)
 {
-    std::vector<TAction*> actions;
-    for (auto action : qAsConst(mActionMap)) {
-        if (action->getName() == name) {
+    std::vector<TAction *> actions;
+    for (auto action : qAsConst(mActionMap))
+    {
+        if (action->getName() == name)
+        {
             actions.push_back(action);
         }
     }
     return actions;
 }
 
-void ActionUnit::addActionRootNode(TAction* pT, int parentPosition, int childPosition)
+void ActionUnit::addActionRootNode(TAction *pT, int parentPosition, int childPosition)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
-    if (!pT->getID()) {
+    if (!pT->getID())
+    {
         pT->setID(getNewID());
     }
-    if ((parentPosition == -1) || (childPosition >= static_cast<int>(mActionRootNodeList.size()))) {
+    if ((parentPosition == -1) || (childPosition >= static_cast<int>(mActionRootNodeList.size())))
+    {
         mActionRootNodeList.push_back(pT);
-    } else {
+    }
+    else
+    {
         // insert item at proper position
         int cnt = 0;
-        for (auto it = mActionRootNodeList.begin(); it != mActionRootNodeList.end(); it++) {
-            if (cnt >= childPosition) {
+        for (auto it = mActionRootNodeList.begin(); it != mActionRootNodeList.end(); it++)
+        {
+            if (cnt >= childPosition)
+            {
                 mActionRootNodeList.insert(it, pT);
                 break;
             }
@@ -118,58 +131,73 @@ void ActionUnit::addActionRootNode(TAction* pT, int parentPosition, int childPos
 
 void ActionUnit::reParentAction(int childID, int oldParentID, int newParentID, int parentPosition, int childPosition)
 {
-    TAction* pOldParent = getActionPrivate(oldParentID);
-    TAction* pNewParent = getActionPrivate(newParentID);
-    TAction* pChild = getActionPrivate(childID);
-    if (!pChild) {
+    TAction *pOldParent = getActionPrivate(oldParentID);
+    TAction *pNewParent = getActionPrivate(newParentID);
+    TAction *pChild = getActionPrivate(childID);
+    if (!pChild)
+    {
         return;
     }
 
-    if (pOldParent) {
+    if (pOldParent)
+    {
         pChild->setDataChanged();
         pOldParent->popChild(pChild);
         pOldParent->setDataChanged();
 
         // clear references to old parent toolbars and buttonbars.
-        if (pOldParent->mpToolBar == pChild->mpToolBar) {
+        if (pOldParent->mpToolBar == pChild->mpToolBar)
+        {
             pChild->mpToolBar = nullptr;
         }
-        if (pOldParent->mpEasyButtonBar == pChild->mpEasyButtonBar) {
+        if (pOldParent->mpEasyButtonBar == pChild->mpEasyButtonBar)
+        {
             pChild->mpEasyButtonBar = nullptr;
         }
     }
-    if (!pOldParent) {
+    if (!pOldParent)
+    {
         removeActionRootNode(pChild);
         pChild->setDataChanged();
     }
 
-    if (pNewParent) {
+    if (pNewParent)
+    {
         pNewParent->Tree<TAction>::addChild(pChild, parentPosition, childPosition);
         pChild->Tree<TAction>::setParent(pNewParent);
         pChild->setDataChanged();
         pNewParent->setDataChanged();
-        //cout << "dumping family of newParent:"<<endl;
-        //pNewParent->Dump();
-    } else {
+        // cout << "dumping family of newParent:"<<endl;
+        // pNewParent->Dump();
+    }
+    else
+    {
         pChild->Tree<TAction>::setParent(nullptr);
         addActionRootNode(pChild, parentPosition, childPosition);
     }
 
     pChild->setDataChanged();
 
-    if ((!pOldParent) && (pNewParent)) {
-        if (pChild->mpEasyButtonBar) {
-            if (pChild->mLocation == 0) {
+    if ((!pOldParent) && (pNewParent))
+    {
+        if (pChild->mpEasyButtonBar)
+        {
+            if (pChild->mLocation == 0)
+            {
                 mpHost->mpConsole->mpTopToolBar->layout()->removeWidget(pChild->mpEasyButtonBar);
             }
-            if (pChild->mLocation == 2) {
+            if (pChild->mLocation == 2)
+            {
                 mpHost->mpConsole->mpLeftToolBar->layout()->removeWidget(pChild->mpEasyButtonBar);
             }
-            if (pChild->mLocation == 3) {
+            if (pChild->mLocation == 3)
+            {
                 mpHost->mpConsole->mpRightToolBar->layout()->removeWidget(pChild->mpEasyButtonBar);
             }
-            if (pChild->mLocation == 4) {
-                if (pChild->mpToolBar) {
+            if (pChild->mLocation == 4)
+            {
+                if (pChild->mpToolBar)
+                {
                     pChild->mpToolBar->setFloating(false);
                     mudlet::self()->removeDockWidget(pChild->mpToolBar);
                 }
@@ -178,77 +206,101 @@ void ActionUnit::reParentAction(int childID, int oldParentID, int newParentID, i
     }
 }
 
-void ActionUnit::removeActionRootNode(TAction* pT)
+void ActionUnit::removeActionRootNode(TAction *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
     mActionRootNodeList.remove(pT);
 }
 
-TAction* ActionUnit::getAction(int id)
+TAction *ActionUnit::getAction(int id)
 {
-    if (mActionMap.contains(id)) {
+    if (mActionMap.contains(id))
+    {
         return mActionMap.value(id);
-    } else {
+    }
+    else
+    {
         return nullptr;
     }
 }
 
-TAction* ActionUnit::getActionPrivate(int id)
+TAction *ActionUnit::getActionPrivate(int id)
 {
-    if (mActionMap.find(id) != mActionMap.end()) {
+    if (mActionMap.find(id) != mActionMap.end())
+    {
         return mActionMap.value(id);
-    } else {
+    }
+    else
+    {
         return nullptr;
     }
 }
 
-bool ActionUnit::registerAction(TAction* pT)
+bool ActionUnit::registerAction(TAction *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return false;
     }
 
-    if (pT->getParent()) {
+    if (pT->getParent())
+    {
         addAction(pT);
         return true;
-    } else {
+    }
+    else
+    {
         addActionRootNode(pT);
         return true;
     }
 }
 
-void ActionUnit::unregisterAction(TAction* pT)
+void ActionUnit::unregisterAction(TAction *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
-    if (pT->getParent() && pT->getParent()->mPackageName.isEmpty()) {
+    if (pT->getParent() && pT->getParent()->mPackageName.isEmpty())
+    {
         removeAction(pT);
         updateToolbar();
         return;
-    } else {
-        if (pT->mpEasyButtonBar && pT->mPackageName.isEmpty()) {
-            if (pT->mLocation == 0) {
+    }
+    else
+    {
+        if (pT->mpEasyButtonBar && pT->mPackageName.isEmpty())
+        {
+            if (pT->mLocation == 0)
+            {
                 mpHost->mpConsole->mpTopToolBar->layout()->removeWidget(pT->mpEasyButtonBar);
             }
-            if (pT->mLocation == 2) {
+            if (pT->mLocation == 2)
+            {
                 mpHost->mpConsole->mpLeftToolBar->layout()->removeWidget(pT->mpEasyButtonBar);
             }
-            if (pT->mLocation == 3) {
+            if (pT->mLocation == 3)
+            {
                 mpHost->mpConsole->mpRightToolBar->layout()->removeWidget(pT->mpEasyButtonBar);
             }
-            if (pT->mLocation == 4) {
-                if (pT->mpToolBar) {
+            if (pT->mLocation == 4)
+            {
+                if (pT->mpToolBar)
+                {
                     pT->mpToolBar->setFloating(false);
                     mudlet::self()->removeDockWidget(pT->mpToolBar);
                 }
             }
         }
-        if (!pT->getParent()) {
+        if (!pT->getParent())
+        {
             removeActionRootNode(pT);
-        } else {
+        }
+        else
+        {
             removeAction(pT);
         }
         updateToolbar();
@@ -256,29 +308,30 @@ void ActionUnit::unregisterAction(TAction* pT)
     }
 }
 
-
-void ActionUnit::addAction(TAction* pT)
+void ActionUnit::addAction(TAction *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
 
-    if (!pT->getID()) {
+    if (!pT->getID())
+    {
         pT->setID(getNewID());
     }
 
     mActionMap.insert(pT->getID(), pT);
 }
 
-void ActionUnit::removeAction(TAction* pT)
+void ActionUnit::removeAction(TAction *pT)
 {
-    if (!pT) {
+    if (!pT)
+    {
         return;
     }
 
     mActionMap.remove(pT->getID());
 }
-
 
 int ActionUnit::getNewID()
 {
@@ -287,50 +340,66 @@ int ActionUnit::getNewID()
 
 std::list<QPointer<TToolBar>> ActionUnit::getToolBarList()
 {
-    for (auto& action : mActionRootNodeList) {
-        if (action->mLocation != 4) {
+    for (auto &action : mActionRootNodeList)
+    {
+        if (action->mLocation != 4)
+        {
             continue; // skip over any root action node that is NOT going to be a TToolBar.
         }
-        if (action->mPackageName.size() > 0) {
-            for (auto& childAction : *action->mpMyChildrenList) {
+        if (action->mPackageName.size() > 0)
+        {
+            for (auto &childAction : *action->mpMyChildrenList)
+            {
                 bool found = false;
                 QPointer<TToolBar> pTB = nullptr;
-                for (auto& toolBar : mToolBarList) {
-                    if (toolBar == childAction->mpToolBar) {
+                for (auto &toolBar : mToolBarList)
+                {
+                    if (toolBar == childAction->mpToolBar)
+                    {
                         found = true;
                         pTB = toolBar;
                     }
                 }
-                if (!found) {
+                if (!found)
+                {
                     pTB = new TToolBar(childAction, childAction->getName(), mudlet::self());
                     mToolBarList.push_back(pTB);
                 }
-                if (childAction->mOrientation == 1) {
+                if (childAction->mOrientation == 1)
+                {
                     pTB->setVerticalOrientation();
-                } else {
+                }
+                else
+                {
                     pTB->setHorizontalOrientation();
                 }
                 constructToolbar(childAction, pTB);
                 childAction->mpToolBar = pTB;
                 pTB->setStyleSheet(pTB->mpTAction->css);
             }
-            continue; //action package
+            continue; // action package
         }
         bool found = false;
         QPointer<TToolBar> pTB = nullptr;
-        for (auto& toolBar : mToolBarList) {
-            if (toolBar == action->mpToolBar) {
+        for (auto &toolBar : mToolBarList)
+        {
+            if (toolBar == action->mpToolBar)
+            {
                 found = true;
                 pTB = toolBar;
             }
         }
-        if (!found) {
+        if (!found)
+        {
             pTB = new TToolBar(action, action->getName(), mudlet::self());
             mToolBarList.push_back(pTB);
         }
-        if (action->mOrientation == 1) {
+        if (action->mOrientation == 1)
+        {
             pTB->setVerticalOrientation();
-        } else {
+        }
+        else
+        {
             pTB->setHorizontalOrientation();
         }
         constructToolbar(action, pTB);
@@ -343,54 +412,72 @@ std::list<QPointer<TToolBar>> ActionUnit::getToolBarList()
 
 std::list<QPointer<TEasyButtonBar>> ActionUnit::getEasyButtonBarList()
 {
-    for (auto& rootAction : mActionRootNodeList) {
-        if (rootAction->mLocation == 4) {
+    for (auto &rootAction : mActionRootNodeList)
+    {
+        if (rootAction->mLocation == 4)
+        {
             continue; // skip over any root action node that IS going to be a TToolBar.
         }
-        if (rootAction->mPackageName.size() > 0) {
-            for (auto childActionIterator = rootAction->mpMyChildrenList->begin(); childActionIterator != rootAction->mpMyChildrenList->end(); childActionIterator++) {
+        if (rootAction->mPackageName.size() > 0)
+        {
+            for (auto childActionIterator = rootAction->mpMyChildrenList->begin();
+                 childActionIterator != rootAction->mpMyChildrenList->end(); childActionIterator++)
+            {
                 bool found = false;
-                TEasyButtonBar* pTB = nullptr;
-                for (auto& easyButtonBar : mEasyButtonBarList) {
-                    if (easyButtonBar == (*childActionIterator)->mpEasyButtonBar) {
+                TEasyButtonBar *pTB = nullptr;
+                for (auto &easyButtonBar : mEasyButtonBarList)
+                {
+                    if (easyButtonBar == (*childActionIterator)->mpEasyButtonBar)
+                    {
                         found = true;
                         pTB = easyButtonBar;
                     }
                 }
-                if (!found) {
-                    pTB = new TEasyButtonBar(rootAction, (*childActionIterator)->getName(), mpHost->mpConsole->mpTopToolBar);
+                if (!found)
+                {
+                    pTB = new TEasyButtonBar(rootAction, (*childActionIterator)->getName(),
+                                             mpHost->mpConsole->mpTopToolBar);
                     mpHost->mpConsole->mpTopToolBar->layout()->addWidget(pTB);
                     mEasyButtonBarList.emplace_back(pTB);
                     (*childActionIterator)->mpEasyButtonBar = pTB; // wird fuer drag&drop gebraucht
                 }
-                if ((*childActionIterator)->mOrientation == 1) {
+                if ((*childActionIterator)->mOrientation == 1)
+                {
                     pTB->setVerticalOrientation();
-                } else {
+                }
+                else
+                {
                     pTB->setHorizontalOrientation();
                 }
                 constructToolbar(*childActionIterator, pTB);
                 (*childActionIterator)->mpEasyButtonBar = pTB;
                 pTB->setStyleSheet(pTB->mpTAction->css);
             }
-            continue; //rootAction package
+            continue; // rootAction package
         }
         bool found = false;
-        TEasyButtonBar* pTB = nullptr;
-        for (auto& easyButtonBar : mEasyButtonBarList) {
-            if (easyButtonBar == rootAction->mpEasyButtonBar) {
+        TEasyButtonBar *pTB = nullptr;
+        for (auto &easyButtonBar : mEasyButtonBarList)
+        {
+            if (easyButtonBar == rootAction->mpEasyButtonBar)
+            {
                 found = true;
                 pTB = easyButtonBar;
             }
         }
-        if (!found) {
+        if (!found)
+        {
             pTB = new TEasyButtonBar(rootAction, rootAction->getName(), mpHost->mpConsole->mpTopToolBar);
             mpHost->mpConsole->mpTopToolBar->layout()->addWidget(pTB);
             mEasyButtonBarList.emplace_back(pTB);
             rootAction->mpEasyButtonBar = pTB; // wird fuer drag&drop gebraucht
         }
-        if (rootAction->mOrientation == 1) {
+        if (rootAction->mOrientation == 1)
+        {
             pTB->setVerticalOrientation();
-        } else {
+        }
+        else
+        {
             pTB->setHorizontalOrientation();
         }
         constructToolbar(rootAction, pTB);
@@ -401,11 +488,14 @@ std::list<QPointer<TEasyButtonBar>> ActionUnit::getEasyButtonBarList()
     return mEasyButtonBarList;
 }
 
-TAction* ActionUnit::getHeadAction(TToolBar* pT)
+TAction *ActionUnit::getHeadAction(TToolBar *pT)
 {
-    for (auto& action : mActionRootNodeList) {
-        for (auto it2 = mToolBarList.begin(); it2 != mToolBarList.end(); it2++) {
-            if (pT == action->mpToolBar) {
+    for (auto &action : mActionRootNodeList)
+    {
+        for (auto it2 = mToolBarList.begin(); it2 != mToolBarList.end(); it2++)
+        {
+            if (pT == action->mpToolBar)
+            {
                 return action;
             }
         }
@@ -413,10 +503,12 @@ TAction* ActionUnit::getHeadAction(TToolBar* pT)
     return nullptr;
 }
 
-void ActionUnit::showToolBar(const QString& name)
+void ActionUnit::showToolBar(const QString &name)
 {
-    for (auto& easyButtonBar : mEasyButtonBarList) {
-        if (easyButtonBar->mpTAction->mName == name) {
+    for (auto &easyButtonBar : mEasyButtonBarList)
+    {
+        if (easyButtonBar->mpTAction->mName == name)
+        {
             easyButtonBar->mpTAction->setIsActive(true);
             updateToolbar();
         }
@@ -425,10 +517,12 @@ void ActionUnit::showToolBar(const QString& name)
     mpHost->mpConsole->mpCommandLine->setFocus();
 }
 
-void ActionUnit::hideToolBar(const QString& name)
+void ActionUnit::hideToolBar(const QString &name)
 {
-    for (auto& easyButtonBar : mEasyButtonBarList) {
-        if (easyButtonBar->mpTAction->mName == name) {
+    for (auto &easyButtonBar : mEasyButtonBarList)
+    {
+        if (easyButtonBar->mpTAction->mName == name)
+        {
             easyButtonBar->mpTAction->setIsActive(false);
             updateToolbar();
         }
@@ -436,48 +530,60 @@ void ActionUnit::hideToolBar(const QString& name)
     mudlet::self()->processEventLoopHack();
 }
 
-void ActionUnit::constructToolbar(TAction* pA, TToolBar* pTB)
+void ActionUnit::constructToolbar(TAction *pA, TToolBar *pTB)
 {
-    if (!pA->isDataChanged()) {
+    if (!pA->isDataChanged())
+    {
         return;
     }
 
     pTB->clear();
-    if ((pA->mLocation != 4) || (!pA->isActive())) {
+    if ((pA->mLocation != 4) || (!pA->isActive()))
+    {
         pTB->setFloating(false);
         mudlet::self()->removeDockWidget(pTB);
         return;
     }
 
-    if (pA->mLocation == 4) {
+    if (pA->mLocation == 4)
+    {
         pA->expandToolbar(pTB);
         pTB->setTitleBarWidget(nullptr);
     }
 
     pTB->finalize();
 
-    if (pA->mOrientation == 0) {
+    if (pA->mOrientation == 0)
+    {
         pTB->setHorizontalOrientation();
-    } else {
+    }
+    else
+    {
         pTB->setVerticalOrientation();
     }
 
     pTB->setTitleBarWidget(nullptr);
     pTB->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    if (pA->mLocation == 4) {
+    if (pA->mLocation == 4)
+    {
         mudlet::self()->addDockWidget(pA->mToolbarLastDockArea, pTB);
-        if (pA->mToolbarLastFloatingState) {
+        if (pA->mToolbarLastFloatingState)
+        {
             pTB->setFloating(true);
             QPoint pos = QPoint(pA->mPosX, pA->mPosY);
             pTB->show();
             pTB->move(pos);
-        } else {
+        }
+        else
+        {
             pTB->setFloating(false);
             pTB->show();
         }
         pTB->mpTAction = pA;
         pTB->recordMove();
-    } else {
+    }
+    else
+    {
         pTB->show();
     }
 
@@ -485,11 +591,14 @@ void ActionUnit::constructToolbar(TAction* pA, TToolBar* pTB)
     pA->setDataSaved();
 }
 
-TAction* ActionUnit::getHeadAction(TEasyButtonBar* pT)
+TAction *ActionUnit::getHeadAction(TEasyButtonBar *pT)
 {
-    for (auto& action : mActionRootNodeList) {
-        for (auto it2 = mEasyButtonBarList.begin(); it2 != mEasyButtonBarList.end(); it2++) {
-            if (pT == action->mpEasyButtonBar) {
+    for (auto &action : mActionRootNodeList)
+    {
+        for (auto it2 = mEasyButtonBarList.begin(); it2 != mEasyButtonBarList.end(); it2++)
+        {
+            if (pT == action->mpEasyButtonBar)
+            {
                 return action;
             }
         }
@@ -497,32 +606,38 @@ TAction* ActionUnit::getHeadAction(TEasyButtonBar* pT)
     return nullptr;
 }
 
-void ActionUnit::constructToolbar(TAction* pA, TEasyButtonBar* pTB)
+void ActionUnit::constructToolbar(TAction *pA, TEasyButtonBar *pTB)
 {
     pTB->clear();
-    if (pA->mLocation == 4) {
-        //floating toolbars are handled differently
+    if (pA->mLocation == 4)
+    {
+        // floating toolbars are handled differently
         return;
     }
-    if (!pA->isActive()) {
+    if (!pA->isActive())
+    {
         pTB->hide();
         return;
     }
 
     pA->expandToolbar(pTB);
     pTB->finalize();
-    if (pA->mOrientation == 0) {
+    if (pA->mOrientation == 0)
+    {
         pTB->setHorizontalOrientation();
-    } else {
+    }
+    else
+    {
         pTB->setVerticalOrientation();
     }
-    switch (pA->mLocation) {
+    switch (pA->mLocation)
+    {
     case 0:
         mpHost->mpConsole->mpTopToolBar->layout()->addWidget(pTB);
         break;
-    //case 1:
-    //mpHost->mpConsole->mpTopToolBar->layout()->addWidget( pTB );
-    //break;
+    // case 1:
+    // mpHost->mpConsole->mpTopToolBar->layout()->addWidget( pTB );
+    // break;
     case 2:
         mpHost->mpConsole->mpLeftToolBar->layout()->addWidget(pTB);
         break;
@@ -534,7 +649,6 @@ void ActionUnit::constructToolbar(TAction* pA, TEasyButtonBar* pTB)
     pTB->setStyleSheet(pTB->mpTAction->css);
     pTB->show();
 }
-
 
 void ActionUnit::updateToolbar()
 {

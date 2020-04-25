@@ -19,13 +19,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "EAction.h"
 #include "TAction.h"
 #include "mudlet.h"
 
-
-EAction::EAction(QIcon& icon, QString& name) : QAction(icon, name, mudlet::self()), mID()
+EAction::EAction(QIcon &icon, QString &name) : QAction(icon, name, mudlet::self()), mID()
 {
     setText(name);
     setObjectName(name);
